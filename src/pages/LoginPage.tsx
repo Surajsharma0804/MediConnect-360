@@ -1,0 +1,281 @@
+import React, { useState } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { Activity, ArrowRight, User, Mail, Lock, Eye, EyeOff, Moon, Sun, Fingerprint } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../context/ThemeContext';
+import { GoogleLogin } from '@react-oauth/google';
+
+const LoginPage: React.FC = () => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    role: 'patient' as 'patient' | 'doctor',
+  });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const { login, signup, socialLogin } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
+  
+  const from = location.state?.from?.pathname || '/dashboard';
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const toggleForm = () => {
+    setIsLogin(!isLogin);
+    setError('');
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+    
+    try {
+      if (isLogin) {
+        await login(formData.email, formData.password);
+      } else {
+        await signup(formData.name, formData.email, formData.password, formData.role);
+      }
+      navigate(from, { replace: true });
+    } catch (err) {
+      setError('Authentication failed. Please check your credentials and try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSocialLogin = async (provider: 'google' | 'facebook' | 'apple', response?: any) => {
+    try {
+      setError('');
+      await socialLogin(provider, response);
+      navigate(from, { replace: true });
+    } catch (err) {
+      setError('Social login failed. Please try again.');
+    }
+  };
+  
+  return (
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full glass-panel p-8 animate-float">
+        <div className="flex justify-between items-center mb-6">
+          <div className="text-center">
+            <div className="flex justify-center">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center mb-2">
+                <Activity className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              {isLogin ? 'Sign in to MediConnect' : 'Join MediConnect'}
+            </h2>
+            <p className="mt-2 text-sm text-slate-400">
+              {isLogin ? 'Access your health universe' : 'Begin your health journey'}
+            </p>
+          </div>
+          
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="p-2 rounded-full text-slate-400 hover:text-white transition-colors"
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+        </div>
+        
+        {error && (
+          <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 text-sm">
+            {error}
+          </div>
+        )}
+
+        {/* Social Login Buttons */}
+        <div className="space-y-3 mb-6">
+          <GoogleLogin
+            onSuccess={(response) => handleSocialLogin('google', response)}
+            onError={() => setError('Google login failed. Please try again.')}
+            theme={theme === 'dark' ? 'filled_black' : 'filled_blue'}
+            size="large"
+            width="100%"
+            text={isLogin ? "Sign in with Google" : "Sign up with Google"}
+          />
+          
+          <button
+            onClick={() => handleSocialLogin('facebook')}
+            className="w-full py-2 px-4 bg-[#1877F2] hover:bg-[#1865D3] text-white rounded-lg flex items-center justify-center gap-2 transition-colors"
+          >
+            <img 
+              src="https://raw.githubusercontent.com/gilbarbara/logos/main/logos/facebook.svg" 
+              alt="Facebook" 
+              className="w-5 h-5"
+            />
+            {isLogin ? "Sign in with Facebook" : "Sign up with Facebook"}
+          </button>
+          
+          <button
+            onClick={() => handleSocialLogin('apple')}
+            className="w-full py-2 px-4 bg-black hover:bg-gray-900 text-white rounded-lg flex items-center justify-center gap-2 transition-colors"
+          >
+            <img 
+              src="https://raw.githubusercontent.com/gilbarbara/logos/main/logos/apple.svg" 
+              alt="Apple" 
+              className="w-5 h-5"
+            />
+            {isLogin ? "Sign in with Apple" : "Sign up with Apple"}
+          </button>
+        </div>
+
+        <div className="relative flex items-center justify-center mb-6">
+          <div className="border-t border-slate-600 flex-grow"></div>
+          <span className="px-2 text-xs text-slate-400">OR</span>
+          <div className="border-t border-slate-600 flex-grow"></div>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {!isLogin && (
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium mb-1">
+                Full Name
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-slate-400" />
+                </div>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="block w-full pl-10 pr-3 py-2 border border-slate-600 rounded-lg bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  placeholder="Jane Smith"
+                />
+              </div>
+            </div>
+          )}
+          
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium mb-1">
+              Email Address
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Mail className="h-5 w-5 text-slate-400" />
+              </div>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className="block w-full pl-10 pr-3 py-2 border border-slate-600 rounded-lg bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                placeholder="doctor@example.com"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium mb-1">
+              Password
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Lock className="h-5 w-5 text-slate-400" />
+              </div>
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete={isLogin ? "current-password" : "new-password"}
+                required
+                value={formData.password}
+                onChange={handleChange}
+                className="block w-full pl-10 pr-10 py-2 border border-slate-600 rounded-lg bg-slate-800/50 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                placeholder="••••••••"
+              />
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-slate-400 hover:text-white focus:outline-none"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {!isLogin && (
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium mb-1">
+                I am a
+              </label>
+              <select
+                id="role"
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className="block w-full px-3 py-2 border border-slate-600 rounded-lg bg-slate-800/50 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              >
+                <option value="patient">Patient</option>
+                <option value="doctor">Healthcare Provider</option>
+              </select>
+            </div>
+          )}
+          
+          <div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full btn-primary py-2 flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Processing...</span>
+                </>
+              ) : (
+                <>
+                  <span>{isLogin ? 'Sign in' : 'Create account'}</span>
+                  <ArrowRight className="h-5 w-5" />
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+        
+        <div className="mt-6 text-center">
+          <button onClick={toggleForm} className="text-indigo-400 hover:text-indigo-300 text-sm">
+            {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+          </button>
+        </div>
+        
+        <div className="mt-4 text-center text-xs text-slate-500">
+          <p>
+            By continuing, you agree to MediConnect's{' '}
+            <Link to="/terms" className="text-indigo-400 hover:text-indigo-300">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link to="/privacy" className="text-indigo-400 hover:text-indigo-300">
+              Privacy Policy
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LoginPage;
