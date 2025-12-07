@@ -77,7 +77,7 @@ class SentryService {
   /**
    * Capture exception
    */
-  captureException(error: Error, context?: Record<string, any>): void {
+  captureException(error: Error, context?: Record<string, unknown>): void {
     if (!this.initialized) {
       console.error('Sentry not initialized, logging error:', error);
       return;
@@ -130,7 +130,7 @@ class SentryService {
   /**
    * Add breadcrumb (for debugging context)
    */
-  addBreadcrumb(message: string, category: string, data?: Record<string, any>): void {
+  addBreadcrumb(message: string, category: string, data?: Record<string, unknown>): void {
     if (!this.initialized) return;
 
     import('@sentry/react').then((Sentry) => {

@@ -13,7 +13,7 @@ interface FirebaseConfig {
 class FirebaseService {
   private initialized = false;
   private config: FirebaseConfig;
-  private messaging: any = null;
+  private messaging: unknown = null;
 
   constructor() {
     this.config = {
@@ -111,7 +111,7 @@ class FirebaseService {
   /**
    * Show notification
    */
-  private showNotification(payload: any): void {
+  private showNotification(payload: { notification?: { title?: string; body?: string; icon?: string } }): void {
     const { notification } = payload;
     
     if (!notification) return;

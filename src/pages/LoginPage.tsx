@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Activity, ArrowRight, User, Mail, Lock, Eye, EyeOff, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../hooks/useTheme';
 import { GoogleLogin } from '@react-oauth/google';
 
 const LoginPage: React.FC = () => {
@@ -55,7 +55,7 @@ const LoginPage: React.FC = () => {
         await signup(formData.name, formData.email, formData.password, formData.role);
       }
       navigate(from, { replace: true });
-    } catch (_err) {
+    } catch {
       setError('Authentication failed. Please check your credentials and try again.');
     } finally {
       setIsLoading(false);
@@ -67,7 +67,7 @@ const LoginPage: React.FC = () => {
       setError('');
       await socialLogin(provider, response);
       navigate(from, { replace: true });
-    } catch (_err) {
+    } catch {
       setError('Social login failed. Please try again.');
     }
   };

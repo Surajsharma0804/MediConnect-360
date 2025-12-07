@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, User, Activity, ArrowRight, Clipboard, Brain } from 'lucide-react';
+import { Send, Activity, ArrowRight, Clipboard, Brain } from 'lucide-react';
 
 const SymptomCheckerPage: React.FC = () => {
   const [message, setMessage] = useState('');

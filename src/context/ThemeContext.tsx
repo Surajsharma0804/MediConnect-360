@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useState, useEffect, ReactNode } from 'react';
 
 type Theme = 'dark' | 'light';
 
@@ -9,14 +9,12 @@ interface ThemeContextType {
   toggleReducedMotion: () => void;
 }
 
-const ThemeContext = createContext<ThemeContextType>({
+export const ThemeContext = createContext<ThemeContextType>({
   theme: 'dark',
   toggleTheme: () => {},
   prefersReducedMotion: false,
   toggleReducedMotion: () => {},
 });
-
-export const useTheme = () => useContext(ThemeContext);
 
 interface ThemeProviderProps {
   children: ReactNode;

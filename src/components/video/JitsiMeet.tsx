@@ -1,11 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 
+interface JitsiParticipant {
+  id: string;
+  displayName?: string;
+}
+
 interface JitsiMeetProps {
   roomName: string;
   userName: string;
   onMeetingEnd?: () => void;
-  onParticipantJoined?: (participant: any) => void;
-  onParticipantLeft?: (participant: any) => void;
+  onParticipantJoined?: (participant: JitsiParticipant) => void;
+  onParticipantLeft?: (participant: JitsiParticipant) => void;
 }
 
 /**
@@ -20,13 +25,13 @@ const JitsiMeet: React.FC<JitsiMeetProps> = ({
   onParticipantLeft,
 }) => {
   const jitsiContainerRef = useRef<HTMLDivElement>(null);
-  const jitsiApi = useRef<any>(null);
+  const jitsiApi = useRef<unknown>(null);
 
   useEffect(() => {
     // Load Jitsi Meet API script
     const loadJitsiScript = () => {
       return new Promise<void>((resolve, reject) => {
-        if ((window as any).JitsiMeetExternalAPI) {
+        if ((window as Record<string, unknown>).JitsiMeetExternalAPI) {
           resolve();
           return;
         }
@@ -97,7 +102,8 @@ const JitsiMeet: React.FC<JitsiMeetProps> = ({
           },
         };
 
-        jitsiApi.current = new (window as any).JitsiMeetExternalAPI(domain, options);
+        const JitsiMeetExternalAPI = (window as Record<string, unknown>).JitsiMeetExternalAPI as new (domain: string, options: Record<string, unknown>) => unknown;
+        jitsiApi.current = new JitsiMeetExternalAPI(domain, options);
 
         // Event listeners
         jitsiApi.current.addEventListener('videoConferenceJoined', () => {
@@ -109,12 +115,12 @@ const JitsiMeet: React.FC<JitsiMeetProps> = ({
           onMeetingEnd?.();
         });
 
-        jitsiApi.current.addEventListener('participantJoined', (participant: any) => {
+        (jitsiApi.current as Record<string, (event: string, callback: (data: JitsiParticipant) => void) => void>).addEventListener('participantJoined', (participant: JitsiParticipant) => {
           console.log('Participant joined:', participant);
           onParticipantJoined?.(participant);
         });
 
-        jitsiApi.current.addEventListener('participantLeft', (participant: any) => {
+        (jitsiApi.current as Record<string, (event: string, callback: (data: JitsiParticipant) => void) => void>).addEventListener('participantLeft', (participant: JitsiParticipant) => {
           console.log('Participant left:', participant);
           onParticipantLeft?.(participant);
         });

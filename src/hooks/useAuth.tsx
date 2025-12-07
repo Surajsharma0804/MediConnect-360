@@ -13,11 +13,11 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string, role: 'patient' | 'doctor') => Promise<void>;
-  socialLogin: (provider: 'google' | 'facebook' | 'apple', response?: any) => Promise<void>;
+  socialLogin: (provider: 'google' | 'facebook' | 'apple', response?: unknown) => Promise<void>;
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType>({
+export const AuthContext = createContext<AuthContextType>({
   user: null,
   isAuthenticated: false,
   isLoading: true,
@@ -113,7 +113,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const socialLogin = async (provider: 'google' | 'facebook' | 'apple', response?: any) => {
+  const socialLogin = async (provider: 'google' | 'facebook' | 'apple', response?: unknown) => {
     setIsLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -121,8 +121,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       let email = 'user@example.com';
       let name = 'John Doe';
       
-      if (provider === 'google' && response?.credential) {
-        const decoded = JSON.parse(atob(response.credential.split('.')[1]));
+      if (provider === 'google' && response && typeof response === 'object' && 'credential' in response) {
+        const credential = (response as { credential: string }).credential;
+        const decoded = JSON.parse(atob(credential.split('.')[1])) as { email: string; name: string };
         email = decoded.email;
         name = decoded.name;
       }

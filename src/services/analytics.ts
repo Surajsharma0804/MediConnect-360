@@ -32,7 +32,7 @@ class AnalyticsService {
 
     // Initialize gtag
     window.dataLayer = window.dataLayer || [];
-    function gtag(...args: any[]) {
+    function gtag(...args: unknown[]) {
       window.dataLayer.push(args);
     }
     gtag('js', new Date());
@@ -135,7 +135,7 @@ class AnalyticsService {
   /**
    * Set user properties
    */
-  setUserProperties(userId: string, properties: Record<string, any>): void {
+  setUserProperties(userId: string, properties: Record<string, unknown>): void {
     if (!this.initialized) return;
 
     window.gtag?.('set', 'user_properties', {
@@ -148,8 +148,8 @@ class AnalyticsService {
 // Extend Window interface for TypeScript
 declare global {
   interface Window {
-    dataLayer: any[];
-    gtag?: (...args: any[]) => void;
+    dataLayer: unknown[];
+    gtag?: (...args: unknown[]) => void;
   }
 }
 
