@@ -13,35 +13,49 @@ const SymptomCheckerPage: React.FC = () => {
   const [bodyPart, setBodyPart] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
     
     // Add user message to chat
-    setChat(prev => [...prev, { type: 'user', text: message }]);
+    const userMessage = message;
+    setChat(prev => [...prev, { type: 'user', text: userMessage }]);
+    setMessage('');
     setLoading(true);
     
-    // Simulate AI processing
-    setTimeout(() => {
-      // Add AI response based on symptom description
-      let response = "I'm analyzing your symptoms. Based on your description, this could be related to several conditions. Would you like me to provide more information about potential causes or suggest when you should seek medical attention?";
+    try {
+      // Call real AI API
+      const response = await fetch('http://localhost:5000/api/ai/symptom-check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ symptoms: userMessage, language: 'en' }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get AI response');
+      }
+
+      const data = await response.json();
       
-      // Very basic symptom matching for demo purposes
-      if (message.toLowerCase().includes('headache')) {
+      // Detect body part from symptoms
+      if (userMessage.toLowerCase().includes('headache') || userMessage.toLowerCase().includes('head')) {
         setBodyPart('head');
-        response = "I notice you mentioned headache. This could be caused by various factors including stress, dehydration, lack of sleep, or tension. If you're experiencing severe headache with vision changes or neck stiffness, please seek immediate medical attention.";
-      } else if (message.toLowerCase().includes('chest') && (message.toLowerCase().includes('pain') || message.toLowerCase().includes('discomfort'))) {
+      } else if (userMessage.toLowerCase().includes('chest') || userMessage.toLowerCase().includes('heart')) {
         setBodyPart('chest');
-        response = "Chest pain or discomfort can be a sign of several conditions ranging from muscle strain to more serious cardiac issues. Given the potential seriousness, I recommend speaking with a healthcare provider promptly.";
-      } else if (message.toLowerCase().includes('stomach') || message.toLowerCase().includes('abdomen')) {
+      } else if (userMessage.toLowerCase().includes('stomach') || userMessage.toLowerCase().includes('abdomen')) {
         setBodyPart('abdomen');
-        response = "Abdominal discomfort can be related to digestive issues, inflammation, or other conditions. If you're experiencing severe pain, persistent symptoms, or signs like blood in stool, please consult a medical professional.";
       }
       
-      setChat(prev => [...prev, { type: 'ai', text: response }]);
+      setChat(prev => [...prev, { type: 'ai', text: data.response }]);
+    } catch (error) {
+      console.error('AI Error:', error);
+      setChat(prev => [...prev, { 
+        type: 'ai', 
+        text: "I'm sorry, I'm having trouble connecting to the AI service right now. Please try again in a moment." 
+      }]);
+    } finally {
       setLoading(false);
-      setMessage('');
-    }, 1500);
+    }
   };
   
   return (

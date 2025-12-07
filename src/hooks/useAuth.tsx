@@ -48,17 +48,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Login failed');
+      }
+
+      const data = await response.json();
       
-      const mockUser: User = {
-        id: '123',
-        name: 'Dr. Jane Smith',
-        email,
-        role: 'doctor',
+      const user: User = {
+        id: data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role || 'patient',
       };
       
-      setUser(mockUser);
-      localStorage.setItem('mediconnect_user', JSON.stringify(mockUser));
+      setUser(user);
+      localStorage.setItem('mediconnect_user', JSON.stringify({ ...user, token: data.token }));
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -70,17 +81,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signup = async (name: string, email: string, password: string, role: 'patient' | 'doctor') => {
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, role }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Registration failed');
+      }
+
+      const data = await response.json();
       
-      const mockUser: User = {
-        id: '456',
-        name,
-        email,
-        role,
+      const user: User = {
+        id: data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role || role,
       };
       
-      setUser(mockUser);
-      localStorage.setItem('mediconnect_user', JSON.stringify(mockUser));
+      setUser(user);
+      localStorage.setItem('mediconnect_user', JSON.stringify({ ...user, token: data.token }));
     } catch (error) {
       console.error('Signup error:', error);
       throw error;
