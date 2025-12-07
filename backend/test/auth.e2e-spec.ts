@@ -13,11 +13,13 @@ describe('Authentication (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
-  });
+  }, 30000);
 
   afterAll(async () => {
-    await app.close();
-  });
+    if (app) {
+      await app.close();
+    }
+  }, 30000);
 
   describe('/auth/register (POST)', () => {
     it('should register a new user', () => {
