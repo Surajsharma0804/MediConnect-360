@@ -22,6 +22,7 @@ const Navbar: React.FC = () => {
     { path: '/', label: 'Home' },
     { path: '/symptom-checker', label: 'Symptom Checker', icon: <Activity size={18} /> },
     { path: '/virtual-consult', label: 'Virtual Consult', icon: <Video size={18} /> },
+    { path: '/pricing', label: 'Pricing', icon: <Settings size={18} /> },
     { path: '/dashboard', label: 'Dashboard', icon: <UserCircle size={18} /> },
   ];
 

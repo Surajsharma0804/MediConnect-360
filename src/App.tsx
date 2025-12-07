@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage';
 import SymptomCheckerPage from './pages/SymptomCheckerPage';
 import VirtualConsultPage from './pages/VirtualConsultPage';
 import DashboardPage from './pages/DashboardPage';
+import PricingPage from './pages/PricingPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { useAuth } from './hooks/useAuth';
 
@@ -48,6 +49,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <DashboardPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/pricing" 
+                element={
+                  <ProtectedRoute>
+                    <PricingPage />
                   </ProtectedRoute>
                 } 
               />
