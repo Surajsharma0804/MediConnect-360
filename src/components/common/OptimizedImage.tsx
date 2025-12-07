@@ -21,12 +21,6 @@ export const OptimizedImage = ({
   const [imageError, setImageError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
-    if (!lazy) {
-      loadImage();
-    }
-  }, [src, lazy]);
-
   const loadImage = () => {
     const img = new Image();
     img.src = src;
@@ -40,16 +34,23 @@ export const OptimizedImage = ({
     };
   };
 
-  const handleIntersection = (entries: IntersectionObserverEntry[]) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        loadImage();
-      }
-    });
-  };
+  useEffect(() => {
+    if (!lazy) {
+      loadImage();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src, lazy]);
 
   useEffect(() => {
     if (!lazy) return;
+
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          loadImage();
+        }
+      });
+    };
 
     const observer = new IntersectionObserver(handleIntersection, {
       rootMargin: '50px',
@@ -65,6 +66,7 @@ export const OptimizedImage = ({
         observer.unobserve(element);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src, lazy]);
 
   return (

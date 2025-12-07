@@ -1,5 +1,12 @@
 // Web Vitals Performance Monitoring
-export const reportWebVitals = (onPerfEntry?: (metric: any) => void) => {
+interface PerformanceMetric {
+  name: string;
+  value: number;
+  id: string;
+  delta: number;
+}
+
+export const reportWebVitals = (onPerfEntry?: (metric: PerformanceMetric) => void) => {
   if (onPerfEntry && onPerfEntry instanceof Function) {
     import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
       getCLS(onPerfEntry);
@@ -42,7 +49,7 @@ export class PerformanceMonitor {
           }
         });
         observer.observe({ entryTypes: ['longtask'] });
-      } catch (e) {
+      } catch {
         // Long tasks not supported
       }
     }
@@ -97,8 +104,8 @@ export class PerformanceMonitor {
   }
 
   // Get performance report
-  getReport() {
-    const report: Record<string, any> = {};
+  getReport(): Record<string, { count: number; average: number; min: number; max: number }> {
+    const report: Record<string, { count: number; average: number; min: number; max: number }> = {};
     
     this.metrics.forEach((values, name) => {
       report[name] = {

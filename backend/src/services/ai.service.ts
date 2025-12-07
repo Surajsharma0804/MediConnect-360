@@ -10,7 +10,9 @@ export class AIService {
   constructor() {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      this.logger.warn('GEMINI_API_KEY is not set - AI features will be disabled');
+      this.logger.warn(
+        'GEMINI_API_KEY is not set - AI features will be disabled',
+      );
       // Don't throw error - allow service to initialize without API key for testing
       return;
     }

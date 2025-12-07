@@ -138,13 +138,13 @@ export const isTouchDevice = () => {
   return (
     'ontouchstart' in window ||
     navigator.maxTouchPoints > 0 ||
-    (navigator as any).msMaxTouchPoints > 0
+    ('msMaxTouchPoints' in navigator && (navigator as { msMaxTouchPoints: number }).msMaxTouchPoints > 0)
   );
 };
 
 // Utility to check if device is iOS
 export const isIOS = () => {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !('MSStream' in window);
 };
 
 // Utility to check if device is Android
@@ -155,5 +155,5 @@ export const isAndroid = () => {
 // Utility to check if running as PWA
 export const isPWA = () => {
   return window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as any).standalone === true;
+    ('standalone' in window.navigator && (window.navigator as { standalone: boolean }).standalone === true);
 };

@@ -1,5 +1,5 @@
 import { InputHTMLAttributes, TextareaHTMLAttributes } from 'react';
-import { UseFormRegister, FieldError } from 'react-hook-form';
+import { UseFormRegister, FieldError, FieldValues } from 'react-hook-form';
 
 interface BaseFieldProps {
   label?: string;
@@ -9,12 +9,12 @@ interface BaseFieldProps {
 }
 
 interface InputFieldProps extends BaseFieldProps, InputHTMLAttributes<HTMLInputElement> {
-  register: UseFormRegister<any>;
+  register: UseFormRegister<FieldValues>;
   name: string;
 }
 
 interface TextareaFieldProps extends BaseFieldProps, TextareaHTMLAttributes<HTMLTextAreaElement> {
-  register: UseFormRegister<any>;
+  register: UseFormRegister<FieldValues>;
   name: string;
 }
 
@@ -115,7 +115,7 @@ export const TextareaField = ({
 };
 
 interface SelectFieldProps extends BaseFieldProps {
-  register: UseFormRegister<any>;
+  register: UseFormRegister<FieldValues>;
   name: string;
   options: { value: string; label: string }[];
   placeholder?: string;
