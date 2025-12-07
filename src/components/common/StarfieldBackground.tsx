@@ -10,26 +10,36 @@ const StarfieldBackground: React.FC = () => {
       <div 
         className="absolute inset-0"
         style={{
-          background: theme === 'dark' 
-            ? 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'
-            : 'linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)'
+          background: theme === 'light' 
+            ? 'linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)'
+            : 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'
         }}
       />
       
       {/* Subtle medical cross pattern */}
       <div 
-        className="absolute inset-0 opacity-[0.02]"
+        className="absolute inset-0"
         style={{
+          opacity: theme === 'light' ? 0.02 : 0.05,
           backgroundImage: `
-            repeating-linear-gradient(0deg, transparent, transparent 50px, #2563eb 50px, #2563eb 51px),
-            repeating-linear-gradient(90deg, transparent, transparent 50px, #2563eb 50px, #2563eb 51px)
+            repeating-linear-gradient(0deg, transparent, transparent 50px, ${theme === 'light' ? '#2563eb' : '#3b82f6'} 50px, ${theme === 'light' ? '#2563eb' : '#3b82f6'} 51px),
+            repeating-linear-gradient(90deg, transparent, transparent 50px, ${theme === 'light' ? '#2563eb' : '#3b82f6'} 50px, ${theme === 'light' ? '#2563eb' : '#3b82f6'} 51px)
           `
         }}
       />
       
       {/* Subtle accent shapes for visual interest */}
-      <div className="absolute top-20 right-20 w-64 h-64 bg-blue-100 rounded-full opacity-20 blur-3xl" />
-      <div className="absolute bottom-20 left-20 w-96 h-96 bg-emerald-100 rounded-full opacity-20 blur-3xl" />
+      {theme === 'light' ? (
+        <>
+          <div className="absolute top-20 right-20 w-64 h-64 bg-blue-100 rounded-full opacity-20 blur-3xl" />
+          <div className="absolute bottom-20 left-20 w-96 h-96 bg-emerald-100 rounded-full opacity-20 blur-3xl" />
+        </>
+      ) : (
+        <>
+          <div className="absolute top-20 right-20 w-64 h-64 bg-blue-900 rounded-full opacity-10 blur-3xl" />
+          <div className="absolute bottom-20 left-20 w-96 h-96 bg-emerald-900 rounded-full opacity-10 blur-3xl" />
+        </>
+      )}
     </div>
   );
 };

@@ -27,15 +27,15 @@ const Navbar: React.FC = () => {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
+    <nav className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link 
               to="/" 
-              className="flex items-center gap-2 text-xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
+              className="flex items-center gap-2 text-xl font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
             >
-              <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
+              <div className="w-10 h-10 rounded-lg bg-blue-600 dark:bg-blue-500 flex items-center justify-center shadow-sm">
                 <Activity size={22} className="text-white" />
               </div>
               <span className="hidden sm:inline">MediConnect 360</span>
@@ -51,8 +51,8 @@ const Navbar: React.FC = () => {
                   to={link.path}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2
                     ${location.pathname === link.path 
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200' 
-                      : 'text-slate-700 hover:bg-slate-50 hover:text-blue-600'
+                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700' 
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400'
                     }`}
                   onClick={closeMenu}
                 >
@@ -65,43 +65,43 @@ const Navbar: React.FC = () => {
           
           <div className="hidden md:flex items-center gap-2">
             <button
-              className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 focus:outline-none transition-colors"
+              className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none transition-colors"
               onClick={toggleTheme}
-              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
             >
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
             </button>
             
             {isAuthenticated ? (
               <div className="relative group">
                 <button
-                  className="flex items-center px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-200"
+                  className="flex items-center px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700"
                 >
-                  <span className="text-sm font-medium mr-2 text-slate-700">Dr. Smith</span>
-                  <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
+                  <span className="text-sm font-medium mr-2 text-slate-700 dark:text-slate-300">Dr. Smith</span>
+                  <div className="w-8 h-8 rounded-full bg-blue-600 dark:bg-blue-500 flex items-center justify-center">
                     <span className="text-white font-medium text-sm">DS</span>
                   </div>
                 </button>
                 
-                <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-lg shadow-lg hidden group-hover:block origin-top-right">
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg hidden group-hover:block origin-top-right">
                   <div className="py-1">
                     <Link
                       to="/dashboard"
-                      className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                      className="flex items-center px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                     >
                       <UserCircle size={16} className="mr-2" />
                       Profile
                     </Link>
                     <Link
                       to="/settings"
-                      className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                      className="flex items-center px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                     >
                       <Settings size={16} className="mr-2" />
                       Settings
                     </Link>
                     <button
                       onClick={logout}
-                      className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                     >
                       <LogOut size={16} className="mr-2" />
                       Sign out

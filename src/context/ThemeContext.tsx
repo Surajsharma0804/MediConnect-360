@@ -23,10 +23,10 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  // Initialize theme from localStorage or default to dark
+  // Initialize theme from localStorage or default to light (professional)
   const [theme, setTheme] = useState<Theme>(() => {
     const savedTheme = localStorage.getItem('theme');
-    return (savedTheme as Theme) || 'dark';
+    return (savedTheme as Theme) || 'light';
   });
 
   // Initialize motion preference from localStorage or system preference

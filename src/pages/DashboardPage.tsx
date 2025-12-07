@@ -69,15 +69,15 @@ const DashboardPage: React.FC = () => {
   ];
   
   return (
-    <div className="min-h-[calc(100vh-4rem)] py-8 px-4 sm:px-6 lg:px-8 bg-slate-50">
+    <div className="min-h-[calc(100vh-4rem)] py-8 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900">
       <div className="max-w-7xl mx-auto">
         {/* Dashboard Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
               Health Dashboard
             </h1>
-            <p className="mt-1 text-slate-600 text-lg">
+            <p className="mt-1 text-slate-600 dark:text-slate-400 text-lg">
               Welcome back, {user?.name || 'User'}
             </p>
           </div>
@@ -95,7 +95,7 @@ const DashboardPage: React.FC = () => {
         </div>
         
         {/* Dashboard Navigation */}
-        <div className="mb-8 border-b border-slate-200 bg-white rounded-t-lg">
+        <div className="mb-8 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-t-lg">
           <nav className="flex space-x-1 px-4 overflow-x-auto">
             {[
               { id: 'overview', label: 'Overview', icon: <Activity className="h-4 w-4" /> },
@@ -109,8 +109,8 @@ const DashboardPage: React.FC = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center pb-4 pt-4 px-4 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
                   activeTab === tab.id
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-600 hover:text-blue-600 hover:border-slate-300'
+                    ? 'border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:border-slate-300 dark:hover:border-slate-600'
                 }`}
               >
                 <span className="mr-2">{tab.icon}</span>
@@ -124,28 +124,28 @@ const DashboardPage: React.FC = () => {
           <>
             {/* Health Stats Grid */}
             <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-4 text-slate-900">Your Health Metrics</h2>
+              <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-slate-100">Your Health Metrics</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {healthMetrics.map((metric, index) => (
-                  <div key={index} className="bg-white border border-slate-200 p-5 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                  <div key={index} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-start mb-3">
                       <div>
-                        <p className="text-sm font-medium text-slate-600">{metric.name}</p>
+                        <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{metric.name}</p>
                         <div className="flex items-baseline mt-2">
-                          <p className="text-3xl font-bold text-slate-900">{metric.value}</p>
-                          <p className="ml-2 text-sm text-slate-500">{metric.unit}</p>
+                          <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">{metric.value}</p>
+                          <p className="ml-2 text-sm text-slate-500 dark:text-slate-400">{metric.unit}</p>
                         </div>
                       </div>
                       <div className={`p-2.5 rounded-lg ${
-                        metric.trend === 'increasing' ? 'bg-emerald-50 text-emerald-600' : 
-                        metric.trend === 'decreasing' ? 'bg-blue-50 text-blue-600' : 
-                        'bg-slate-50 text-slate-600'
+                        metric.trend === 'increasing' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 
+                        metric.trend === 'decreasing' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 
+                        'bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
                       }`}>
                         {metric.icon}
                       </div>
                     </div>
                     <div className="mt-4">
-                      <div className="w-full bg-slate-100 rounded-full h-2">
+                      <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2">
                         <div 
                           className={`h-2 rounded-full ${
                             metric.trend === 'increasing' ? 'bg-emerald-500' : 
@@ -155,7 +155,7 @@ const DashboardPage: React.FC = () => {
                           style={{ width: `${Math.random() * 40 + 60}%` }}
                         ></div>
                       </div>
-                      <p className="mt-2 text-xs font-medium text-slate-600">
+                      <p className="mt-2 text-xs font-medium text-slate-600 dark:text-slate-400">
                         {metric.trend === 'increasing' ? '↗ Improving' : 
                          metric.trend === 'decreasing' ? '↘ Improving' : 
                          '→ Stable'} from last check
