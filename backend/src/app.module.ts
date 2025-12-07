@@ -20,7 +20,7 @@ import { SMSService } from './services/sms.service';
 import { PaymentService } from './services/payment.service';
 
 // Conditionally add OAuth strategies only if credentials are configured
-const oauthProviders = [];
+const oauthProviders: any[] = [];
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   oauthProviders.push(GoogleStrategy);
 }
