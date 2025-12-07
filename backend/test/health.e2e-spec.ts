@@ -30,14 +30,10 @@ describe('Health Check (e2e)', () => {
   });
 
   it('/health/ready (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/health/ready')
-      .expect(200);
+    return request(app.getHttpServer()).get('/health/ready').expect(200);
   });
 
   it('/health/live (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/health/live')
-      .expect(200);
+    return request(app.getHttpServer()).get('/health/live').expect(200);
   });
 });

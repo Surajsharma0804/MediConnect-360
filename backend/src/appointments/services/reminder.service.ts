@@ -48,7 +48,7 @@ export class ReminderService {
 
         // Send 1-hour reminder
         if (hoursUntil <= 1 && hoursUntil > 0.5) {
-          await this.send1HourReminder(appointment);
+          this.send1HourReminder(appointment);
         }
       }
 
@@ -91,7 +91,7 @@ export class ReminderService {
     }
   }
 
-  private async send1HourReminder(appointment: Appointment) {
+  private send1HourReminder(appointment: Appointment) {
     try {
       const message = `Reminder: Your appointment is in 1 hour at ${appointment.scheduledAt.toLocaleTimeString()}`;
 

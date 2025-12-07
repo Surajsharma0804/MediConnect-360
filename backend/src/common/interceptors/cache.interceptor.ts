@@ -37,8 +37,8 @@ export class HttpCacheInterceptor implements NestInterceptor {
 
     // If not in cache, execute request and cache response
     return next.handle().pipe(
-      tap(async (response) => {
-        await this.cacheManager.set(cacheKey, response, 300); // 5 minutes
+      tap((response) => {
+        void this.cacheManager.set(cacheKey, response, 300); // 5 minutes
       }),
     );
   }
