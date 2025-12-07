@@ -35,7 +35,7 @@ export class CareTeamService {
 
     const savedMember = await this.careTeamRepository.save(member);
 
-    await this.notificationService.sendPushNotification(userId, {
+    this.notificationService.sendPushNotification(userId, {
       title: 'Care Team Updated',
       body: `A new ${data.role} has been added to your care team.`,
     });

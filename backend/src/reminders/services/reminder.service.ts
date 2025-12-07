@@ -45,7 +45,7 @@ export class ReminderService {
 
     const savedReminder = await this.reminderRepository.save(reminder);
 
-    await this.notificationService.sendPushNotification(userId, {
+    this.notificationService.sendPushNotification(userId, {
       title: 'Reminder Created',
       body: `Reminder "${data.title}" has been set.`,
     });
@@ -183,7 +183,7 @@ export class ReminderService {
     const methods = reminder.notificationMethods || ['push'];
 
     if (methods.includes('push')) {
-      await this.notificationService.sendPushNotification(reminder.userId, {
+      this.notificationService.sendPushNotification(reminder.userId, {
         title: reminder.title,
         body: reminder.description || 'You have a reminder',
       });

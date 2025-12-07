@@ -114,7 +114,7 @@ export class VoiceController {
 
   @Post('translate')
   @UseGuards(JwtAuthGuard)
-  async translateText(
+  translateText(
     @Body('text') text: string,
     @Body('targetLanguage') targetLanguage: string,
     @Body('sourceLanguage') sourceLanguage?: string,
@@ -143,7 +143,7 @@ export class VoiceController {
 
   @Post('text-to-speech')
   @UseGuards(JwtAuthGuard)
-  async textToSpeech(
+  textToSpeech(
     @Body('text') text: string,
     @Body('language') language: string = 'en-US',
   ) {

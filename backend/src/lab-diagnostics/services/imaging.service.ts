@@ -34,7 +34,7 @@ export class ImagingService {
 
     const savedStudy = await this.imagingRepository.save(study);
 
-    await this.notificationService.sendPushNotification(userId, {
+    this.notificationService.sendPushNotification(userId, {
       title: 'Imaging Study Ordered',
       body: `Your ${createDto.modality} study has been ordered.`,
     });
@@ -88,7 +88,7 @@ export class ImagingService {
     };
 
     if (statusMessages[status]) {
-      await this.notificationService.sendPushNotification(userId, {
+      this.notificationService.sendPushNotification(userId, {
         title: 'Imaging Update',
         body: statusMessages[status],
       });
@@ -150,7 +150,7 @@ export class ImagingService {
 
       const updatedStudy = await this.imagingRepository.save(study);
 
-      await this.notificationService.sendPushNotification(userId, {
+      this.notificationService.sendPushNotification(userId, {
         title: 'AI Analysis Complete',
         body: 'AI analysis of your imaging study is ready.',
       });
@@ -180,7 +180,7 @@ export class ImagingService {
 
     const updatedStudy = await this.imagingRepository.save(study);
 
-    await this.notificationService.sendPushNotification(userId, {
+    this.notificationService.sendPushNotification(userId, {
       title: 'Imaging Report Ready',
       body: 'Your imaging report has been completed by the radiologist.',
     });

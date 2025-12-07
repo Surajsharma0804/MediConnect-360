@@ -85,7 +85,7 @@ export class InsuranceClaimService {
 
       const updated = await this.claimRepository.save(claim);
 
-      await this.notificationService.sendPushNotification(userId, {
+      this.notificationService.sendPushNotification(userId, {
         title: 'Claim Submitted',
         body: `Your claim #${claim.claimNumber} has been submitted`,
         icon: '/icons/claim.png',
@@ -124,7 +124,7 @@ export class InsuranceClaimService {
 
       const updated = await this.claimRepository.save(claim);
 
-      await this.notificationService.sendPushNotification(claim.userId, {
+      this.notificationService.sendPushNotification(claim.userId, {
         title: 'Claim Status Update',
         body: `Your claim #${claim.claimNumber} is now ${status}`,
         icon: '/icons/claim.png',

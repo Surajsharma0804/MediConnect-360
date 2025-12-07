@@ -35,7 +35,7 @@ export class WearableService {
 
     const savedDevice = await this.wearableRepository.save(device);
 
-    await this.notificationService.sendPushNotification(userId, {
+    this.notificationService.sendPushNotification(userId, {
       title: 'Device Connected',
       body: `${deviceName} has been successfully connected.`,
     });
@@ -71,7 +71,7 @@ export class WearableService {
 
     await this.wearableRepository.save(device);
 
-    await this.notificationService.sendPushNotification(userId, {
+    this.notificationService.sendPushNotification(userId, {
       title: 'Device Disconnected',
       body: `${device.deviceName} has been disconnected.`,
     });

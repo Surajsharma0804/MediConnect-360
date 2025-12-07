@@ -192,7 +192,7 @@ export class InsuranceCardService {
       const updated = await this.insuranceCardRepository.save(card);
 
       // Send notification
-      await this.notificationService.sendPushNotification(userId, {
+      this.notificationService.sendPushNotification(userId, {
         title: 'Insurance Verified',
         body: `Your ${card.insuranceProvider} insurance has been verified`,
         icon: '/icons/insurance.png',

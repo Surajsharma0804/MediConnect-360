@@ -97,13 +97,10 @@ export class ReminderService {
 
       // Send SMS if phone number available
       if (appointment.patient.phone) {
-        await this.smsService.sendAppointmentReminder(
-          appointment.patient.phone,
-          {
-            doctorName: appointment.doctor.name,
-            time: appointment.scheduledAt.toLocaleTimeString(),
-          },
-        );
+        this.smsService.sendAppointmentReminder(appointment.patient.phone, {
+          doctorName: appointment.doctor.name,
+          time: appointment.scheduledAt.toLocaleTimeString(),
+        });
       }
 
       // Send push notification

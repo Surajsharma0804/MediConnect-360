@@ -57,7 +57,7 @@ export class MessageService {
       );
 
       for (const participantId of otherParticipants) {
-        await this.notificationService.sendPushNotification(participantId, {
+        this.notificationService.sendPushNotification(participantId, {
           title: 'New Message',
           body: data.content.substring(0, 100),
           icon: '/icons/message.png',

@@ -31,7 +31,7 @@ export class LabTestOrderService {
     const savedOrder = await this.labTestOrderRepository.save(order);
 
     // Send notification
-    await this.notificationService.sendPushNotification(userId, {
+    this.notificationService.sendPushNotification(userId, {
       title: 'Lab Test Ordered',
       body: `Your ${createDto.testName} has been ordered successfully.`,
     });
@@ -87,7 +87,7 @@ export class LabTestOrderService {
     };
 
     if (statusMessages[status]) {
-      await this.notificationService.sendPushNotification(userId, {
+      this.notificationService.sendPushNotification(userId, {
         title: 'Lab Test Update',
         body: statusMessages[status],
       });

@@ -57,7 +57,7 @@ export class SOSService {
         if (contact.notifyOnEmergency) {
           // Send SMS
           if (contact.primaryPhone) {
-            await this.smsService.sendEmergencyAlert(
+            this.smsService.sendEmergencyAlert(
               contact.primaryPhone,
               location || 'Location not available',
             );
@@ -65,7 +65,7 @@ export class SOSService {
           }
 
           // Send push notification (if they have the app)
-          await this.notificationService.sendPushNotification(userId, {
+          this.notificationService.sendPushNotification(userId, {
             title: '🚨 Emergency SOS Triggered',
             body: sosSession.message,
             icon: '/icons/emergency.png',
@@ -123,7 +123,7 @@ export class SOSService {
           session.contactsNotified.includes(contact.id) &&
           contact.primaryPhone
         ) {
-          await this.smsService.sendAppointmentReminder(contact.primaryPhone, {
+          this.smsService.sendAppointmentReminder(contact.primaryPhone, {
             doctorName: 'Emergency',
             time: 'SOS Alert Cancelled - User is safe',
           });

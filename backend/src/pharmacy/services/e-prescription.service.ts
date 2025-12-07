@@ -77,7 +77,7 @@ export class EPrescriptionService {
       const saved = await this.ePrescriptionRepository.save(ePrescription);
 
       // Send notifications
-      await this.notifyPrescriptionSent(prescription, pharmacy);
+      this.notifyPrescriptionSent(prescription, pharmacy);
 
       this.logger.log(`E-prescription sent to pharmacy ${pharmacyId}`);
       return saved;
@@ -159,7 +159,7 @@ export class EPrescriptionService {
       const updated = await this.ePrescriptionRepository.save(ePrescription);
 
       // Send status update notifications
-      await this.notifyStatusUpdate(ePrescription);
+      this.notifyStatusUpdate(ePrescription);
 
       return updated;
     } catch (error) {
@@ -287,13 +287,10 @@ export class EPrescriptionService {
     }
   }
 
-  private async notifyPrescriptionSent(
-    prescription: any,
-    pharmacy: Pharmacy,
-  ): Promise<void> {
+  private notifyPrescriptionSent(prescription: any, pharmacy: Pharmacy): void {
     try {
       // Push notification
-      await this.notificationService.sendPushNotification(prescription.userId, {
+      this.notificationService.sendPushNotification(prescription.userId, {
         title: 'Prescription Sent',
         body: `Your prescription for ${prescription.medicationName} has been sent to ${pharmacy.name}`,
         icon: '/icons/prescription.png',
@@ -307,7 +304,7 @@ export class EPrescriptionService {
     }
   }
 
-  private async notifyStatusUpdate(ePrescription: any): Promise<void> {
+  private notifyStatusUpdate(ePrescription: any): void {
     try {
       let title = '';
       let message = '';
@@ -327,18 +324,15 @@ export class EPrescriptionService {
       }
 
       if (message) {
-        await this.notificationService.sendPushNotification(
-          ePrescription.userId,
-          {
-            title,
-            body: message,
-            icon: '/icons/prescription.png',
-            data: {
-              type: 'prescription_status',
-              status: ePrescription.status,
-            },
+        this.notificationService.sendPushNotification(ePrescription.userId, {
+          title,
+          body: message,
+          icon: '/icons/prescription.png',
+          data: {
+            type: 'prescription_status',
+            status: ePrescription.status,
           },
-        );
+        });
       }
     } catch (error) {
       this.logger.error(`Error sending status notification: ${error.message}`);

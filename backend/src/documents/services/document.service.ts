@@ -52,7 +52,7 @@ export class DocumentService {
 
     const savedDocument = await this.documentRepository.save(document);
 
-    await this.notificationService.sendPushNotification(userId, {
+    this.notificationService.sendPushNotification(userId, {
       title: 'Document Uploaded',
       body: `${data.title} has been uploaded successfully.`,
     });

@@ -23,7 +23,7 @@ export class CarePlanService {
 
     const savedPlan = await this.carePlanRepository.save(plan);
 
-    await this.notificationService.sendPushNotification(userId, {
+    this.notificationService.sendPushNotification(userId, {
       title: 'Care Plan Created',
       body: `Your care plan "${data.title}" has been created.`,
     });
