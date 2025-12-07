@@ -18,12 +18,20 @@ describe('AIService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should throw error if GEMINI_API_KEY is not set', () => {
+  it('should initialize without error if GEMINI_API_KEY is not set', () => {
     delete process.env.GEMINI_API_KEY;
 
     expect(() => {
       new AIService();
-    }).toThrow('Gemini API key is required');
+    }).not.toThrow();
+  });
+
+  it('should return default response when API key is not set', async () => {
+    delete process.env.GEMINI_API_KEY;
+    const serviceWithoutKey = new AIService();
+
+    const result = await serviceWithoutKey.analyzeSymptoms('headache', 'en');
+    expect(result).toContain('AI service is currently unavailable');
   });
 
   describe('analyzeSymptoms', () => {
