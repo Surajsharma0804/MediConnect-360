@@ -16,52 +16,72 @@ Previous attempts had Docker tag format issues:
 - Job runs after both backend and frontend tests pass
 - Only triggers on push to main branch
 
-### 2. Fixed Tag Format
-**Before (BROKEN):**
+### 2. Fixed Image Naming and Permissions
+**Using docker/metadata-action for proper tag generation:**
 ```yaml
-tags: |
-  ghcr.io/${{ steps.repo.outputs.repository }}/backend:latest
-  ghcr.io/${{ steps.repo.outputs.repository }}/frontend:latest
+- name: Extract metadata for backend
+  id: meta-backend
+  uses: docker/metadata-action@v5
+  with:
+    images: ghcr.io/${{ github.repository_owner }}/mediconnect-backend
+    tags: |
+      type=raw,value=latest
+      type=sha,prefix={{branch}}-
 ```
 
-**After (FIXED):**
-```yaml
-tags: |
-  ghcr.io/${{ steps.repo.outputs.repository }}-backend:latest
-  ghcr.io/${{ steps.repo.outputs.repository }}-frontend:latest
-```
+This generates clean image names like:
+- `ghcr.io/surajsharma0804/mediconnect-backend:latest`
+- `ghcr.io/surajsharma0804/mediconnect-frontend:latest`
 
-Changed from `/backend` to `-backend` suffix format.
-
-### 3. Added Proper Permissions
+### 3. Added Enhanced Permissions
 ```yaml
 permissions:
   contents: read
   packages: write
+  id-token: write
 ```
 
-This allows the workflow to push to GitHub Container Registry (ghcr.io).
+Added `id-token: write` for better authentication with GHCR.
 
-### 4. Maintained Lowercase Conversion
+### 4. Optimized Docker Builds for Speed
+
+**Added backend/.dockerignore:**
+- Excludes test files, coverage, and unnecessary files
+- Reduces build context size significantly
+
+**Optimized Dockerfile layers:**
+```dockerfile
+# Install with optimizations
+RUN npm ci --prefer-offline --no-audit && npm cache clean --force
+```
+
+**Enabled GitHub Actions cache:**
 ```yaml
-- name: Convert repository name to lowercase
-  id: repo
-  run: echo "repository=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+cache-from: type=gha
+cache-to: type=gha,mode=max
 ```
 
-Ensures repository name is lowercase for Docker registry compatibility.
+This caches Docker layers between builds, making subsequent builds much faster.
 
 ## Docker Images Built
 
 When CI runs successfully, it will build and push:
 
 1. **Backend Image:**
-   - `ghcr.io/surajsharma0804/mediconnect-360-backend:latest`
-   - `ghcr.io/surajsharma0804/mediconnect-360-backend:<commit-sha>`
+   - `ghcr.io/surajsharma0804/mediconnect-backend:latest`
+   - `ghcr.io/surajsharma0804/mediconnect-backend:main-<commit-sha>`
 
 2. **Frontend Image:**
-   - `ghcr.io/surajsharma0804/mediconnect-360-frontend:latest`
-   - `ghcr.io/surajsharma0804/mediconnect-360-frontend:<commit-sha>`
+   - `ghcr.io/surajsharma0804/mediconnect-frontend:latest`
+   - `ghcr.io/surajsharma0804/mediconnect-frontend:main-<commit-sha>`
+
+## Build Speed Optimizations
+
+1. **Layer Caching**: GitHub Actions cache stores Docker layers between builds
+2. **Optimized npm install**: Using `--prefer-offline --no-audit` flags
+3. **.dockerignore**: Excludes test files and unnecessary content
+4. **Multi-stage builds**: Separate builder and production stages
+5. **Parallel builds**: Backend and frontend build simultaneously
 
 ## CI/CD Pipeline Status
 
