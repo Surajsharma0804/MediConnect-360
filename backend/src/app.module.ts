@@ -23,6 +23,7 @@ import { EmergencyModule } from './emergency/emergency.module';
 import { HealthTrackingModule } from './health-tracking/health-tracking.module';
 import { PharmacyModule } from './pharmacy/pharmacy.module';
 import { InsuranceModule } from './insurance/insurance.module';
+import { LabDiagnosticsModule } from './lab-diagnostics/lab-diagnostics.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AIService } from './services/ai.service';
 import { VoiceService } from './services/voice.service';
@@ -68,6 +69,7 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
     HealthTrackingModule,
     PharmacyModule,
     InsuranceModule,
+    LabDiagnosticsModule,
   ],
   controllers: [AppController, AuthController, PaymentController],
   providers: [
