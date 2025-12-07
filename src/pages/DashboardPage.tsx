@@ -69,25 +69,25 @@ const DashboardPage: React.FC = () => {
   ];
   
   return (
-    <div className="min-h-[calc(100vh-4rem)] py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-[calc(100vh-4rem)] py-8 px-4 sm:px-6 lg:px-8 bg-slate-50">
       <div className="max-w-7xl mx-auto">
         {/* Dashboard Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold text-slate-900">
               Health Dashboard
             </h1>
-            <p className="mt-1 text-slate-400">
+            <p className="mt-1 text-slate-600 text-lg">
               Welcome back, {user?.name || 'User'}
             </p>
           </div>
           
           <div className="mt-4 md:mt-0 flex space-x-3">
-            <button className="btn-secondary flex items-center">
+            <button className="btn-secondary flex items-center text-sm">
               <Calendar className="h-4 w-4 mr-2" />
               Schedule Appointment
             </button>
-            <button className="btn-primary flex items-center">
+            <button className="btn-primary flex items-center text-sm">
               <Activity className="h-4 w-4 mr-2" />
               Start Consult
             </button>
@@ -95,8 +95,8 @@ const DashboardPage: React.FC = () => {
         </div>
         
         {/* Dashboard Navigation */}
-        <div className="mb-8 border-b border-slate-800">
-          <nav className="flex space-x-8">
+        <div className="mb-8 border-b border-slate-200 bg-white rounded-t-lg">
+          <nav className="flex space-x-1 px-4 overflow-x-auto">
             {[
               { id: 'overview', label: 'Overview', icon: <Activity className="h-4 w-4" /> },
               { id: 'appointments', label: 'Appointments', icon: <Calendar className="h-4 w-4" /> },
@@ -107,10 +107,10 @@ const DashboardPage: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center pb-4 px-1 border-b-2 font-medium text-sm ${
+                className={`flex items-center pb-4 pt-4 px-4 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
                   activeTab === tab.id
-                    ? 'border-indigo-500 text-indigo-400'
-                    : 'border-transparent text-slate-400 hover:text-white hover:border-slate-600'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-slate-600 hover:text-blue-600 hover:border-slate-300'
                 }`}
               >
                 <span className="mr-2">{tab.icon}</span>
@@ -124,38 +124,38 @@ const DashboardPage: React.FC = () => {
           <>
             {/* Health Stats Grid */}
             <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-4">Your Health Metrics</h2>
+              <h2 className="text-xl font-semibold mb-4 text-slate-900">Your Health Metrics</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {healthMetrics.map((metric, index) => (
-                  <div key={index} className="glass-panel p-4 rounded-xl">
-                    <div className="flex justify-between items-start">
+                  <div key={index} className="bg-white border border-slate-200 p-5 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start mb-3">
                       <div>
-                        <p className="text-sm text-slate-400">{metric.name}</p>
-                        <div className="flex items-baseline mt-1">
-                          <p className="text-2xl font-bold">{metric.value}</p>
-                          <p className="ml-1 text-sm text-slate-400">{metric.unit}</p>
+                        <p className="text-sm font-medium text-slate-600">{metric.name}</p>
+                        <div className="flex items-baseline mt-2">
+                          <p className="text-3xl font-bold text-slate-900">{metric.value}</p>
+                          <p className="ml-2 text-sm text-slate-500">{metric.unit}</p>
                         </div>
                       </div>
-                      <div className={`p-2 rounded-full ${
-                        metric.trend === 'increasing' ? 'bg-emerald-500/20' : 
-                        metric.trend === 'decreasing' ? 'bg-blue-500/20' : 
-                        'bg-indigo-500/20'
+                      <div className={`p-2.5 rounded-lg ${
+                        metric.trend === 'increasing' ? 'bg-emerald-50 text-emerald-600' : 
+                        metric.trend === 'decreasing' ? 'bg-blue-50 text-blue-600' : 
+                        'bg-slate-50 text-slate-600'
                       }`}>
                         {metric.icon}
                       </div>
                     </div>
-                    <div className="mt-3">
-                      <div className="w-full bg-slate-700 rounded-full h-1.5">
+                    <div className="mt-4">
+                      <div className="w-full bg-slate-100 rounded-full h-2">
                         <div 
-                          className={`h-1.5 rounded-full ${
+                          className={`h-2 rounded-full ${
                             metric.trend === 'increasing' ? 'bg-emerald-500' : 
                             metric.trend === 'decreasing' ? 'bg-blue-500' : 
-                            'bg-indigo-500'
+                            'bg-slate-400'
                           }`} 
                           style={{ width: `${Math.random() * 40 + 60}%` }}
                         ></div>
                       </div>
-                      <p className="mt-1 text-xs text-slate-400">
+                      <p className="mt-2 text-xs font-medium text-slate-600">
                         {metric.trend === 'increasing' ? '↗ Improving' : 
                          metric.trend === 'decreasing' ? '↘ Improving' : 
                          '→ Stable'} from last check

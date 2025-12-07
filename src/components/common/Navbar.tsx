@@ -27,18 +27,18 @@ const Navbar: React.FC = () => {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 glass-panel bg-opacity-80 backdrop-blur-lg">
+    <nav className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link 
               to="/" 
-              className="flex items-center gap-2 text-xl font-bold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"
+              className="flex items-center gap-2 text-xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
             >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center">
-                <Activity size={20} className="text-white" />
+              <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
+                <Activity size={22} className="text-white" />
               </div>
-              MediConnect 360
+              <span className="hidden sm:inline">MediConnect 360</span>
             </Link>
           </div>
           
@@ -49,10 +49,10 @@ const Navbar: React.FC = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2
                     ${location.pathname === link.path 
-                      ? 'bg-indigo-800/30 text-white' 
-                      : 'text-slate-300 hover:bg-indigo-700/20 hover:text-white'
+                      ? 'bg-blue-50 text-blue-700 border border-blue-200' 
+                      : 'text-slate-700 hover:bg-slate-50 hover:text-blue-600'
                     }`}
                   onClick={closeMenu}
                 >
@@ -65,7 +65,7 @@ const Navbar: React.FC = () => {
           
           <div className="hidden md:flex items-center gap-2">
             <button
-              className="p-2 rounded-full text-slate-300 hover:text-white focus:outline-none"
+              className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 focus:outline-none transition-colors"
               onClick={toggleTheme}
               aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             >
@@ -75,33 +75,33 @@ const Navbar: React.FC = () => {
             {isAuthenticated ? (
               <div className="relative group">
                 <button
-                  className="flex items-center px-3 py-2 rounded-full bg-indigo-700/20 hover:bg-indigo-700/40 transition-colors"
+                  className="flex items-center px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-200"
                 >
-                  <span className="text-sm font-medium mr-2">Dr. Smith</span>
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-400 to-purple-500 flex items-center justify-center">
-                    <span className="text-white font-medium">DS</span>
+                  <span className="text-sm font-medium mr-2 text-slate-700">Dr. Smith</span>
+                  <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
+                    <span className="text-white font-medium text-sm">DS</span>
                   </div>
                 </button>
                 
-                <div className="absolute right-0 mt-2 w-48 glass-panel hidden group-hover:block origin-top-right">
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-lg shadow-lg hidden group-hover:block origin-top-right">
                   <div className="py-1">
                     <Link
                       to="/dashboard"
-                      className="flex items-center px-4 py-2 text-sm hover:bg-indigo-700/20 transition-colors"
+                      className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                     >
                       <UserCircle size={16} className="mr-2" />
                       Profile
                     </Link>
                     <Link
                       to="/settings"
-                      className="flex items-center px-4 py-2 text-sm hover:bg-indigo-700/20 transition-colors"
+                      className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                     >
                       <Settings size={16} className="mr-2" />
                       Settings
                     </Link>
                     <button
                       onClick={logout}
-                      className="w-full text-left flex items-center px-4 py-2 text-sm hover:bg-indigo-700/20 transition-colors"
+                      className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                     >
                       <LogOut size={16} className="mr-2" />
                       Sign out
@@ -110,7 +110,7 @@ const Navbar: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <Link to="/login" className="btn-primary">
+              <Link to="/login" className="btn-primary text-sm px-6">
                 Sign In
               </Link>
             )}
