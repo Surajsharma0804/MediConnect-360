@@ -64,6 +64,7 @@ jobs:
   deploy-blue-green:
     needs: build-and-push
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && vars.KUBE_CONFIG != ''
     steps:
       - uses: actions/checkout@v3
       
@@ -92,13 +93,13 @@ jobs:
       
       - name: Cleanup Green environment
         run: |
-          kubectl delete deployment mediconnect-backend -n green
-          kubectl delete deployment mediconnect-frontend -n green
+          kubectl delete deployment mediconnect-backend -n green || true
+          kubectl delete deployment mediconnect-frontend -n green || true
 
   deploy-canary:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && vars.KUBE_CONFIG != ''
     steps:
       - uses: actions/checkout@v3
       
@@ -121,4 +122,4 @@ jobs:
       - name: Full rollout
         run: |
           kubectl apply -f k8s/deployment.yaml
-          kubectl delete -f k8s/canary.yaml
+          kubectl delete -f k8s/canary.yaml || true
