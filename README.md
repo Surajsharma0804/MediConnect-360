@@ -7,6 +7,30 @@
 [![NestJS](https://img.shields.io/badge/NestJS-11+-E0234E?logo=nestjs)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 
+## 🌐 Live Deployment
+
+- **Frontend:** https://medi-connect-360.vercel.app
+- **Backend API:** https://mediconnect-backend-4ujn.onrender.com
+- **Status:** ✅ Fully Operational
+
+## 🔧 Recent Updates (Dec 7, 2025)
+
+### Fixed Issues
+- ✅ Fixed OAuth authentication (Google & GitHub login now working)
+- ✅ Fixed API URL configuration (all endpoints now use environment variables)
+- ✅ Fixed routing issues (removed duplicate BrowserRouter)
+- ✅ Added comprehensive Pricing/Payment page with Stripe integration
+- ✅ Cleaned up redundant documentation files
+- ✅ Updated Navbar with Pricing link
+
+### Configured Services
+- ✅ Google OAuth (Client ID configured)
+- ✅ GitHub OAuth (Client ID configured)
+- ✅ Stripe Payments (Test mode keys configured)
+- ✅ Sentry Error Tracking (Frontend & Backend DSNs configured)
+- ✅ PostgreSQL Database (Render - fully operational)
+- ✅ Environment Variables (18 backend, 6 frontend - all set)
+
 ## ✨ Features (100% FREE!)
 
 ### Core Features
@@ -114,24 +138,13 @@ See [docs/GET_API_KEYS.md](docs/GET_API_KEYS.md) for detailed instructions.
 
 ## 📚 Documentation
 
-### 🚀 Deployment (Start Here!)
-- **[Deploy NOW Guide](DEPLOY_NOW.md)** - Deploy in 30 minutes (FREE)
-- **[Deployment Quick Start](DEPLOYMENT_QUICK_START.md)** - Visual step-by-step guide
-- **[Full Deployment Guide](DEPLOYMENT.md)** - All deployment options
+### Quick Links
+- **Live Demo:** https://medi-connect-360.vercel.app
+- **API Docs:** https://mediconnect-backend-4ujn.onrender.com/api
+- **GitHub:** https://github.com/Surajsharma0804/MediConnect-360
 
-### 🆓 FREE Features Setup
-- **[FREE API Setup Guide](FREE_API_SETUP_GUIDE.md)** - Get all FREE API keys (25 min)
-- **[FREE Features Complete](FREE_FEATURES_COMPLETE.md)** - All FREE features implemented
-- **[Quick Reference](QUICK_REFERENCE.md)** - Quick commands and tips
-
-### Essential Guides
-- **[Testing Guide](TESTING_GUIDE.md)** - Complete testing documentation
-- **[Improvements Summary](IMPROVEMENTS_SUMMARY.md)** - What's new in v1.1.0
-
-### Additional Resources
-- **[OAuth & Payments Setup](docs/OAUTH_PAYMENT_SETUP.md)** - Google, GitHub, Stripe
-- **[API Keys Guide](docs/GET_API_KEYS.md)** - Get all required keys
-- **[Contributing](docs/CONTRIBUTING.md)** - How to contribute
+### Setup & Deployment
+All deployment information is consolidated in this README. Follow the Quick Start section above to get started locally or deploy to production using Vercel (frontend) and Render (backend).
 
 ## 🏗️ Tech Stack
 
