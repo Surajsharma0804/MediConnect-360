@@ -1,4 +1,5 @@
-import { Controller, Post, Body, Get, Query, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, UseGuards, Req, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { RegisterDto } from './dto/register.dto';
@@ -31,8 +32,13 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  async googleAuthCallback(@Req() req) {
-    return this.authService.googleLogin(req.user);
+  async googleAuthCallback(@Req() req, @Res() res: Response) {
+    const result = await this.authService.googleLogin(req.user);
+    const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5173';
+    
+    // Redirect to frontend with token and user data
+    const redirectUrl = `${frontendUrl}/auth/callback?token=${result.accessToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
+    return res.redirect(redirectUrl);
   }
 
   @Get('verify-email')
@@ -66,7 +72,12 @@ export class AuthController {
 
   @Get('github/callback')
   @UseGuards(AuthGuard('github'))
-  async githubAuthCallback(@Req() req) {
-    return this.authService.githubLogin(req.user);
+  async githubAuthCallback(@Req() req, @Res() res: Response) {
+    const result = await this.authService.githubLogin(req.user);
+    const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5173';
+    
+    // Redirect to frontend with token and user data
+    const redirectUrl = `${frontendUrl}/auth/callback?token=${result.accessToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
+    return res.redirect(redirectUrl);
   }
 }

@@ -24,6 +24,15 @@ const LoginPage: React.FC = () => {
   
   const from = location.state?.from?.pathname || '/dashboard';
   
+  // Check for OAuth error in URL
+  React.useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const authError = searchParams.get('error');
+    if (authError === 'auth_failed') {
+      setError('Authentication failed. Please try again.');
+    }
+  }, [location.search]);
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));

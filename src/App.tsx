@@ -8,6 +8,7 @@ import SymptomCheckerPage from './pages/SymptomCheckerPage';
 import VirtualConsultPage from './pages/VirtualConsultPage';
 import DashboardPage from './pages/DashboardPage';
 import PricingPage from './pages/PricingPage';
+import AuthCallbackPage from './pages/AuthCallbackPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { useAuth } from './hooks/useAuth';
 
@@ -25,6 +26,7 @@ function App() {
               <Route path="/login" element={
                 isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />
               } />
+              <Route path="/auth/callback" element={<AuthCallbackPage />} />
               <Route path="/" element={
                 isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />
               } />
