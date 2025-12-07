@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Video, Mic, MicOff, VideoOff, Phone, MessageSquare, UserPlus, Share2, Clock } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Video, Mic, MicOff, VideoOff, Phone, MessageSquare, UserPlus, Share2, Clock, AlertCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const VirtualConsultPage: React.FC = () => {
   const [isConnecting, setIsConnecting] = useState(true);
@@ -7,27 +8,97 @@ const VirtualConsultPage: React.FC = () => {
   const [isMicOn, setIsMicOn] = useState(true);
   const [isVideoOn, setIsVideoOn] = useState(true);
   const [isWaiting, setIsWaiting] = useState(false);
+  const [hasPermissions, setHasPermissions] = useState(false);
+  const [permissionError, setPermissionError] = useState('');
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   
-  // Simulate connection process
-  const startConsultation = () => {
-    setIsWaiting(true);
+  // Request camera and microphone permissions
+  const requestPermissions = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true
+      });
+      
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      
+      setHasPermissions(true);
+      setPermissionError('');
+      toast.success('Camera and microphone access granted');
+    } catch (error) {
+      console.error('Error accessing media devices:', error);
+      setPermissionError('Unable to access camera or microphone. Please check your permissions.');
+      toast.error('Camera/microphone access denied');
+    }
+  };
+
+  // Start consultation
+  const startConsultation = async () => {
+    if (!hasPermissions) {
+      await requestPermissions();
+    }
     
-    // Simulate doctor joining after 3 seconds
-    setTimeout(() => {
-      setIsWaiting(false);
-      setIsConnecting(false);
-      setIsConnected(true);
-    }, 3000);
+    if (hasPermissions) {
+      setIsWaiting(true);
+      toast.loading('Connecting to doctor...', { duration: 3000 });
+      
+      // Simulate doctor joining after 3 seconds
+      setTimeout(() => {
+        setIsWaiting(false);
+        setIsConnecting(false);
+        setIsConnected(true);
+        toast.success('Dr. Sarah Johnson has joined the call');
+      }, 3000);
+    }
   };
   
   const endCall = () => {
+    // Stop all media tracks
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+    }
+    
     setIsConnected(false);
     setIsConnecting(true);
     setIsWaiting(false);
+    setHasPermissions(false);
+    toast.success('Call ended');
   };
   
-  const toggleMic = () => setIsMicOn(!isMicOn);
-  const toggleVideo = () => setIsVideoOn(!isVideoOn);
+  const toggleMic = () => {
+    if (streamRef.current) {
+      const audioTrack = streamRef.current.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.enabled = !audioTrack.enabled;
+        setIsMicOn(audioTrack.enabled);
+        toast.success(audioTrack.enabled ? 'Microphone on' : 'Microphone off');
+      }
+    }
+  };
+  
+  const toggleVideo = () => {
+    if (streamRef.current) {
+      const videoTrack = streamRef.current.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.enabled = !videoTrack.enabled;
+        setIsVideoOn(videoTrack.enabled);
+        toast.success(videoTrack.enabled ? 'Camera on' : 'Camera off');
+      }
+    }
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
   
   return (
     <div className="min-h-[calc(100vh-4rem)] py-8 px-4 sm:px-6 lg:px-8">
@@ -41,7 +112,7 @@ const VirtualConsultPage: React.FC = () => {
           <div className="lg:col-span-3 glass-panel rounded-xl overflow-hidden">
             <div className="relative aspect-video bg-slate-900 w-full">
               {isConnecting && !isWaiting && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
                   <div className="mb-4">
                     <div className="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center">
                       <Video className="h-8 w-8 text-white" />
@@ -49,15 +120,22 @@ const VirtualConsultPage: React.FC = () => {
                   </div>
                   
                   <h2 className="text-xl font-semibold mb-2">Ready to Connect</h2>
-                  <p className="text-slate-400 mb-6 text-center max-w-md">
-                    Your virtual consultation room is ready. Click "Start Consultation" when you're ready to begin.
+                  <p className="text-slate-400 mb-4 text-center max-w-md">
+                    Your virtual consultation room is ready. We'll request access to your camera and microphone.
                   </p>
+                  
+                  {permissionError && (
+                    <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start max-w-md">
+                      <AlertCircle className="h-5 w-5 text-red-400 mr-2 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-red-400">{permissionError}</p>
+                    </div>
+                  )}
                   
                   <button
                     onClick={startConsultation}
                     className="btn-primary"
                   >
-                    Start Consultation
+                    {hasPermissions ? 'Start Consultation' : 'Grant Permissions & Start'}
                   </button>
                 </div>
               )}
@@ -95,14 +173,16 @@ const VirtualConsultPage: React.FC = () => {
                   <div className="absolute bottom-4 right-4 w-48 h-36 md:w-64 md:h-48 rounded-lg overflow-hidden border-2 border-indigo-500 shadow-lg">
                     <div className={`w-full h-full ${isVideoOn ? 'bg-slate-800' : 'bg-slate-900 flex items-center justify-center'}`}>
                       {isVideoOn ? (
-                        <img 
-                          src="https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
-                          alt="You" 
-                          className="w-full h-full object-cover"
+                        <video
+                          ref={videoRef}
+                          autoPlay
+                          playsInline
+                          muted
+                          className="w-full h-full object-cover transform scale-x-[-1]"
                         />
                       ) : (
                         <div className="w-16 h-16 rounded-full bg-indigo-600 flex items-center justify-center">
-                          <span className="text-xl font-bold text-white">YS</span>
+                          <span className="text-xl font-bold text-white">YOU</span>
                         </div>
                       )}
                     </div>

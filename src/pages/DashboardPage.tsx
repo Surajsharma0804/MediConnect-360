@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Activity, 
   Calendar, 
@@ -83,14 +84,14 @@ const DashboardPage: React.FC = () => {
           </div>
           
           <div className="mt-4 md:mt-0 flex space-x-3">
-            <button className="btn-secondary flex items-center text-sm">
+            <Link to="/appointments/schedule" className="btn-secondary flex items-center text-sm">
               <Calendar className="h-4 w-4 mr-2" />
               Schedule Appointment
-            </button>
-            <button className="btn-primary flex items-center text-sm">
+            </Link>
+            <Link to="/virtual-consult" className="btn-primary flex items-center text-sm">
               <Activity className="h-4 w-4 mr-2" />
               Start Consult
-            </button>
+            </Link>
           </div>
         </div>
         

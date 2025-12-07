@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Moon, Sun, Activity, Video, UserCircle, Settings, LogOut } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
@@ -6,9 +6,23 @@ import { useAuth } from '../../hooks/useAuth';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const { theme, toggleTheme } = useTheme();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
   const location = useLocation();
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -73,41 +87,46 @@ const Navbar: React.FC = () => {
             </button>
             
             {isAuthenticated ? (
-              <div className="relative group">
+              <div className="relative" ref={dropdownRef}>
                 <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700"
                 >
-                  <span className="text-sm font-medium mr-2 text-slate-700 dark:text-slate-300">Dr. Smith</span>
+                  <span className="text-sm font-medium mr-2 text-slate-700 dark:text-slate-300">{user?.name || 'User'}</span>
                   <div className="w-8 h-8 rounded-full bg-blue-600 dark:bg-blue-500 flex items-center justify-center">
-                    <span className="text-white font-medium text-sm">DS</span>
+                    <span className="text-white font-medium text-sm">{(user?.name || 'U').charAt(0).toUpperCase()}</span>
                   </div>
                 </button>
                 
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg hidden group-hover:block origin-top-right">
-                  <div className="py-1">
-                    <Link
-                      to="/dashboard"
-                      className="flex items-center px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                    >
-                      <UserCircle size={16} className="mr-2" />
-                      Profile
-                    </Link>
-                    <Link
-                      to="/settings"
-                      className="flex items-center px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                    >
-                      <Settings size={16} className="mr-2" />
-                      Settings
-                    </Link>
-                    <button
-                      onClick={logout}
-                      className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                    >
-                      <LogOut size={16} className="mr-2" />
-                      Sign out
-                    </button>
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg z-50">
+                    <div className="py-1">
+                      <Link
+                        to="/dashboard"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="flex items-center px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                      >
+                        <UserCircle size={16} className="mr-2" />
+                        Profile
+                      </Link>
+                      <Link
+                        to="/settings"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="flex items-center px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                      >
+                        <Settings size={16} className="mr-2" />
+                        Settings
+                      </Link>
+                      <button
+                        onClick={() => { logout(); setIsDropdownOpen(false); }}
+                        className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                      >
+                        <LogOut size={16} className="mr-2" />
+                        Sign out
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             ) : (
               <Link to="/login" className="btn-primary text-sm px-6">

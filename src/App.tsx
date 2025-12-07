@@ -8,6 +8,7 @@ import SymptomCheckerPage from './pages/SymptomCheckerPage';
 import VirtualConsultPage from './pages/VirtualConsultPage';
 import DashboardPage from './pages/DashboardPage';
 import PricingPage from './pages/PricingPage';
+import SettingsPage from './pages/SettingsPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import ErrorBoundary from './components/common/ErrorBoundary';
@@ -63,6 +64,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <PricingPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/settings" 
+                  element={
+                    <ProtectedRoute>
+                      <SettingsPage />
                     </ProtectedRoute>
                   } 
                 />
