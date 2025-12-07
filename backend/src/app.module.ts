@@ -26,6 +26,8 @@ import { InsuranceModule } from './insurance/insurance.module';
 import { LabDiagnosticsModule } from './lab-diagnostics/lab-diagnostics.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { CareCoordinationModule } from './care-coordination/care-coordination.module';
+import { DocumentsModule } from './documents/documents.module';
+import { RemindersModule } from './reminders/reminders.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AIService } from './services/ai.service';
 import { VoiceService } from './services/voice.service';
@@ -74,6 +76,8 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
     LabDiagnosticsModule,
     IntegrationsModule,
     CareCoordinationModule,
+    DocumentsModule,
+    RemindersModule,
   ],
   controllers: [AppController, AuthController, PaymentController],
   providers: [
