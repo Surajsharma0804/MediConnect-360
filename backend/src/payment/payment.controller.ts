@@ -79,10 +79,7 @@ export class PaymentController {
     @Headers('stripe-signature') signature: string,
   ) {
     const rawBody = req.rawBody || req.body;
-    const event = await this.paymentService.constructWebhookEvent(
-      rawBody,
-      signature,
-    );
+    const event = this.paymentService.constructWebhookEvent(rawBody, signature);
 
     // Handle different event types
     switch (event.type) {

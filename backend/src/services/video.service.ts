@@ -18,8 +18,8 @@ export class VideoService {
    */
   generateRoomUrl(
     appointmentId: string,
-    patientName: string,
-    doctorName: string,
+    _patientName: string,
+    _doctorName: string,
   ): string {
     // Create a unique, secure room name
     const roomName = `mediconnect-${appointmentId}-${Date.now()}`;
@@ -64,9 +64,9 @@ export class VideoService {
    * Generate JWT token for Jitsi (if self-hosting with authentication)
    */
   generateJitsiJWT(
-    roomName: string,
-    userName: string,
-    userEmail: string,
+    _roomName: string,
+    _userName: string,
+    _userEmail: string,
   ): string {
     // This would be used if you self-host Jitsi with JWT authentication
     // For public Jitsi, no JWT is needed

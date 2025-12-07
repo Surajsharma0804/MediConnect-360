@@ -136,17 +136,9 @@ export class PrescriptionService {
     }
   }
 
-  async getAdherenceRate(
-    userId: string,
-    prescriptionId?: string,
-  ): Promise<number> {
-    try {
-      // Simplified adherence calculation
-      // In production, this would track actual medication logs
-      return 85; // Placeholder
-    } catch (error) {
-      this.logger.error(`Error calculating adherence: ${error.message}`);
-      throw new Error('Failed to calculate adherence rate');
-    }
+  getAdherenceRate(_userId: string, _prescriptionId?: string): number {
+    // Simplified adherence calculation
+    // In production, this would track actual medication logs
+    return 85; // Placeholder
   }
 }

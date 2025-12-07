@@ -197,14 +197,9 @@ export class PharmacyService {
     }
   }
 
-  async updateRating(pharmacyId: string): Promise<void> {
-    try {
-      // This would typically calculate from reviews
-      // For now, just a placeholder
-      this.logger.log(`Rating updated for pharmacy ${pharmacyId}`);
-    } catch (error) {
-      this.logger.error(`Error updating pharmacy rating: ${error.message}`);
-      throw error;
-    }
+  updateRating(pharmacyId: string): void {
+    // This would typically calculate from reviews
+    // For now, just a placeholder
+    this.logger.log(`Rating updated for pharmacy ${pharmacyId}`);
   }
 }

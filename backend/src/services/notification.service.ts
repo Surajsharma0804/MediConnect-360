@@ -19,10 +19,7 @@ export class NotificationService {
    * Send push notification via Firebase Cloud Messaging
    * FREE - 10M messages/month
    */
-  async sendPushNotification(
-    userId: string,
-    notification: PushNotification,
-  ): Promise<void> {
+  sendPushNotification(userId: string, notification: PushNotification): void {
     try {
       // This would integrate with Firebase Cloud Messaging
       // For now, log it
@@ -63,7 +60,7 @@ export class NotificationService {
     );
 
     // Send push notification (FREE via Firebase)
-    await this.sendPushNotification(userId, {
+    this.sendPushNotification(userId, {
       title: 'Appointment Reminder',
       body: `Your appointment with ${appointmentDetails.doctorName} is in 30 minutes`,
       icon: '/icons/appointment.png',
@@ -77,16 +74,16 @@ export class NotificationService {
   /**
    * Send medication reminder
    */
-  async sendMedicationReminder(
+  sendMedicationReminder(
     userId: string,
-    userEmail: string,
+    _userEmail: string,
     medication: {
       name: string;
       dosage: string;
       time: string;
     },
-  ): Promise<void> {
-    await this.sendPushNotification(userId, {
+  ): void {
+    this.sendPushNotification(userId, {
       title: 'Medication Reminder',
       body: `Time to take ${medication.name} (${medication.dosage})`,
       icon: '/icons/medication.png',
@@ -100,15 +97,15 @@ export class NotificationService {
   /**
    * Send health alert
    */
-  async sendHealthAlert(
+  sendHealthAlert(
     userId: string,
-    userEmail: string,
+    _userEmail: string,
     alert: {
       title: string;
       message: string;
       severity: 'low' | 'medium' | 'high';
     },
-  ): Promise<void> {
+  ): void {
     // High severity alerts go via email too
     if (alert.severity === 'high') {
       // Send email for critical alerts
@@ -117,7 +114,7 @@ export class NotificationService {
       );
     }
 
-    await this.sendPushNotification(userId, {
+    this.sendPushNotification(userId, {
       title: alert.title,
       body: alert.message,
       icon: '/icons/alert.png',
@@ -132,12 +129,12 @@ export class NotificationService {
   /**
    * Send test result notification
    */
-  async sendTestResultNotification(
+  sendTestResultNotification(
     userId: string,
-    userEmail: string,
+    _userEmail: string,
     testName: string,
-  ): Promise<void> {
-    await this.sendPushNotification(userId, {
+  ): void {
+    this.sendPushNotification(userId, {
       title: 'Test Results Available',
       body: `Your ${testName} results are ready to view`,
       icon: '/icons/test-results.png',

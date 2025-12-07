@@ -11,7 +11,7 @@ export class AppController {
   }
 
   @Get('health')
-  async healthCheck() {
+  healthCheck() {
     const health = {
       status: 'ok',
       timestamp: new Date().toISOString(),
@@ -42,7 +42,7 @@ export class AppController {
       health.checks.email = process.env.RESEND_API_KEY
         ? 'configured'
         : 'not_configured';
-    } catch (error) {
+    } catch {
       health.status = 'degraded';
     }
 

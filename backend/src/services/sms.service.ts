@@ -4,10 +4,7 @@ import { Injectable, Logger } from '@nestjs/common';
 export class SMSService {
   private readonly logger = new Logger(SMSService.name);
 
-  async sendOTP(
-    phone: string,
-    otp: string,
-  ): Promise<{ success: boolean; provider: string }> {
+  sendOTP(phone: string, otp: string): { success: boolean; provider: string } {
     // For development, just log to console
     console.log('\n' + '='.repeat(60));
     console.log('📱 SMS NOTIFICATION');
@@ -26,10 +23,10 @@ export class SMSService {
     // }
   }
 
-  async sendAppointmentReminder(
+  sendAppointmentReminder(
     phone: string,
     appointment: any,
-  ): Promise<{ success: boolean }> {
+  ): { success: boolean } {
     console.log('\n' + '='.repeat(60));
     console.log('📱 SMS REMINDER');
     console.log('='.repeat(60));
@@ -43,10 +40,7 @@ export class SMSService {
     return { success: true };
   }
 
-  async sendEmergencyAlert(
-    phone: string,
-    location: string,
-  ): Promise<{ success: boolean }> {
+  sendEmergencyAlert(phone: string, location: string): { success: boolean } {
     console.log('\n' + '='.repeat(60));
     console.log('🚨 EMERGENCY ALERT');
     console.log('='.repeat(60));

@@ -90,4 +90,4 @@ process.on('unhandledRejection', (reason, promise) => {
   process.exit(1);
 });
 
-bootstrap();
+void bootstrap();

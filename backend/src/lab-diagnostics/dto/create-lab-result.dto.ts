@@ -4,7 +4,6 @@ import {
   IsBoolean,
   IsDateString,
   IsEnum,
-  IsArray,
   IsObject,
 } from 'class-validator';
 import { ResultStatus } from '../../entities/lab-test-result-detail.entity';

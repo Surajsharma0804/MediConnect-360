@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between } from 'typeorm';
+import { Repository } from 'typeorm';
 import {
   LabTestResultDetail,
   ResultStatus,
@@ -98,7 +98,7 @@ export class LabResultService {
       result.aiInterpretation = interpretation;
 
       return this.labResultRepository.save(result);
-    } catch (error) {
+    } catch {
       throw new Error('Failed to interpret lab result with AI');
     }
   }
@@ -160,7 +160,7 @@ export class LabResultService {
 
   private getTrendRecommendation(
     trend: string,
-    percentageChange: number,
+    _percentageChange: number,
   ): string {
     if (trend === 'STABLE') {
       return 'Your values are stable. Continue current treatment plan.';

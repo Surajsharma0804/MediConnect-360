@@ -8,11 +8,11 @@ export class AnalyticsService {
    * Track user events (backend-side)
    * FREE - No API key needed for basic tracking
    */
-  async trackEvent(
+  trackEvent(
     userId: string,
     eventName: string,
     properties?: Record<string, any>,
-  ): Promise<void> {
+  ): void {
     try {
       // Log event for monitoring
       this.logger.log(
@@ -34,11 +34,11 @@ export class AnalyticsService {
   /**
    * Track user registration
    */
-  async trackRegistration(
+  trackRegistration(
     userId: string,
     method: 'email' | 'google' | 'github',
-  ): Promise<void> {
-    await this.trackEvent(userId, 'user_registered', {
+  ): void {
+    this.trackEvent(userId, 'user_registered', {
       method,
       timestamp: new Date().toISOString(),
     });
@@ -47,11 +47,8 @@ export class AnalyticsService {
   /**
    * Track login
    */
-  async trackLogin(
-    userId: string,
-    method: 'email' | 'google' | 'github',
-  ): Promise<void> {
-    await this.trackEvent(userId, 'user_login', {
+  trackLogin(userId: string, method: 'email' | 'google' | 'github'): void {
+    this.trackEvent(userId, 'user_login', {
       method,
       timestamp: new Date().toISOString(),
     });
@@ -60,12 +57,12 @@ export class AnalyticsService {
   /**
    * Track AI usage
    */
-  async trackAIUsage(
+  trackAIUsage(
     userId: string,
     feature: 'symptom_check' | 'chat' | 'drug_interaction',
     tokensUsed?: number,
-  ): Promise<void> {
-    await this.trackEvent(userId, 'ai_usage', {
+  ): void {
+    this.trackEvent(userId, 'ai_usage', {
       feature,
       tokensUsed,
       timestamp: new Date().toISOString(),
@@ -75,12 +72,12 @@ export class AnalyticsService {
   /**
    * Track appointment booking
    */
-  async trackAppointmentBooked(
+  trackAppointmentBooked(
     userId: string,
     appointmentId: string,
     type: 'video' | 'phone' | 'in_person',
-  ): Promise<void> {
-    await this.trackEvent(userId, 'appointment_booked', {
+  ): void {
+    this.trackEvent(userId, 'appointment_booked', {
       appointmentId,
       type,
       timestamp: new Date().toISOString(),
@@ -90,14 +87,14 @@ export class AnalyticsService {
   /**
    * Track errors (for monitoring)
    */
-  async trackError(
+  trackError(
     userId: string | null,
     error: Error,
     context?: Record<string, any>,
-  ): Promise<void> {
+  ): void {
     this.logger.error(`Error tracked: ${error.message}`, error.stack);
 
-    await this.trackEvent(userId || 'anonymous', 'error_occurred', {
+    this.trackEvent(userId || 'anonymous', 'error_occurred', {
       errorMessage: error.message,
       errorStack: error.stack,
       context,

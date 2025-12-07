@@ -54,8 +54,8 @@ export class AuthService {
         verificationToken,
         name,
       );
-    } catch (error) {
-      console.error('Failed to send verification email:', error);
+    } catch {
+      console.error('Failed to send verification email');
     }
 
     const { password: _, ...result } = user;
@@ -167,12 +167,12 @@ export class AuthService {
       // Send welcome email
       try {
         await this.emailService.sendWelcomeEmail(user.email, user.name);
-      } catch (error) {
-        console.error('Failed to send welcome email:', error);
+      } catch {
+        console.error('Failed to send welcome email');
       }
 
       return { message: 'Email verified successfully!' };
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Invalid or expired token');
     }
   }
@@ -192,8 +192,8 @@ export class AuthService {
 
     try {
       await this.emailService.sendPasswordReset(email, resetToken, user.name);
-    } catch (error) {
-      console.error('Failed to send password reset email:', error);
+    } catch {
+      console.error('Failed to send password reset email');
     }
 
     return { message: 'If the email exists, a reset link has been sent.' };
@@ -219,7 +219,7 @@ export class AuthService {
       await this.usersRepository.save(user);
 
       return { message: 'Password reset successfully!' };
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Invalid or expired token');
     }
   }

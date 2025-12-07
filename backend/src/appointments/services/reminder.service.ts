@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan, MoreThan } from 'typeorm';
+import { Repository, MoreThan } from 'typeorm';
 import {
   Appointment,
   AppointmentStatus,
@@ -27,8 +27,6 @@ export class ReminderService {
   async sendReminders() {
     try {
       const now = new Date();
-      const in24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-      const in1Hour = new Date(now.getTime() + 60 * 60 * 1000);
 
       // Get appointments in next 24 hours
       const upcomingAppointments = await this.appointmentRepository.find({
@@ -79,14 +77,11 @@ export class ReminderService {
       );
 
       // Send push notification
-      await this.notificationService.sendPushNotification(
-        appointment.patientId,
-        {
-          title: 'Appointment Reminder',
-          body: message,
-          icon: '/icons/appointment.png',
-        },
-      );
+      this.notificationService.sendPushNotification(appointment.patientId, {
+        title: 'Appointment Reminder',
+        body: message,
+        icon: '/icons/appointment.png',
+      });
 
       this.logger.log(
         `Sent 24-hour reminder for appointment ${appointment.id}`,
@@ -112,14 +107,11 @@ export class ReminderService {
       }
 
       // Send push notification
-      await this.notificationService.sendPushNotification(
-        appointment.patientId,
-        {
-          title: 'Appointment Starting Soon',
-          body: message,
-          icon: '/icons/appointment.png',
-        },
-      );
+      this.notificationService.sendPushNotification(appointment.patientId, {
+        title: 'Appointment Starting Soon',
+        body: message,
+        icon: '/icons/appointment.png',
+      });
 
       this.logger.log(`Sent 1-hour reminder for appointment ${appointment.id}`);
     } catch (error) {
@@ -127,11 +119,11 @@ export class ReminderService {
     }
   }
 
-  async scheduleCustomReminder(
+  scheduleCustomReminder(
     appointmentId: string,
-    reminderTime: Date,
-    message: string,
-  ): Promise<void> {
+    _reminderTime: Date,
+    _message: string,
+  ): void {
     try {
       // In production, use a job queue like Bull
       this.logger.log(

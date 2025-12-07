@@ -35,7 +35,7 @@ export class SOSService {
       let medicalID;
       try {
         medicalID = await this.medicalIDService.findByUserId(userId);
-      } catch (error) {
+      } catch {
         this.logger.warn(`User ${userId} has no medical ID`);
       }
 
@@ -143,46 +143,36 @@ export class SOSService {
     }
   }
 
-  async getSOSStatus(userId: string): Promise<any> {
-    try {
-      const session = this.activeSOSessions.get(userId);
+  getSOSStatus(userId: string): any {
+    const session = this.activeSOSessions.get(userId);
 
-      if (!session) {
-        return {
-          active: false,
-          message: 'No active SOS session',
-        };
-      }
-
+    if (!session) {
       return {
-        active: true,
-        ...session,
+        active: false,
+        message: 'No active SOS session',
       };
-    } catch (error) {
-      this.logger.error(`Error getting SOS status: ${error.message}`);
-      throw new Error('Failed to get SOS status');
     }
+
+    return {
+      active: true,
+      ...session,
+    };
   }
 
-  async shareLocation(userId: string, location: any): Promise<any> {
-    try {
-      const session = this.activeSOSessions.get(userId);
+  shareLocation(userId: string, location: any): any {
+    const session = this.activeSOSessions.get(userId);
 
-      if (session) {
-        session.location = location;
-        session.lastLocationUpdate = new Date();
-      }
-
-      this.logger.log(`Location shared for user ${userId}`);
-
-      return {
-        success: true,
-        message: 'Location shared with emergency contacts',
-        location,
-      };
-    } catch (error) {
-      this.logger.error(`Error sharing location: ${error.message}`);
-      throw new Error('Failed to share location');
+    if (session) {
+      session.location = location;
+      session.lastLocationUpdate = new Date();
     }
+
+    this.logger.log(`Location shared for user ${userId}`);
+
+    return {
+      success: true,
+      message: 'Location shared with emergency contacts',
+      location,
+    };
   }
 }

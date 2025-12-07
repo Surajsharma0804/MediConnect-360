@@ -106,15 +106,6 @@ export class InvoiceService {
     try {
       const invoice = await this.findById(id, userId);
 
-      // Generate superbill PDF (simplified version)
-      const superbillData = {
-        invoiceNumber: invoice.invoiceNumber,
-        patientName: 'Patient Name', // Would come from user data
-        serviceDate: invoice.issueDate,
-        lineItems: invoice.lineItems,
-        totalAmount: invoice.totalAmount,
-      };
-
       // In production, generate actual PDF
       const superbillUrl = `superbills/${userId}/${id}.pdf`;
       invoice.superbillUrl = superbillUrl;

@@ -39,11 +39,11 @@ export class PrescriptionController {
   }
 
   @Get('adherence')
-  async getAdherence(
+  getAdherence(
     @Request() req,
     @Query('prescriptionId') prescriptionId?: string,
   ) {
-    const rate = await this.prescriptionService.getAdherenceRate(
+    const rate = this.prescriptionService.getAdherenceRate(
       req.user.userId,
       prescriptionId,
     );

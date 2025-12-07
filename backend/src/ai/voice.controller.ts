@@ -42,7 +42,7 @@ export class VoiceController {
       }
 
       // Transcribe audio to text
-      const transcribedText = await this.voiceService.transcribeAudio(
+      const transcribedText = this.voiceService.transcribeAudio(
         file.buffer,
         language,
       );
@@ -51,7 +51,7 @@ export class VoiceController {
       const analysis = await this.aiService.analyzeSymptoms(transcribedText);
 
       // Convert response to speech
-      const audioResponse = await this.voiceService.synthesizeSpeech(
+      const audioResponse = this.voiceService.synthesizeSpeech(
         analysis,
         language,
       );
@@ -77,7 +77,7 @@ export class VoiceController {
   async voiceChat(
     @UploadedFile() file: Express.Multer.File,
     @Query('language') language: string = 'en-US',
-    @Body('conversationHistory') conversationHistory?: string,
+    @Body('conversationHistory') _conversationHistory?: string,
   ) {
     try {
       if (!file) {
@@ -85,7 +85,7 @@ export class VoiceController {
       }
 
       // Transcribe audio to text
-      const transcribedText = await this.voiceService.transcribeAudio(
+      const transcribedText = this.voiceService.transcribeAudio(
         file.buffer,
         language,
       );
@@ -94,7 +94,7 @@ export class VoiceController {
       const aiResponse = await this.aiService.analyzeSymptoms(transcribedText);
 
       // Convert response to speech
-      const audioResponse = await this.voiceService.synthesizeSpeech(
+      const audioResponse = this.voiceService.synthesizeSpeech(
         aiResponse,
         language,
       );
@@ -124,7 +124,7 @@ export class VoiceController {
         throw new BadRequestException('Text and target language are required');
       }
 
-      const translation = await this.voiceService.translateText(
+      const translation = this.voiceService.translateText(
         text,
         targetLanguage,
         sourceLanguage,
@@ -152,10 +152,7 @@ export class VoiceController {
         throw new BadRequestException('Text is required');
       }
 
-      const audioBuffer = await this.voiceService.synthesizeSpeech(
-        text,
-        language,
-      );
+      const audioBuffer = this.voiceService.synthesizeSpeech(text, language);
 
       return {
         text,

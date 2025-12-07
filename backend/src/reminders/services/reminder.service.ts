@@ -143,10 +143,11 @@ export class ReminderService {
       case ReminderFrequency.WEEKLY:
         return new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-      case ReminderFrequency.MONTHLY:
+      case ReminderFrequency.MONTHLY: {
         const nextMonth = new Date(now);
         nextMonth.setMonth(nextMonth.getMonth() + 1);
         return nextMonth;
+      }
 
       case ReminderFrequency.CUSTOM:
         if (reminder.customSchedule?.interval) {

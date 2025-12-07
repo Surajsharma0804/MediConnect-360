@@ -96,7 +96,7 @@ export class PaymentService {
     }
   }
 
-  async constructWebhookEvent(payload: Buffer, signature: string) {
+  constructWebhookEvent(payload: Buffer, signature: string) {
     try {
       const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
       if (!webhookSecret) {

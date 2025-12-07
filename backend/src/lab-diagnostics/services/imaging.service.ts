@@ -156,7 +156,7 @@ export class ImagingService {
       });
 
       return updatedStudy;
-    } catch (error) {
+    } catch {
       throw new Error('Failed to analyze imaging study with AI');
     }
   }

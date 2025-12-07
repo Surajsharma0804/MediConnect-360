@@ -26,12 +26,12 @@ export class SOSController {
   }
 
   @Get('status')
-  async getSOSStatus(@Request() req) {
+  getSOSStatus(@Request() req) {
     return this.sosService.getSOSStatus(req.user.userId);
   }
 
   @Post('location')
-  async shareLocation(@Request() req, @Body('location') location: any) {
+  shareLocation(@Request() req, @Body('location') location: any) {
     return this.sosService.shareLocation(req.user.userId, location);
   }
 }

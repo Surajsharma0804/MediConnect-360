@@ -43,10 +43,7 @@ export class VoiceService {
    * Transcribe audio to text using Google Speech-to-Text
    * This is a placeholder - actual implementation would use Google Cloud Speech-to-Text API
    */
-  async transcribeAudio(
-    audioBuffer: Buffer,
-    languageCode: string,
-  ): Promise<string> {
+  transcribeAudio(_audioBuffer: Buffer, languageCode: string): string {
     try {
       this.logger.log(`Transcribing audio in language: ${languageCode}`);
 
@@ -64,8 +61,9 @@ export class VoiceService {
       // return response.results.map(result => result.alternatives[0].transcript).join('\n');
 
       return 'Transcribed text placeholder';
-    } catch (error) {
-      this.logger.error(`Error transcribing audio: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Error transcribing audio: ${message}`);
       throw new Error('Failed to transcribe audio');
     }
   }
@@ -74,7 +72,7 @@ export class VoiceService {
    * Convert text to speech using Google Text-to-Speech
    * This is a placeholder - actual implementation would use Google Cloud Text-to-Speech API
    */
-  async synthesizeSpeech(text: string, languageCode: string): Promise<Buffer> {
+  synthesizeSpeech(_text: string, languageCode: string): Buffer {
     try {
       this.logger.log(`Synthesizing speech in language: ${languageCode}`);
 
@@ -95,8 +93,9 @@ export class VoiceService {
       // return Buffer.from(response.audioContent, 'binary');
 
       return Buffer.from('Audio placeholder');
-    } catch (error) {
-      this.logger.error(`Error synthesizing speech: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Error synthesizing speech: ${message}`);
       throw new Error('Failed to synthesize speech');
     }
   }
@@ -105,11 +104,11 @@ export class VoiceService {
    * Translate text between languages
    * This is a placeholder - actual implementation would use Google Translate API
    */
-  async translateText(
+  translateText(
     text: string,
     targetLanguage: string,
-    sourceLanguage?: string,
-  ): Promise<string> {
+    _sourceLanguage?: string,
+  ): string {
     try {
       this.logger.log(`Translating text to ${targetLanguage}`);
 
@@ -123,8 +122,9 @@ export class VoiceService {
       // return translation;
 
       return `Translated: ${text}`;
-    } catch (error) {
-      this.logger.error(`Error translating text: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Error translating text: ${message}`);
       throw new Error('Failed to translate text');
     }
   }
