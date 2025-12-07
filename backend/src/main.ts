@@ -1,10 +1,12 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, Logger } from '@nestjs/common';
+import { ValidationPipe, Logger, VersioningType } from '@nestjs/common';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
+import * as compression from 'compression';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { validateEnvironment } from './config/env.validation';
+import { setupSwagger } from './config/swagger.config';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -21,6 +23,15 @@ async function bootstrap() {
     if (process.env.NODE_ENV === 'production') {
       app.use(helmet());
     }
+
+    // Enable compression
+    app.use(compression());
+
+    // Enable API versioning
+    app.enableVersioning({
+      type: VersioningType.URI,
+      defaultVersion: '1',
+    });
 
     // CORS Configuration
     app.enableCors({
@@ -51,6 +62,11 @@ async function bootstrap() {
 
     // Global API prefix
     app.setGlobalPrefix('api');
+
+    // Setup Swagger documentation
+    if (process.env.NODE_ENV !== 'production') {
+      setupSwagger(app);
+    }
 
     // Graceful shutdown
     app.enableShutdownHooks();

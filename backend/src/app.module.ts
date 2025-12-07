@@ -3,6 +3,9 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { CacheModule } from '@nestjs/cache-manager';
+import { BullModule } from '@nestjs/bull';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { databaseConfig } from './config/database.config';
@@ -28,7 +31,9 @@ import { IntegrationsModule } from './integrations/integrations.module';
 import { CareCoordinationModule } from './care-coordination/care-coordination.module';
 import { DocumentsModule } from './documents/documents.module';
 import { RemindersModule } from './reminders/reminders.module';
+import { HealthModule } from './health/health.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { redisCacheConfig } from './config/cache.config';
 import { AIService } from './services/ai.service';
 import { VoiceService } from './services/voice.service';
 import { StorageService } from './services/storage.service';
@@ -63,6 +68,26 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
       signOptions: { expiresIn: '7d' },
     }),
     ScheduleModule.forRoot(),
+    // Rate limiting
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 1 minute
+        limit: 100, // 100 requests per minute
+      },
+    ]),
+    // Caching
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useFactory: redisCacheConfig,
+    }),
+    // Background jobs
+    BullModule.forRoot({
+      redis: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379'),
+      },
+    }),
+    HealthModule,
     AIModule,
     EHRModule,
     ProvidersModule,
