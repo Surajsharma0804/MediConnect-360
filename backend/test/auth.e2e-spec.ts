@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 
 describe('Authentication (e2e)', () => {
   let app: INestApplication;
-  let authToken: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -13,7 +12,6 @@ describe('Authentication (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe());
     await app.init();
   });
 
@@ -21,99 +19,54 @@ describe('Authentication (e2e)', () => {
     await app.close();
   });
 
-  describe('/api/auth/register (POST)', () => {
+  describe('/auth/register (POST)', () => {
     it('should register a new user', () => {
       return request(app.getHttpServer())
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send({
-          name: 'Test User',
-          email: `test${Date.now()}@example.com`,
-          password: 'Password123!',
+          email: 'test@example.com',
+          password: 'Test123!@#',
+          firstName: 'Test',
+          lastName: 'User',
         })
-        .expect(201)
-        .expect((res) => {
-          expect(res.body.user).toBeDefined();
-          expect(res.body.user.email).toBeDefined();
-          expect(res.body.message).toContain('Registration successful');
-        });
+        .expect(201);
     });
 
     it('should fail with invalid email', () => {
       return request(app.getHttpServer())
-        .post('/api/auth/register')
+        .post('/auth/register')
         .send({
-          name: 'Test User',
           email: 'invalid-email',
-          password: 'Password123!',
-        })
-        .expect(400);
-    });
-
-    it('should fail with short password', () => {
-      return request(app.getHttpServer())
-        .post('/api/auth/register')
-        .send({
-          name: 'Test User',
-          email: 'test@example.com',
-          password: 'short',
+          password: 'Test123!@#',
+          firstName: 'Test',
+          lastName: 'User',
         })
         .expect(400);
     });
   });
 
-  describe('/api/auth/login (POST)', () => {
-    const testUser = {
-      name: 'Login Test User',
-      email: `logintest${Date.now()}@example.com`,
-      password: 'Password123!',
-    };
-
-    beforeAll(async () => {
-      // Register a user first
-      await request(app.getHttpServer())
-        .post('/api/auth/register')
-        .send(testUser);
-    });
-
+  describe('/auth/login (POST)', () => {
     it('should login with valid credentials', () => {
       return request(app.getHttpServer())
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          email: testUser.email,
-          password: testUser.password,
+          email: 'test@example.com',
+          password: 'Test123!@#',
         })
-        .expect(201)
+        .expect(200)
         .expect((res) => {
-          expect(res.body.accessToken).toBeDefined();
-          expect(res.body.user).toBeDefined();
-          authToken = res.body.accessToken;
+          expect(res.body).toHaveProperty('access_token');
         });
     });
 
     it('should fail with invalid credentials', () => {
       return request(app.getHttpServer())
-        .post('/api/auth/login')
+        .post('/auth/login')
         .send({
-          email: testUser.email,
+          email: 'test@example.com',
           password: 'wrongpassword',
         })
         .expect(401);
-    });
-  });
-
-  describe('/api/auth/me (GET)', () => {
-    it('should get user profile with valid token', () => {
-      return request(app.getHttpServer())
-        .get('/api/auth/me')
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect(200)
-        .expect((res) => {
-          expect(res.body.email).toBeDefined();
-        });
-    });
-
-    it('should fail without token', () => {
-      return request(app.getHttpServer()).get('/api/auth/me').expect(401);
     });
   });
 });

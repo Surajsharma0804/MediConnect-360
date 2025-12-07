@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: feature-flags
+data:
+  features.json: |
+    {
+      "newDashboard": {
+        "enabled": true,
+        "rolloutPercentage": 100,
+        "description": "New dashboard UI"
+      },
+      "aiSymptomChecker": {
+        "enabled": true,
+        "rolloutPercentage": 100,
+        "description": "AI-powered symptom checker"
+      },
+      "videoConsultations": {
+        "enabled": true,
+        "rolloutPercentage": 100,
+        "description": "Video consultation feature"
+      },
+      "prescriptionRefill": {
+        "enabled": true,
+        "rolloutPercentage": 50,
+        "description": "Online prescription refill"
+      },
+      "labResults": {
+        "enabled": true,
+        "rolloutPercentage": 100,
+        "description": "Lab results viewing"
+      },
+      "insuranceClaims": {
+        "enabled": true,
+        "rolloutPercentage": 75,
+        "description": "Insurance claim management"
+      },
+      "betaFeatures": {
+        "enabled": false,
+        "rolloutPercentage": 10,
+        "description": "Beta features for testing"
+      }
+    }

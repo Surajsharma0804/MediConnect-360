@@ -1,0 +1,55 @@
+{
+  "dashboard": {
+    "title": "MediConnect 360 - Production Dashboard",
+    "panels": [
+      {
+        "title": "Request Rate",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])"
+          }
+        ]
+      },
+      {
+        "title": "Response Time (p95)",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))"
+          }
+        ]
+      },
+      {
+        "title": "Error Rate",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{status=~\"5..\"}[5m])"
+          }
+        ]
+      },
+      {
+        "title": "CPU Usage",
+        "targets": [
+          {
+            "expr": "rate(container_cpu_usage_seconds_total[5m])"
+          }
+        ]
+      },
+      {
+        "title": "Memory Usage",
+        "targets": [
+          {
+            "expr": "container_memory_usage_bytes"
+          }
+        ]
+      },
+      {
+        "title": "Active Users",
+        "targets": [
+          {
+            "expr": "sum(active_sessions)"
+          }
+        ]
+      }
+    ]
+  }
+}
