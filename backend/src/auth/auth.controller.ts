@@ -1,4 +1,13 @@
-import { Controller, Post, Body, Get, Query, UseGuards, Req, Res } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Query,
+  UseGuards,
+  Req,
+  Res,
+} from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -35,7 +44,7 @@ export class AuthController {
   async googleAuthCallback(@Req() req, @Res() res: Response) {
     const result = await this.authService.googleLogin(req.user);
     const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5173';
-    
+
     // Redirect to frontend with token and user data
     const redirectUrl = `${frontendUrl}/auth/callback?token=${result.accessToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
     return res.redirect(redirectUrl);
@@ -52,9 +61,7 @@ export class AuthController {
   }
 
   @Post('reset-password')
-  async resetPassword(
-    @Body() body: { token: string; password: string },
-  ) {
+  async resetPassword(@Body() body: { token: string; password: string }) {
     return this.authService.resetPassword(body.token, body.password);
   }
 
@@ -75,7 +82,7 @@ export class AuthController {
   async githubAuthCallback(@Req() req, @Res() res: Response) {
     const result = await this.authService.githubLogin(req.user);
     const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5173';
-    
+
     // Redirect to frontend with token and user data
     const redirectUrl = `${frontendUrl}/auth/callback?token=${result.accessToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
     return res.redirect(redirectUrl);

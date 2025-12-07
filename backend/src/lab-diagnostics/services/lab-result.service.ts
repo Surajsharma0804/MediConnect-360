@@ -40,7 +40,9 @@ export class LabResultService {
     // Send notification for abnormal/critical results
     if (result.isAbnormal || result.isCritical) {
       await this.notificationService.sendPushNotification(userId, {
-        title: result.isCritical ? 'Critical Lab Result' : 'Abnormal Lab Result',
+        title: result.isCritical
+          ? 'Critical Lab Result'
+          : 'Abnormal Lab Result',
         body: `Your ${result.testName} - ${result.componentName} result is ${result.isCritical ? 'critical' : 'abnormal'}. Please review immediately.`,
       });
     }
@@ -183,10 +185,7 @@ export class LabResultService {
     });
   }
 
-  async compareWithPrevious(
-    id: string,
-    userId: string,
-  ): Promise<any> {
+  async compareWithPrevious(id: string, userId: string): Promise<any> {
     const current = await this.findOne(id, userId);
 
     const previous = await this.labResultRepository.findOne({

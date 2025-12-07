@@ -1,7 +1,15 @@
-import { Injectable, Logger, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
-import { Conversation, ConversationType } from '../../entities/conversation.entity';
+import {
+  Conversation,
+  ConversationType,
+} from '../../entities/conversation.entity';
 
 @Injectable()
 export class ConversationService {
@@ -56,12 +64,17 @@ export class ConversationService {
 
       // Check if user is participant
       if (!conversation.participants.includes(userId)) {
-        throw new ForbiddenException('You are not a participant in this conversation');
+        throw new ForbiddenException(
+          'You are not a participant in this conversation',
+        );
       }
 
       return conversation;
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
         throw error;
       }
       this.logger.error(`Error fetching conversation: ${error.message}`);
@@ -69,14 +82,20 @@ export class ConversationService {
     }
   }
 
-  async addParticipant(conversationId: string, userId: string, newParticipantId: string): Promise<Conversation> {
+  async addParticipant(
+    conversationId: string,
+    userId: string,
+    newParticipantId: string,
+  ): Promise<Conversation> {
     try {
       const conversation = await this.findOne(conversationId, userId);
 
       if (!conversation.participants.includes(newParticipantId)) {
         conversation.participants.push(newParticipantId);
         const updated = await this.conversationRepository.save(conversation);
-        this.logger.log(`Added participant ${newParticipantId} to conversation ${conversationId}`);
+        this.logger.log(
+          `Added participant ${newParticipantId} to conversation ${conversationId}`,
+        );
         return updated;
       }
 
@@ -87,13 +106,21 @@ export class ConversationService {
     }
   }
 
-  async removeParticipant(conversationId: string, userId: string, participantId: string): Promise<Conversation> {
+  async removeParticipant(
+    conversationId: string,
+    userId: string,
+    participantId: string,
+  ): Promise<Conversation> {
     try {
       const conversation = await this.findOne(conversationId, userId);
 
-      conversation.participants = conversation.participants.filter(id => id !== participantId);
+      conversation.participants = conversation.participants.filter(
+        (id) => id !== participantId,
+      );
       const updated = await this.conversationRepository.save(conversation);
-      this.logger.log(`Removed participant ${participantId} from conversation ${conversationId}`);
+      this.logger.log(
+        `Removed participant ${participantId} from conversation ${conversationId}`,
+      );
       return updated;
     } catch (error) {
       this.logger.error(`Error removing participant: ${error.message}`);
@@ -104,14 +131,16 @@ export class ConversationService {
   async markAsRead(conversationId: string, userId: string): Promise<void> {
     try {
       const conversation = await this.findOne(conversationId, userId);
-      
+
       if (!conversation.unreadCount) {
         conversation.unreadCount = {};
       }
-      
+
       conversation.unreadCount[userId] = 0;
       await this.conversationRepository.save(conversation);
-      this.logger.log(`Marked conversation ${conversationId} as read by ${userId}`);
+      this.logger.log(
+        `Marked conversation ${conversationId} as read by ${userId}`,
+      );
     } catch (error) {
       this.logger.error(`Error marking as read: ${error.message}`);
       throw error;
@@ -121,7 +150,7 @@ export class ConversationService {
   async getUnreadCount(userId: string): Promise<number> {
     try {
       const conversations = await this.findAll(userId);
-      
+
       let unreadCount = 0;
       for (const conv of conversations) {
         const count = conv.unreadCount?.[userId] || 0;
@@ -135,7 +164,10 @@ export class ConversationService {
     }
   }
 
-  async updateLastMessage(conversationId: string, messageContent: string): Promise<void> {
+  async updateLastMessage(
+    conversationId: string,
+    messageContent: string,
+  ): Promise<void> {
     try {
       await this.conversationRepository.update(conversationId, {
         lastMessageContent: messageContent,
@@ -149,10 +181,12 @@ export class ConversationService {
   async delete(id: string, userId: string): Promise<void> {
     try {
       const conversation = await this.findOne(id, userId);
-      
+
       // Only creator can delete
       if (conversation.createdBy !== userId) {
-        throw new ForbiddenException('Only the creator can delete this conversation');
+        throw new ForbiddenException(
+          'Only the creator can delete this conversation',
+        );
       }
 
       await this.conversationRepository.delete(id);

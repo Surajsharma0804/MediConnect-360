@@ -1,7 +1,10 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { InsuranceClaim, ClaimStatus } from '../../entities/insurance-claim.entity';
+import {
+  InsuranceClaim,
+  ClaimStatus,
+} from '../../entities/insurance-claim.entity';
 import { InsuranceCard } from '../../entities/insurance-card.entity';
 import { NotificationService } from '../../services/notification.service';
 import { StorageService } from '../../services/storage.service';
@@ -19,7 +22,10 @@ export class InsuranceClaimService {
     private storageService: StorageService,
   ) {}
 
-  async create(userId: string, claimData: Partial<InsuranceClaim>): Promise<InsuranceClaim> {
+  async create(
+    userId: string,
+    claimData: Partial<InsuranceClaim>,
+  ): Promise<InsuranceClaim> {
     try {
       const claimNumber = this.generateClaimNumber();
       const claim = this.claimRepository.create({
@@ -93,13 +99,20 @@ export class InsuranceClaimService {
     }
   }
 
-  async updateStatus(id: string, status: ClaimStatus, notes?: string): Promise<InsuranceClaim> {
+  async updateStatus(
+    id: string,
+    status: ClaimStatus,
+    notes?: string,
+  ): Promise<InsuranceClaim> {
     try {
       const claim = await this.claimRepository.findOne({ where: { id } });
       if (!claim) throw new NotFoundException('Claim not found');
 
       claim.status = status;
-      if (status === ClaimStatus.APPROVED || status === ClaimStatus.PARTIALLY_APPROVED) {
+      if (
+        status === ClaimStatus.APPROVED ||
+        status === ClaimStatus.PARTIALLY_APPROVED
+      ) {
         claim.processedAt = new Date();
       }
       if (status === ClaimStatus.PAID) {
@@ -125,7 +138,12 @@ export class InsuranceClaimService {
     }
   }
 
-  async uploadDocument(id: string, userId: string, file: Buffer, filename: string): Promise<InsuranceClaim> {
+  async uploadDocument(
+    id: string,
+    userId: string,
+    file: Buffer,
+    filename: string,
+  ): Promise<InsuranceClaim> {
     try {
       const claim = await this.findById(id, userId);
       const url = await this.storageService.uploadFile(
@@ -156,12 +174,25 @@ export class InsuranceClaimService {
 
       return {
         total: claims.length,
-        pending: claims.filter((c) => c.status === ClaimStatus.SUBMITTED || c.status === ClaimStatus.IN_REVIEW).length,
-        approved: claims.filter((c) => c.status === ClaimStatus.APPROVED || c.status === ClaimStatus.PAID).length,
+        pending: claims.filter(
+          (c) =>
+            c.status === ClaimStatus.SUBMITTED ||
+            c.status === ClaimStatus.IN_REVIEW,
+        ).length,
+        approved: claims.filter(
+          (c) =>
+            c.status === ClaimStatus.APPROVED || c.status === ClaimStatus.PAID,
+        ).length,
         denied: claims.filter((c) => c.status === ClaimStatus.DENIED).length,
         totalBilled: claims.reduce((sum, c) => sum + Number(c.billedAmount), 0),
-        totalPaid: claims.reduce((sum, c) => sum + Number(c.insurancePaid || 0), 0),
-        totalPatientResponsibility: claims.reduce((sum, c) => sum + Number(c.patientResponsibility || 0), 0),
+        totalPaid: claims.reduce(
+          (sum, c) => sum + Number(c.insurancePaid || 0),
+          0,
+        ),
+        totalPatientResponsibility: claims.reduce(
+          (sum, c) => sum + Number(c.patientResponsibility || 0),
+          0,
+        ),
       };
     } catch (error) {
       this.logger.error(`Error getting claims summary: ${error.message}`);

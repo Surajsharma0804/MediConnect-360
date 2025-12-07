@@ -9,17 +9,23 @@ export class PaymentService {
   constructor() {
     const apiKey = process.env.STRIPE_SECRET_KEY;
     if (!apiKey) {
-      this.logger.warn('STRIPE_SECRET_KEY not configured. Payment features will be disabled.');
+      this.logger.warn(
+        'STRIPE_SECRET_KEY not configured. Payment features will be disabled.',
+      );
       return;
     }
-    
+
     this.stripe = new Stripe(apiKey, {
       apiVersion: '2025-11-17.clover',
     });
     this.logger.log('Stripe Payment Service initialized');
   }
 
-  async createPaymentIntent(amount: number, currency: string = 'usd', metadata?: any) {
+  async createPaymentIntent(
+    amount: number,
+    currency: string = 'usd',
+    metadata?: any,
+  ) {
     try {
       const paymentIntent = await this.stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to cents

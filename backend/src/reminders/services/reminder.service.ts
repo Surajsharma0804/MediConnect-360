@@ -106,11 +106,7 @@ export class ReminderService {
     await this.reminderRepository.save(reminder);
   }
 
-  async snooze(
-    id: string,
-    userId: string,
-    minutes: number,
-  ): Promise<Reminder> {
+  async snooze(id: string, userId: string, minutes: number): Promise<Reminder> {
     const reminder = await this.findOne(id, userId);
 
     const snoozeUntil = new Date(Date.now() + minutes * 60 * 1000);

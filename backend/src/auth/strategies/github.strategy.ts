@@ -8,7 +8,9 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
     super({
       clientID: process.env.GITHUB_CLIENT_ID || '',
       clientSecret: process.env.GITHUB_CLIENT_SECRET || '',
-      callbackURL: process.env.GITHUB_CALLBACK_URL || 'http://localhost:5000/api/auth/github/callback',
+      callbackURL:
+        process.env.GITHUB_CALLBACK_URL ||
+        'http://localhost:5000/api/auth/github/callback',
       scope: ['user:email'],
     });
   }
@@ -20,7 +22,7 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
     done: any,
   ): Promise<any> {
     const { id, username, emails, displayName, photos } = profile;
-    
+
     const user = {
       githubId: id,
       email: emails?.[0]?.value || `${username}@github.user`,
@@ -29,7 +31,7 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
       avatar: photos?.[0]?.value,
       provider: 'github',
     };
-    
+
     done(null, user);
   }
 }

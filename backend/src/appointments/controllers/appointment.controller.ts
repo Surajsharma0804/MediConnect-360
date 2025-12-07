@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+  Query,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { AppointmentService } from '../services/appointment.service';
 import { SchedulingService } from '../services/scheduling.service';
@@ -20,7 +31,10 @@ export class AppointmentController {
 
   @Get()
   async findAll(@Request() req, @Query('upcoming') upcoming?: string) {
-    return this.appointmentService.findAll(req.user.userId, upcoming === 'true');
+    return this.appointmentService.findAll(
+      req.user.userId,
+      upcoming === 'true',
+    );
   }
 
   @Get('available-slots')
@@ -73,7 +87,11 @@ export class AppointmentController {
 
   @Delete(':id')
   async remove(@Request() req, @Param('id') id: string) {
-    await this.appointmentService.cancel(id, req.user.userId, 'Deleted by user');
+    await this.appointmentService.cancel(
+      id,
+      req.user.userId,
+      'Deleted by user',
+    );
     return { message: 'Appointment cancelled successfully' };
   }
 }

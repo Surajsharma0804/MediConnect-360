@@ -18,7 +18,7 @@ export class VitalSignsService {
         ...data,
         user: { id: userId },
       });
-      
+
       const saved = await this.vitalSignsRepository.save(vitalSigns);
       this.logger.log(`Created vital signs ${saved.id} for user ${userId}`);
       return saved;
@@ -61,7 +61,11 @@ export class VitalSignsService {
     }
   }
 
-  async update(id: string, userId: string, data: Partial<VitalSigns>): Promise<VitalSigns> {
+  async update(
+    id: string,
+    userId: string,
+    data: Partial<VitalSigns>,
+  ): Promise<VitalSigns> {
     try {
       const vitalSigns = await this.findOne(id, userId);
       Object.assign(vitalSigns, data);
@@ -85,7 +89,11 @@ export class VitalSignsService {
     }
   }
 
-  async getTrends(userId: string, startDate: Date, endDate: Date): Promise<VitalSigns[]> {
+  async getTrends(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<VitalSigns[]> {
     try {
       return await this.vitalSignsRepository.find({
         where: {
@@ -112,17 +120,22 @@ export class VitalSignsService {
     }
   }
 
-  async bulkImport(userId: string, vitals: Partial<VitalSigns>[]): Promise<VitalSigns[]> {
+  async bulkImport(
+    userId: string,
+    vitals: Partial<VitalSigns>[],
+  ): Promise<VitalSigns[]> {
     try {
-      const records = vitals.map(data => 
+      const records = vitals.map((data) =>
         this.vitalSignsRepository.create({
           ...data,
           user: { id: userId },
-        })
+        }),
       );
-      
+
       const saved = await this.vitalSignsRepository.save(records);
-      this.logger.log(`Bulk imported ${saved.length} vital signs for user ${userId}`);
+      this.logger.log(
+        `Bulk imported ${saved.length} vital signs for user ${userId}`,
+      );
       return saved;
     } catch (error) {
       this.logger.error(`Error bulk importing vitals: ${error.message}`);

@@ -7,31 +7,40 @@ export class VideoService {
 
   constructor() {
     this.jitsiDomain = process.env.JITSI_DOMAIN || 'meet.jit.si';
-    this.logger.log(`Video Service initialized with Jitsi domain: ${this.jitsiDomain}`);
+    this.logger.log(
+      `Video Service initialized with Jitsi domain: ${this.jitsiDomain}`,
+    );
   }
 
   /**
    * Generate a unique video room URL for appointments
    * FREE - No API key needed!
    */
-  generateRoomUrl(appointmentId: string, patientName: string, doctorName: string): string {
+  generateRoomUrl(
+    appointmentId: string,
+    patientName: string,
+    doctorName: string,
+  ): string {
     // Create a unique, secure room name
     const roomName = `mediconnect-${appointmentId}-${Date.now()}`;
     const url = `https://${this.jitsiDomain}/${roomName}`;
 
     this.logger.log(`Generated video room: ${url}`);
-    
+
     return url;
   }
 
   /**
    * Generate room with custom configuration
    */
-  generateRoomWithConfig(appointmentId: string, config?: {
-    requirePassword?: boolean;
-    recordSession?: boolean;
-    maxParticipants?: number;
-  }): {
+  generateRoomWithConfig(
+    appointmentId: string,
+    config?: {
+      requirePassword?: boolean;
+      recordSession?: boolean;
+      maxParticipants?: number;
+    },
+  ): {
     url: string;
     roomName: string;
     password?: string;
@@ -40,8 +49,8 @@ export class VideoService {
     const url = `https://${this.jitsiDomain}/${roomName}`;
 
     // Generate password if required
-    const password = config?.requirePassword 
-      ? this.generatePassword() 
+    const password = config?.requirePassword
+      ? this.generatePassword()
       : undefined;
 
     return {
@@ -54,10 +63,14 @@ export class VideoService {
   /**
    * Generate JWT token for Jitsi (if self-hosting with authentication)
    */
-  generateJitsiJWT(roomName: string, userName: string, userEmail: string): string {
+  generateJitsiJWT(
+    roomName: string,
+    userName: string,
+    userEmail: string,
+  ): string {
     // This would be used if you self-host Jitsi with JWT authentication
     // For public Jitsi, no JWT is needed
-    
+
     if (!process.env.JITSI_APP_ID || !process.env.JITSI_APP_SECRET) {
       this.logger.warn('Jitsi JWT not configured, using public access');
       return '';

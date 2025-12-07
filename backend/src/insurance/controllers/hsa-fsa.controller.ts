@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { HsaFsaService } from '../services/hsa-fsa.service';
 
@@ -28,7 +36,11 @@ export class HsaFsaController {
   }
 
   @Post(':id/transaction')
-  async processTransaction(@Request() req, @Param('id') id: string, @Body() body: any) {
+  async processTransaction(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() body: any,
+  ) {
     return this.hsaFsaService.processTransaction(
       id,
       req.user.userId,

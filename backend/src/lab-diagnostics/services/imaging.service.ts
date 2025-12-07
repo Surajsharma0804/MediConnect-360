@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ImagingStudy, ImagingStatus } from '../../entities/imaging-study.entity';
+import {
+  ImagingStudy,
+  ImagingStatus,
+} from '../../entities/imaging-study.entity';
 import { CreateImagingStudyDto } from '../dto/create-imaging-study.dto';
 import { AIService } from '../../services/ai.service';
 import { NotificationService } from '../../services/notification.service';
@@ -141,7 +144,8 @@ export class ImagingService {
         findings: [analysis],
         confidence: 75,
         abnormalitiesDetected: analysis.toLowerCase().includes('abnormal'),
-        suggestedFollowUp: 'Consult with radiologist for professional interpretation',
+        suggestedFollowUp:
+          'Consult with radiologist for professional interpretation',
       };
 
       const updatedStudy = await this.imagingRepository.save(study);

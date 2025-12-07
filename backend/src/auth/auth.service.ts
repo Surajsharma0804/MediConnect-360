@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -17,7 +21,9 @@ export class AuthService {
 
   async register(email: string, password: string, name: string, role?: string) {
     // Check if user exists
-    const existingUser = await this.usersRepository.findOne({ where: { email } });
+    const existingUser = await this.usersRepository.findOne({
+      where: { email },
+    });
     if (existingUser) {
       throw new ConflictException('Email already registered');
     }
@@ -43,7 +49,11 @@ export class AuthService {
 
     // Send verification email
     try {
-      await this.emailService.sendVerificationEmail(email, verificationToken, name);
+      await this.emailService.sendVerificationEmail(
+        email,
+        verificationToken,
+        name,
+      );
     } catch (error) {
       console.error('Failed to send verification email:', error);
     }
@@ -51,7 +61,8 @@ export class AuthService {
     const { password: _, ...result } = user;
     return {
       user: result,
-      message: 'Registration successful! Please check your email to verify your account.',
+      message:
+        'Registration successful! Please check your email to verify your account.',
     };
   }
 

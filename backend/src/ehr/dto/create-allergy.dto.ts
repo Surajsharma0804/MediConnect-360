@@ -1,4 +1,13 @@
-import { IsString, IsNotEmpty, IsOptional, IsDate, IsEnum, MaxLength, IsArray, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsDate,
+  IsEnum,
+  MaxLength,
+  IsArray,
+  IsBoolean,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { AllergySeverity, AllergyType } from '../../entities/allergy.entity';
 

@@ -1,4 +1,11 @@
-import { IsString, IsNotEmpty, IsOptional, IsEnum, MaxLength, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsEnum,
+  MaxLength,
+  IsArray,
+} from 'class-validator';
 import { MessageType } from '../../entities/message.entity';
 
 export class CreateMessageDto {

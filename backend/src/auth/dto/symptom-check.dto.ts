@@ -1,4 +1,11 @@
-import { IsString, IsNotEmpty, IsOptional, IsArray, MinLength, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsArray,
+  MinLength,
+  MaxLength,
+} from 'class-validator';
 
 export class SymptomCheckDto {
   @IsString()

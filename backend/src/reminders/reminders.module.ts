@@ -11,12 +11,7 @@ import { SMSService } from '../services/sms.service';
 @Module({
   imports: [TypeOrmModule.forFeature([Reminder, User])],
   controllers: [ReminderController],
-  providers: [
-    ReminderService,
-    NotificationService,
-    EmailService,
-    SMSService,
-  ],
+  providers: [ReminderService, NotificationService, EmailService, SMSService],
   exports: [ReminderService],
 })
 export class RemindersModule {}

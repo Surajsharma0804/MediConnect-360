@@ -1,4 +1,13 @@
-import { Controller, Post, Body, Get, Param, UseGuards, Req, Headers } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  UseGuards,
+  Req,
+  Headers,
+} from '@nestjs/common';
 import { PaymentService } from '../services/payment.service';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -36,11 +45,9 @@ export class PaymentController {
   @Post('create-customer')
   @UseGuards(AuthGuard('jwt'))
   async createCustomer(@Req() req) {
-    return this.paymentService.createCustomer(
-      req.user.email,
-      req.user.name,
-      { userId: req.user.id },
-    );
+    return this.paymentService.createCustomer(req.user.email, req.user.name, {
+      userId: req.user.id,
+    });
   }
 
   @Post('create-subscription')
@@ -48,7 +55,10 @@ export class PaymentController {
   async createSubscription(
     @Body() body: { customerId: string; priceId: string },
   ) {
-    return this.paymentService.createSubscription(body.customerId, body.priceId);
+    return this.paymentService.createSubscription(
+      body.customerId,
+      body.priceId,
+    );
   }
 
   @Post('cancel-subscription/:subscriptionId')

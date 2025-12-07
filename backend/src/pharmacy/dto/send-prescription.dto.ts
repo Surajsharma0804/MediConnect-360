@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsEnum, IsOptional, IsUUID } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsEnum,
+  IsOptional,
+  IsUUID,
+} from 'class-validator';
 import { DeliveryMethod } from '../../entities/e-prescription.entity';
 
 export class SendPrescriptionDto {

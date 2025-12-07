@@ -19,7 +19,7 @@ export class RateLimitGuard implements CanActivate {
 
     // Get or initialize request timestamps for this IP
     const timestamps = this.requests.get(ip) || [];
-    
+
     // Remove timestamps outside the current window
     const validTimestamps = timestamps.filter(
       (timestamp) => now - timestamp < this.windowMs,

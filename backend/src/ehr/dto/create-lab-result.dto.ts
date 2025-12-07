@@ -1,4 +1,14 @@
-import { IsString, IsNotEmpty, IsOptional, IsDate, MaxLength, IsArray, IsEnum, IsBoolean, ValidateNested } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsDate,
+  MaxLength,
+  IsArray,
+  IsEnum,
+  IsBoolean,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { LabResultStatus } from '../../entities/lab-result.entity';
 

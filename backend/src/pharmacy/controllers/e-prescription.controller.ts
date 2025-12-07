@@ -39,7 +39,10 @@ export class EPrescriptionController {
   }
 
   @Get(':id')
-  async findOne(@Request() req, @Param('id') id: string): Promise<EPrescription> {
+  async findOne(
+    @Request() req,
+    @Param('id') id: string,
+  ): Promise<EPrescription> {
     return this.ePrescriptionService.findById(id, req.user.userId);
   }
 
@@ -71,7 +74,10 @@ export class EPrescriptionController {
     @Request() req,
     @Param('prescriptionId') prescriptionId: string,
   ): Promise<EPrescription> {
-    return this.ePrescriptionService.requestRefill(prescriptionId, req.user.userId);
+    return this.ePrescriptionService.requestRefill(
+      prescriptionId,
+      req.user.userId,
+    );
   }
 
   @Post(':id/transfer')

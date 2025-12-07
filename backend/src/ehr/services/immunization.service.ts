@@ -12,13 +12,16 @@ export class ImmunizationService {
     private readonly immunizationRepository: Repository<Immunization>,
   ) {}
 
-  async create(userId: string, data: Partial<Immunization>): Promise<Immunization> {
+  async create(
+    userId: string,
+    data: Partial<Immunization>,
+  ): Promise<Immunization> {
     try {
       const immunization = this.immunizationRepository.create({
         ...data,
         user: { id: userId },
       });
-      
+
       const saved = await this.immunizationRepository.save(immunization);
       this.logger.log(`Created immunization ${saved.id} for user ${userId}`);
       return saved;
@@ -60,7 +63,11 @@ export class ImmunizationService {
     }
   }
 
-  async update(id: string, userId: string, data: Partial<Immunization>): Promise<Immunization> {
+  async update(
+    id: string,
+    userId: string,
+    data: Partial<Immunization>,
+  ): Promise<Immunization> {
     try {
       const immunization = await this.findOne(id, userId);
       Object.assign(immunization, data);

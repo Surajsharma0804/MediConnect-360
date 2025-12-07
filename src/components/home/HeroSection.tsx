@@ -4,7 +4,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../hooks/useAuth';
 
 const HeroSection: React.FC = () => {
-  const { theme, prefersReducedMotion } = useTheme();
+  const { prefersReducedMotion } = useTheme();
   const { isAuthenticated } = useAuth();
   const spaceshipRef = useRef<HTMLDivElement>(null);
   

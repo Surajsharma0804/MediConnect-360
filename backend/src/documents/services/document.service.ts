@@ -172,8 +172,7 @@ export class DocumentService {
     const document = await this.findOne(id, userId);
 
     document.sharedWith = document.sharedWith.filter(
-      (share) =>
-        share.providerId !== shareId && share.userId !== shareId,
+      (share) => share.providerId !== shareId && share.userId !== shareId,
     );
 
     document.isShared = document.sharedWith.length > 0;
@@ -191,7 +190,11 @@ export class DocumentService {
       .getMany();
   }
 
-  async addTag(id: string, userId: string, tag: string): Promise<MedicalDocument> {
+  async addTag(
+    id: string,
+    userId: string,
+    tag: string,
+  ): Promise<MedicalDocument> {
     const document = await this.findOne(id, userId);
 
     const tags = document.tags || [];

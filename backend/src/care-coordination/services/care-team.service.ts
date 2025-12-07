@@ -113,8 +113,7 @@ export class CareTeamService {
       recentContacts: members
         .filter((m) => m.lastContactDate)
         .sort(
-          (a, b) =>
-            b.lastContactDate.getTime() - a.lastContactDate.getTime(),
+          (a, b) => b.lastContactDate.getTime() - a.lastContactDate.getTime(),
         )
         .slice(0, 5),
     };

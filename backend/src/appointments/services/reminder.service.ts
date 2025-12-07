@@ -2,7 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan, MoreThan } from 'typeorm';
-import { Appointment, AppointmentStatus } from '../../entities/appointment.entity';
+import {
+  Appointment,
+  AppointmentStatus,
+} from '../../entities/appointment.entity';
 import { NotificationService } from '../../services/notification.service';
 import { EmailService } from '../../services/email.service';
 import { SMSService } from '../../services/sms.service';
@@ -51,7 +54,9 @@ export class ReminderService {
         }
       }
 
-      this.logger.log(`Processed ${upcomingAppointments.length} appointment reminders`);
+      this.logger.log(
+        `Processed ${upcomingAppointments.length} appointment reminders`,
+      );
     } catch (error) {
       this.logger.error(`Error sending reminders: ${error.message}`);
     }
@@ -60,7 +65,7 @@ export class ReminderService {
   private async send24HourReminder(appointment: Appointment) {
     try {
       const message = `Reminder: You have an appointment tomorrow at ${appointment.scheduledAt.toLocaleTimeString()}`;
-      
+
       // Send email
       await this.emailService.sendAppointmentConfirmation(
         appointment.patient.email,
@@ -83,7 +88,9 @@ export class ReminderService {
         },
       );
 
-      this.logger.log(`Sent 24-hour reminder for appointment ${appointment.id}`);
+      this.logger.log(
+        `Sent 24-hour reminder for appointment ${appointment.id}`,
+      );
     } catch (error) {
       this.logger.error(`Error sending 24-hour reminder: ${error.message}`);
     }
@@ -92,13 +99,16 @@ export class ReminderService {
   private async send1HourReminder(appointment: Appointment) {
     try {
       const message = `Reminder: Your appointment is in 1 hour at ${appointment.scheduledAt.toLocaleTimeString()}`;
-      
+
       // Send SMS if phone number available
       if (appointment.patient.phone) {
-        await this.smsService.sendAppointmentReminder(appointment.patient.phone, {
-          doctorName: appointment.doctor.name,
-          time: appointment.scheduledAt.toLocaleTimeString(),
-        });
+        await this.smsService.sendAppointmentReminder(
+          appointment.patient.phone,
+          {
+            doctorName: appointment.doctor.name,
+            time: appointment.scheduledAt.toLocaleTimeString(),
+          },
+        );
       }
 
       // Send push notification
@@ -124,7 +134,9 @@ export class ReminderService {
   ): Promise<void> {
     try {
       // In production, use a job queue like Bull
-      this.logger.log(`Scheduled custom reminder for appointment ${appointmentId}`);
+      this.logger.log(
+        `Scheduled custom reminder for appointment ${appointmentId}`,
+      );
     } catch (error) {
       this.logger.error(`Error scheduling custom reminder: ${error.message}`);
       throw new Error('Failed to schedule reminder');

@@ -12,15 +12,20 @@ export class MedicalHistoryService {
     private readonly medicalHistoryRepository: Repository<MedicalHistory>,
   ) {}
 
-  async create(userId: string, data: Partial<MedicalHistory>): Promise<MedicalHistory> {
+  async create(
+    userId: string,
+    data: Partial<MedicalHistory>,
+  ): Promise<MedicalHistory> {
     try {
       const medicalHistory = this.medicalHistoryRepository.create({
         ...data,
         user: { id: userId },
       });
-      
+
       const saved = await this.medicalHistoryRepository.save(medicalHistory);
-      this.logger.log(`Created medical history record ${saved.id} for user ${userId}`);
+      this.logger.log(
+        `Created medical history record ${saved.id} for user ${userId}`,
+      );
       return saved;
     } catch (error) {
       this.logger.error(`Error creating medical history: ${error.message}`);
@@ -55,18 +60,24 @@ export class MedicalHistoryService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      this.logger.error(`Error fetching medical history record: ${error.message}`);
+      this.logger.error(
+        `Error fetching medical history record: ${error.message}`,
+      );
       throw new Error('Failed to fetch medical history record');
     }
   }
 
-  async update(id: string, userId: string, data: Partial<MedicalHistory>): Promise<MedicalHistory> {
+  async update(
+    id: string,
+    userId: string,
+    data: Partial<MedicalHistory>,
+  ): Promise<MedicalHistory> {
     try {
       const record = await this.findOne(id, userId);
-      
+
       Object.assign(record, data);
       const updated = await this.medicalHistoryRepository.save(record);
-      
+
       this.logger.log(`Updated medical history record ${id}`);
       return updated;
     } catch (error) {
@@ -86,13 +97,16 @@ export class MedicalHistoryService {
     }
   }
 
-  async findByCondition(userId: string, conditionName: string): Promise<MedicalHistory[]> {
+  async findByCondition(
+    userId: string,
+    conditionName: string,
+  ): Promise<MedicalHistory[]> {
     try {
       return await this.medicalHistoryRepository
         .createQueryBuilder('history')
         .where('history.userId = :userId', { userId })
-        .andWhere('LOWER(history.conditionName) LIKE LOWER(:conditionName)', { 
-          conditionName: `%${conditionName}%` 
+        .andWhere('LOWER(history.conditionName) LIKE LOWER(:conditionName)', {
+          conditionName: `%${conditionName}%`,
         })
         .orderBy('history.diagnosisDate', 'DESC')
         .getMany();
@@ -105,7 +119,7 @@ export class MedicalHistoryService {
   async findFamilyHistory(userId: string): Promise<MedicalHistory[]> {
     try {
       return await this.medicalHistoryRepository.find({
-        where: { 
+        where: {
           user: { id: userId },
           isFamilyHistory: true,
         },

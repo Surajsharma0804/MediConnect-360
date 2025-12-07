@@ -57,7 +57,10 @@ export class NotificationService {
     },
   ): Promise<void> {
     // Send email notification (FREE via Resend)
-    await this.emailService.sendAppointmentConfirmation(userEmail, appointmentDetails);
+    await this.emailService.sendAppointmentConfirmation(
+      userEmail,
+      appointmentDetails,
+    );
 
     // Send push notification (FREE via Firebase)
     await this.sendPushNotification(userId, {
@@ -109,7 +112,9 @@ export class NotificationService {
     // High severity alerts go via email too
     if (alert.severity === 'high') {
       // Send email for critical alerts
-      this.logger.warn(`High severity alert for user ${userId}: ${alert.title}`);
+      this.logger.warn(
+        `High severity alert for user ${userId}: ${alert.title}`,
+      );
     }
 
     await this.sendPushNotification(userId, {

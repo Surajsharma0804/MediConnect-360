@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+  Query,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { AllergyService } from '../services/allergy.service';
 import { CreateAllergyDto } from '../dto/create-allergy.dto';
@@ -25,8 +36,14 @@ export class AllergyController {
   }
 
   @Get('check-conflicts')
-  async checkConflicts(@Request() req, @Query('medication') medication: string) {
-    return this.allergyService.checkMedicationConflicts(req.user.userId, medication);
+  async checkConflicts(
+    @Request() req,
+    @Query('medication') medication: string,
+  ) {
+    return this.allergyService.checkMedicationConflicts(
+      req.user.userId,
+      medication,
+    );
   }
 
   @Get(':id')

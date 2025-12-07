@@ -69,7 +69,11 @@ export class CareTeamMember {
   @Column({ type: 'text', nullable: true })
   notes: string;
 
-  @Column({ name: 'added_date', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    name: 'added_date',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   addedDate: Date;
 
   @Column({ name: 'last_contact_date', type: 'timestamp', nullable: true })

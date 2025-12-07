@@ -86,7 +86,12 @@ export class StorageService {
     filename: string,
     userId: string,
   ): Promise<string> {
-    return this.uploadFile(file, filename, 'application/pdf', `medical-docs/${userId}`);
+    return this.uploadFile(
+      file,
+      filename,
+      'application/pdf',
+      `medical-docs/${userId}`,
+    );
   }
 
   async uploadProfileImage(
@@ -102,6 +107,11 @@ export class StorageService {
     filename: string,
     userId: string,
   ): Promise<string> {
-    return this.uploadFile(file, filename, 'application/pdf', `prescriptions/${userId}`);
+    return this.uploadFile(
+      file,
+      filename,
+      'application/pdf',
+      `prescriptions/${userId}`,
+    );
   }
 }

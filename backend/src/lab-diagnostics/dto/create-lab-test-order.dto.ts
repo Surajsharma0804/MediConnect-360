@@ -1,5 +1,16 @@
-import { IsEnum, IsString, IsOptional, IsBoolean, IsNumber, IsDateString, IsObject } from 'class-validator';
-import { LabTestType, LabTestPriority } from '../../entities/lab-test-order.entity';
+import {
+  IsEnum,
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsNumber,
+  IsDateString,
+  IsObject,
+} from 'class-validator';
+import {
+  LabTestType,
+  LabTestPriority,
+} from '../../entities/lab-test-order.entity';
 
 export class CreateLabTestOrderDto {
   @IsEnum(LabTestType)

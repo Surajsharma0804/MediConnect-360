@@ -1,4 +1,12 @@
-import { IsString, IsOptional, IsBoolean, IsDateString, IsEnum, IsArray, IsObject } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsDateString,
+  IsEnum,
+  IsArray,
+  IsObject,
+} from 'class-validator';
 import { ResultStatus } from '../../entities/lab-test-result-detail.entity';
 
 export class CreateLabResultDto {

@@ -1,4 +1,10 @@
-import { IsString, IsOptional, IsArray, IsEnum, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  IsEnum,
+  MaxLength,
+} from 'class-validator';
 import { ConversationType } from '../../entities/conversation.entity';
 
 export class CreateConversationDto {

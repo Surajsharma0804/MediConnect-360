@@ -1,4 +1,12 @@
-import { IsString, IsNotEmpty, IsEnum, IsOptional, IsDate, IsBoolean, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsEnum,
+  IsOptional,
+  IsDate,
+  IsBoolean,
+  IsNumber,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { InsuranceType } from '../../entities/insurance-card.entity';
 

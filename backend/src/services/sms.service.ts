@@ -4,7 +4,10 @@ import { Injectable, Logger } from '@nestjs/common';
 export class SMSService {
   private readonly logger = new Logger(SMSService.name);
 
-  async sendOTP(phone: string, otp: string): Promise<{ success: boolean; provider: string }> {
+  async sendOTP(
+    phone: string,
+    otp: string,
+  ): Promise<{ success: boolean; provider: string }> {
     // For development, just log to console
     console.log('\n' + '='.repeat(60));
     console.log('📱 SMS NOTIFICATION');
@@ -23,24 +26,34 @@ export class SMSService {
     // }
   }
 
-  async sendAppointmentReminder(phone: string, appointment: any): Promise<{ success: boolean }> {
+  async sendAppointmentReminder(
+    phone: string,
+    appointment: any,
+  ): Promise<{ success: boolean }> {
     console.log('\n' + '='.repeat(60));
     console.log('📱 SMS REMINDER');
     console.log('='.repeat(60));
     console.log(`To: ${phone}`);
-    console.log(`Message: Reminder: You have an appointment with Dr. ${appointment.doctorName} at ${appointment.time}`);
+    console.log(
+      `Message: Reminder: You have an appointment with Dr. ${appointment.doctorName} at ${appointment.time}`,
+    );
     console.log('='.repeat(60) + '\n');
 
     this.logger.log(`Appointment reminder sent to ${phone}`);
     return { success: true };
   }
 
-  async sendEmergencyAlert(phone: string, location: string): Promise<{ success: boolean }> {
+  async sendEmergencyAlert(
+    phone: string,
+    location: string,
+  ): Promise<{ success: boolean }> {
     console.log('\n' + '='.repeat(60));
     console.log('🚨 EMERGENCY ALERT');
     console.log('='.repeat(60));
     console.log(`To: ${phone}`);
-    console.log(`Message: EMERGENCY: Your emergency contact has triggered an SOS alert at ${location}`);
+    console.log(
+      `Message: EMERGENCY: Your emergency contact has triggered an SOS alert at ${location}`,
+    );
     console.log('='.repeat(60) + '\n');
 
     this.logger.warn(`Emergency alert sent to ${phone}`);

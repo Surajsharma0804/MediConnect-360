@@ -1,7 +1,10 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThanOrEqual } from 'typeorm';
-import { Prescription, PrescriptionStatus } from '../../entities/prescription.entity';
+import {
+  Prescription,
+  PrescriptionStatus,
+} from '../../entities/prescription.entity';
 
 @Injectable()
 export class PrescriptionService {
@@ -12,13 +15,16 @@ export class PrescriptionService {
     private readonly prescriptionRepository: Repository<Prescription>,
   ) {}
 
-  async create(userId: string, data: Partial<Prescription>): Promise<Prescription> {
+  async create(
+    userId: string,
+    data: Partial<Prescription>,
+  ): Promise<Prescription> {
     try {
       const prescription = this.prescriptionRepository.create({
         ...data,
         user: { id: userId },
       });
-      
+
       const saved = await this.prescriptionRepository.save(prescription);
       this.logger.log(`Created prescription ${saved.id} for user ${userId}`);
       return saved;
@@ -34,7 +40,7 @@ export class PrescriptionService {
       if (activeOnly) {
         query.status = PrescriptionStatus.ACTIVE;
       }
-      
+
       return await this.prescriptionRepository.find({
         where: query,
         order: { startDate: 'DESC' },
@@ -65,7 +71,11 @@ export class PrescriptionService {
     }
   }
 
-  async update(id: string, userId: string, data: Partial<Prescription>): Promise<Prescription> {
+  async update(
+    id: string,
+    userId: string,
+    data: Partial<Prescription>,
+  ): Promise<Prescription> {
     try {
       const prescription = await this.findOne(id, userId);
       Object.assign(prescription, data);
@@ -92,14 +102,14 @@ export class PrescriptionService {
   async requestRefill(id: string, userId: string): Promise<Prescription> {
     try {
       const prescription = await this.findOne(id, userId);
-      
+
       if (prescription.refillsRemaining <= 0) {
         throw new Error('No refills remaining. Please contact your provider.');
       }
 
       prescription.refillsRemaining -= 1;
       prescription.lastRefillDate = new Date();
-      
+
       const updated = await this.prescriptionRepository.save(prescription);
       this.logger.log(`Refill requested for prescription ${id}`);
       return updated;
@@ -126,7 +136,10 @@ export class PrescriptionService {
     }
   }
 
-  async getAdherenceRate(userId: string, prescriptionId?: string): Promise<number> {
+  async getAdherenceRate(
+    userId: string,
+    prescriptionId?: string,
+  ): Promise<number> {
     try {
       // Simplified adherence calculation
       // In production, this would track actual medication logs

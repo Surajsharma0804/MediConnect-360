@@ -80,7 +80,8 @@ export class CostEstimatorService {
 
       // Calculate costs based on insurance
       const deductibleRemaining =
-        Number(insuranceCard.deductible || 0) - Number(insuranceCard.deductibleMet || 0);
+        Number(insuranceCard.deductible || 0) -
+        Number(insuranceCard.deductibleMet || 0);
 
       let copay = 0;
       let coinsurance = 0;
@@ -118,7 +119,9 @@ export class CostEstimatorService {
       if (copay > 0) {
         notes.push(`Copay applies: $${copay.toFixed(2)}`);
       }
-      notes.push('Estimate based on average costs and typical insurance coverage');
+      notes.push(
+        'Estimate based on average costs and typical insurance coverage',
+      );
       notes.push('Actual costs may vary by provider and location');
 
       return {
@@ -143,13 +146,23 @@ export class CostEstimatorService {
   async compareProviders(
     userId: string,
     serviceType: string,
-    providerCosts: Array<{ providerId: string; providerName: string; cost: number }>,
+    providerCosts: Array<{
+      providerId: string;
+      providerName: string;
+      cost: number;
+    }>,
     insuranceCardId?: string,
-  ): Promise<Array<CostEstimate & { providerId: string; providerName: string }>> {
+  ): Promise<
+    Array<CostEstimate & { providerId: string; providerName: string }>
+  > {
     try {
       const estimates = await Promise.all(
         providerCosts.map(async (provider) => {
-          const estimate = await this.estimateCost(userId, serviceType, insuranceCardId);
+          const estimate = await this.estimateCost(
+            userId,
+            serviceType,
+            insuranceCardId,
+          );
           // Adjust for provider-specific cost
           const costRatio = provider.cost / estimate.providerCost;
           return {
@@ -164,14 +177,20 @@ export class CostEstimatorService {
       );
 
       // Sort by patient responsibility (lowest first)
-      return estimates.sort((a, b) => a.patientResponsibility - b.patientResponsibility);
+      return estimates.sort(
+        (a, b) => a.patientResponsibility - b.patientResponsibility,
+      );
     } catch (error) {
       this.logger.error(`Error comparing providers: ${error.message}`);
       throw error;
     }
   }
 
-  getAvailableServices(): Array<{ key: string; name: string; averageCost: number }> {
+  getAvailableServices(): Array<{
+    key: string;
+    name: string;
+    averageCost: number;
+  }> {
     return Object.entries(this.serviceCosts).map(([key, cost]) => ({
       key,
       name: key.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()),

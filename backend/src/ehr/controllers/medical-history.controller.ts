@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+  Query,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { MedicalHistoryService } from '../services/medical-history.service';
 import { CreateMedicalHistoryDto } from '../dto/create-medical-history.dto';
@@ -15,7 +26,10 @@ export class MedicalHistoryController {
   }
 
   @Get()
-  async findAll(@Request() req, @Query('familyHistory') familyHistory?: string) {
+  async findAll(
+    @Request() req,
+    @Query('familyHistory') familyHistory?: string,
+  ) {
     if (familyHistory === 'true') {
       return this.medicalHistoryService.findFamilyHistory(req.user.userId);
     }
@@ -24,7 +38,10 @@ export class MedicalHistoryController {
 
   @Get('search')
   async search(@Request() req, @Query('condition') condition: string) {
-    return this.medicalHistoryService.findByCondition(req.user.userId, condition);
+    return this.medicalHistoryService.findByCondition(
+      req.user.userId,
+      condition,
+    );
   }
 
   @Get(':id')

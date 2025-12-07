@@ -12,7 +12,10 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { ReminderService } from '../services/reminder.service';
-import { ReminderType, ReminderFrequency } from '../../entities/reminder.entity';
+import {
+  ReminderType,
+  ReminderFrequency,
+} from '../../entities/reminder.entity';
 
 @Controller('reminders')
 @UseGuards(JwtAuthGuard)

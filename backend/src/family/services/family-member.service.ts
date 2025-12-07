@@ -128,7 +128,8 @@ export class FamilyMemberService {
       const member = await this.findOne(id, userId);
 
       member.accessLevel = accessData.accessLevel || member.accessLevel;
-      member.canViewMedicalRecords = accessData.canViewMedicalRecords ?? member.canViewMedicalRecords;
+      member.canViewMedicalRecords =
+        accessData.canViewMedicalRecords ?? member.canViewMedicalRecords;
       member.canBookAppointments =
         accessData.canBookAppointments ?? member.canBookAppointments;
       member.canManagePrescriptions =
@@ -193,7 +194,9 @@ export class FamilyMemberService {
   async getMinors(userId: string): Promise<FamilyMember[]> {
     try {
       const members = await this.findAll(userId);
-      return members.filter((member) => this.calculateAge(member.dateOfBirth) < 18);
+      return members.filter(
+        (member) => this.calculateAge(member.dateOfBirth) < 18,
+      );
     } catch (error) {
       this.logger.error(`Error fetching minors: ${error.message}`);
       throw new Error('Failed to fetch minors');
@@ -206,7 +209,10 @@ export class FamilyMemberService {
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
 
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
       age--;
     }
 

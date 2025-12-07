@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProviderReview } from '../../entities/provider-review.entity';
@@ -14,7 +19,11 @@ export class ProviderReviewService {
     private readonly providerService: ProviderService,
   ) {}
 
-  async create(userId: string, providerId: string, data: Partial<ProviderReview>): Promise<ProviderReview> {
+  async create(
+    userId: string,
+    providerId: string,
+    data: Partial<ProviderReview>,
+  ): Promise<ProviderReview> {
     try {
       // Check if user already reviewed this provider
       const existing = await this.reviewRepository.findOne({
@@ -22,7 +31,9 @@ export class ProviderReviewService {
       });
 
       if (existing) {
-        throw new BadRequestException('You have already reviewed this provider');
+        throw new BadRequestException(
+          'You have already reviewed this provider',
+        );
       }
 
       const review = this.reviewRepository.create({
@@ -44,7 +55,11 @@ export class ProviderReviewService {
     }
   }
 
-  async findByProvider(providerId: string, limit = 20, offset = 0): Promise<{ reviews: ProviderReview[]; total: number }> {
+  async findByProvider(
+    providerId: string,
+    limit = 20,
+    offset = 0,
+  ): Promise<{ reviews: ProviderReview[]; total: number }> {
     try {
       const [reviews, total] = await this.reviewRepository.findAndCount({
         where: { providerId },
@@ -80,7 +95,11 @@ export class ProviderReviewService {
     }
   }
 
-  async update(id: string, userId: string, data: Partial<ProviderReview>): Promise<ProviderReview> {
+  async update(
+    id: string,
+    userId: string,
+    data: Partial<ProviderReview>,
+  ): Promise<ProviderReview> {
     try {
       const review = await this.findOne(id);
 
@@ -122,7 +141,11 @@ export class ProviderReviewService {
     }
   }
 
-  async markHelpful(reviewId: string, userId: string, helpful: boolean = true): Promise<ProviderReview> {
+  async markHelpful(
+    reviewId: string,
+    userId: string,
+    helpful: boolean = true,
+  ): Promise<ProviderReview> {
     try {
       const review = await this.findOne(reviewId);
 
@@ -151,10 +174,17 @@ export class ProviderReviewService {
         return;
       }
 
-      const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+      const totalRating = reviews.reduce(
+        (sum, review) => sum + review.rating,
+        0,
+      );
       const averageRating = totalRating / reviews.length;
 
-      await this.providerService.updateRating(providerId, averageRating, reviews.length);
+      await this.providerService.updateRating(
+        providerId,
+        averageRating,
+        reviews.length,
+      );
     } catch (error) {
       this.logger.error(`Error updating provider rating: ${error.message}`);
     }

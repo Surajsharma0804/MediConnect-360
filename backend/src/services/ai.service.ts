@@ -19,7 +19,10 @@ export class AIService {
     this.logger.log('AI Service initialized with Gemini 2.5 Flash');
   }
 
-  async analyzeSymptoms(symptoms: string, language: string = 'en'): Promise<string> {
+  async analyzeSymptoms(
+    symptoms: string,
+    language: string = 'en',
+  ): Promise<string> {
     try {
       const prompt = `You are a medical AI assistant for MediConnect 360. Analyze these symptoms and provide:
 

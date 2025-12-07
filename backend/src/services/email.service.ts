@@ -12,7 +12,11 @@ export class EmailService {
     this.fromEmail = process.env.FROM_EMAIL || 'onboarding@resend.dev';
   }
 
-  async sendVerificationEmail(to: string, token: string, name: string): Promise<void> {
+  async sendVerificationEmail(
+    to: string,
+    token: string,
+    name: string,
+  ): Promise<void> {
     try {
       const verificationUrl = `${process.env.CORS_ORIGIN}/verify-email?token=${token}`;
 
@@ -66,7 +70,11 @@ export class EmailService {
     }
   }
 
-  async sendPasswordReset(to: string, token: string, name: string): Promise<void> {
+  async sendPasswordReset(
+    to: string,
+    token: string,
+    name: string,
+  ): Promise<void> {
     try {
       const resetUrl = `${process.env.CORS_ORIGIN}/reset-password?token=${token}`;
 

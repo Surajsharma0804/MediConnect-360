@@ -31,7 +31,9 @@ export class ConversationController {
 
   @Get('unread-count')
   async getUnreadCount(@Request() req) {
-    const count = await this.conversationService.getUnreadCount(req.user.userId);
+    const count = await this.conversationService.getUnreadCount(
+      req.user.userId,
+    );
     return { count };
   }
 
@@ -46,7 +48,11 @@ export class ConversationController {
     @Param('id') id: string,
     @Body('participantId') participantId: string,
   ) {
-    return this.conversationService.addParticipant(id, req.user.userId, participantId);
+    return this.conversationService.addParticipant(
+      id,
+      req.user.userId,
+      participantId,
+    );
   }
 
   @Delete(':id/participants/:participantId')
@@ -56,7 +62,11 @@ export class ConversationController {
     @Param('id') id: string,
     @Param('participantId') participantId: string,
   ) {
-    await this.conversationService.removeParticipant(id, req.user.userId, participantId);
+    await this.conversationService.removeParticipant(
+      id,
+      req.user.userId,
+      participantId,
+    );
   }
 
   @Post(':id/read')

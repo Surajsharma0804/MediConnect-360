@@ -1,4 +1,12 @@
-import { IsNumber, IsOptional, IsDate, Min, Max, MaxLength, IsString } from 'class-validator';
+import {
+  IsNumber,
+  IsOptional,
+  IsDate,
+  Min,
+  Max,
+  MaxLength,
+  IsString,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateVitalSignsDto {

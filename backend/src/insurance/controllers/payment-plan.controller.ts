@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { PaymentPlanService } from '../services/payment-plan.service';
 
@@ -23,7 +31,11 @@ export class PaymentPlanController {
   }
 
   @Post(':id/payment')
-  async processPayment(@Request() req, @Param('id') id: string, @Body('amount') amount: number) {
+  async processPayment(
+    @Request() req,
+    @Param('id') id: string,
+    @Body('amount') amount: number,
+  ) {
     return this.paymentPlanService.processPayment(id, req.user.userId, amount);
   }
 }

@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { LabTestOrder, LabTestStatus } from '../../entities/lab-test-order.entity';
+import {
+  LabTestOrder,
+  LabTestStatus,
+} from '../../entities/lab-test-order.entity';
 import { CreateLabTestOrderDto } from '../dto/create-lab-test-order.dto';
 import { NotificationService } from '../../services/notification.service';
 

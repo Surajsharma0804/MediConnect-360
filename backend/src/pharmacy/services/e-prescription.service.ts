@@ -1,7 +1,15 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { EPrescription, EPrescriptionStatus } from '../../entities/e-prescription.entity';
+import {
+  EPrescription,
+  EPrescriptionStatus,
+} from '../../entities/e-prescription.entity';
 import { Prescription } from '../../entities/prescription.entity';
 import { Pharmacy } from '../../entities/pharmacy.entity';
 import { EmailService } from '../../services/email.service';
@@ -50,7 +58,9 @@ export class EPrescriptionService {
       }
 
       if (!pharmacy.acceptsEPrescriptions) {
-        throw new BadRequestException('Pharmacy does not accept e-prescriptions');
+        throw new BadRequestException(
+          'Pharmacy does not accept e-prescriptions',
+        );
       }
 
       const ePrescription = this.ePrescriptionRepository.create({
@@ -153,12 +163,18 @@ export class EPrescriptionService {
 
       return updated;
     } catch (error) {
-      this.logger.error(`Error updating e-prescription status: ${error.message}`);
+      this.logger.error(
+        `Error updating e-prescription status: ${error.message}`,
+      );
       throw error;
     }
   }
 
-  async cancel(id: string, userId: string, reason?: string): Promise<EPrescription> {
+  async cancel(
+    id: string,
+    userId: string,
+    reason?: string,
+  ): Promise<EPrescription> {
     try {
       const ePrescription = await this.findById(id, userId);
 
@@ -179,7 +195,10 @@ export class EPrescriptionService {
     }
   }
 
-  async requestRefill(prescriptionId: string, userId: string): Promise<EPrescription> {
+  async requestRefill(
+    prescriptionId: string,
+    userId: string,
+  ): Promise<EPrescription> {
     try {
       const prescription = await this.prescriptionRepository.findOne({
         where: { id: prescriptionId, userId },
@@ -226,7 +245,9 @@ export class EPrescriptionService {
       const ePrescription = await this.findById(id, userId);
 
       if (ePrescription.status !== EPrescriptionStatus.PENDING) {
-        throw new BadRequestException('Can only transfer pending prescriptions');
+        throw new BadRequestException(
+          'Can only transfer pending prescriptions',
+        );
       }
 
       const newPharmacy = await this.pharmacyRepository.findOne({
@@ -259,26 +280,28 @@ export class EPrescriptionService {
         order: { sentAt: 'ASC' },
       });
     } catch (error) {
-      this.logger.error(`Error finding pharmacy prescriptions: ${error.message}`);
+      this.logger.error(
+        `Error finding pharmacy prescriptions: ${error.message}`,
+      );
       throw error;
     }
   }
 
-  private async notifyPrescriptionSent(prescription: any, pharmacy: Pharmacy): Promise<void> {
+  private async notifyPrescriptionSent(
+    prescription: any,
+    pharmacy: Pharmacy,
+  ): Promise<void> {
     try {
       // Push notification
-      await this.notificationService.sendPushNotification(
-        prescription.userId,
-        {
-          title: 'Prescription Sent',
-          body: `Your prescription for ${prescription.medicationName} has been sent to ${pharmacy.name}`,
-          icon: '/icons/prescription.png',
-          data: {
-            type: 'prescription_sent',
-            pharmacyName: pharmacy.name,
-          },
+      await this.notificationService.sendPushNotification(prescription.userId, {
+        title: 'Prescription Sent',
+        body: `Your prescription for ${prescription.medicationName} has been sent to ${pharmacy.name}`,
+        icon: '/icons/prescription.png',
+        data: {
+          type: 'prescription_sent',
+          pharmacyName: pharmacy.name,
         },
-      );
+      });
     } catch (error) {
       this.logger.error(`Error sending notifications: ${error.message}`);
     }

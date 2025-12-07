@@ -1,7 +1,15 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
-import { Appointment, AppointmentStatus } from '../../entities/appointment.entity';
+import {
+  Appointment,
+  AppointmentStatus,
+} from '../../entities/appointment.entity';
 
 @Injectable()
 export class AppointmentService {
@@ -87,7 +95,11 @@ export class AppointmentService {
     }
   }
 
-  async update(id: string, userId: string, data: Partial<Appointment>): Promise<Appointment> {
+  async update(
+    id: string,
+    userId: string,
+    data: Partial<Appointment>,
+  ): Promise<Appointment> {
     try {
       const appointment = await this.findOne(id, userId);
       Object.assign(appointment, data);
@@ -100,7 +112,11 @@ export class AppointmentService {
     }
   }
 
-  async cancel(id: string, userId: string, reason?: string): Promise<Appointment> {
+  async cancel(
+    id: string,
+    userId: string,
+    reason?: string,
+  ): Promise<Appointment> {
     try {
       const appointment = await this.findOne(id, userId);
       appointment.status = AppointmentStatus.CANCELLED;
@@ -115,7 +131,11 @@ export class AppointmentService {
     }
   }
 
-  async complete(id: string, doctorId: string, notes?: string): Promise<Appointment> {
+  async complete(
+    id: string,
+    doctorId: string,
+    notes?: string,
+  ): Promise<Appointment> {
     try {
       const appointment = await this.appointmentRepository.findOne({
         where: { id, doctorId },
@@ -143,14 +163,16 @@ export class AppointmentService {
   ): Promise<boolean> {
     try {
       const endTime = new Date(scheduledAt.getTime() + duration * 60000);
-      
+
       const conflicts = await this.appointmentRepository
         .createQueryBuilder('appointment')
         .where('appointment.doctorId = :doctorId', { doctorId })
-        .andWhere('appointment.status != :cancelled', { cancelled: AppointmentStatus.CANCELLED })
+        .andWhere('appointment.status != :cancelled', {
+          cancelled: AppointmentStatus.CANCELLED,
+        })
         .andWhere(
           '(appointment.scheduledAt BETWEEN :start AND :end OR ' +
-          '(appointment.scheduledAt + (appointment.durationMinutes * interval \'1 minute\')) BETWEEN :start AND :end)',
+            "(appointment.scheduledAt + (appointment.durationMinutes * interval '1 minute')) BETWEEN :start AND :end)",
           { start: scheduledAt, end: endTime },
         )
         .getCount();

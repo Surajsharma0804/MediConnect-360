@@ -1,6 +1,18 @@
-import { IsString, IsNotEmpty, IsOptional, IsDate, IsEnum, IsBoolean, MaxLength, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsDate,
+  IsEnum,
+  IsBoolean,
+  MaxLength,
+  IsArray,
+} from 'class-validator';
 import { Type } from 'class-transformer';
-import { ConditionSeverity, ConditionStatus } from '../../entities/medical-history.entity';
+import {
+  ConditionSeverity,
+  ConditionStatus,
+} from '../../entities/medical-history.entity';
 
 export class CreateMedicalHistoryDto {
   @IsString()

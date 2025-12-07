@@ -54,11 +54,7 @@ export class LabTestOrderController {
     @Param('id') id: string,
     @Body('status') status: LabTestStatus,
   ) {
-    return this.labTestOrderService.updateStatus(
-      id,
-      req.user.userId,
-      status,
-    );
+    return this.labTestOrderService.updateStatus(id, req.user.userId, status);
   }
 
   @Patch(':id/cancel')

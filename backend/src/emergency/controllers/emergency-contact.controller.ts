@@ -19,7 +19,9 @@ import { UpdateEmergencyContactDto } from '../dto/update-emergency-contact.dto';
 @Controller('emergency/contacts')
 @UseGuards(JwtAuthGuard)
 export class EmergencyContactController {
-  constructor(private readonly emergencyContactService: EmergencyContactService) {}
+  constructor(
+    private readonly emergencyContactService: EmergencyContactService,
+  ) {}
 
   @Post()
   async create(@Request() req, @Body() createDto: CreateEmergencyContactDto) {

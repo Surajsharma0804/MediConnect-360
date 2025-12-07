@@ -65,8 +65,12 @@ async function bootstrap() {
     logger.log(`✅ API: http://localhost:${port}/api`);
     logger.log(`✅ Health: http://localhost:${port}/api/health`);
     logger.log(`✅ Environment: ${process.env.NODE_ENV || 'development'}`);
-    logger.log(`✅ Database: ${process.env.DATABASE_URL ? 'Connected' : 'Not configured'}`);
-    logger.log(`✅ CORS: ${process.env.CORS_ORIGIN || 'http://localhost:5173'}`);
+    logger.log(
+      `✅ Database: ${process.env.DATABASE_URL ? 'Connected' : 'Not configured'}`,
+    );
+    logger.log(
+      `✅ CORS: ${process.env.CORS_ORIGIN || 'http://localhost:5173'}`,
+    );
     logger.log('='.repeat(60) + '\n');
   } catch (error) {
     logger.error('❌ Failed to start server:', error);

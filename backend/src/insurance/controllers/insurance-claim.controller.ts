@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Body, Param, UseGuards, Request, UseInterceptors, UploadedFile } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { InsuranceClaimService } from '../services/insurance-claim.service';
@@ -40,7 +51,16 @@ export class InsuranceClaimController {
 
   @Post(':id/documents')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadDocument(@Request() req, @Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
-    return this.claimService.uploadDocument(id, req.user.userId, file.buffer, file.originalname);
+  async uploadDocument(
+    @Request() req,
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.claimService.uploadDocument(
+      id,
+      req.user.userId,
+      file.buffer,
+      file.originalname,
+    );
   }
 }

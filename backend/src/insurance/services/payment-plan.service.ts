@@ -1,7 +1,10 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PaymentPlan, PaymentPlanStatus } from '../../entities/payment-plan.entity';
+import {
+  PaymentPlan,
+  PaymentPlanStatus,
+} from '../../entities/payment-plan.entity';
 import { PaymentService } from '../../services/payment.service';
 import { NotificationService } from '../../services/notification.service';
 
@@ -16,7 +19,10 @@ export class PaymentPlanService {
     private notificationService: NotificationService,
   ) {}
 
-  async create(userId: string, planData: Partial<PaymentPlan>): Promise<PaymentPlan> {
+  async create(
+    userId: string,
+    planData: Partial<PaymentPlan>,
+  ): Promise<PaymentPlan> {
     try {
       const plan = this.paymentPlanRepository.create({
         ...planData,
@@ -62,7 +68,11 @@ export class PaymentPlanService {
     }
   }
 
-  async processPayment(id: string, userId: string, amount: number): Promise<PaymentPlan> {
+  async processPayment(
+    id: string,
+    userId: string,
+    amount: number,
+  ): Promise<PaymentPlan> {
     try {
       const plan = await this.findById(id, userId);
 
@@ -86,7 +96,10 @@ export class PaymentPlanService {
 
       // Calculate next payment date
       if (plan.status === PaymentPlanStatus.ACTIVE) {
-        plan.nextPaymentDate = this.calculateNextPaymentDate(plan.nextPaymentDate, plan.frequency);
+        plan.nextPaymentDate = this.calculateNextPaymentDate(
+          plan.nextPaymentDate,
+          plan.frequency,
+        );
       }
 
       return await this.paymentPlanRepository.save(plan);

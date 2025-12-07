@@ -10,7 +10,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { DrugPriceService, PriceComparison } from '../services/drug-price.service';
+import {
+  DrugPriceService,
+  PriceComparison,
+} from '../services/drug-price.service';
 import { ComparePricesDto } from '../dto/compare-prices.dto';
 import { DrugPrice } from '../../entities/drug-price.entity';
 

@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { InvoiceService } from '../services/invoice.service';
 
@@ -23,13 +31,20 @@ export class InvoiceController {
   }
 
   @Post(':id/pay')
-  async markAsPaid(@Request() req, @Param('id') id: string, @Body() paymentDetails: any) {
+  async markAsPaid(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() paymentDetails: any,
+  ) {
     return this.invoiceService.markAsPaid(id, req.user.userId, paymentDetails);
   }
 
   @Post(':id/superbill')
   async generateSuperbill(@Request() req, @Param('id') id: string) {
-    const url = await this.invoiceService.generateSuperbill(id, req.user.userId);
+    const url = await this.invoiceService.generateSuperbill(
+      id,
+      req.user.userId,
+    );
     return { superbillUrl: url };
   }
 }

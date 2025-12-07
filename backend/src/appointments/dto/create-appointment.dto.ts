@@ -1,4 +1,13 @@
-import { IsString, IsNotEmpty, IsDate, IsOptional, IsNumber, Min, MaxLength, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsDate,
+  IsOptional,
+  IsNumber,
+  Min,
+  MaxLength,
+  IsEnum,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { AppointmentType } from '../../entities/appointment.entity';
 

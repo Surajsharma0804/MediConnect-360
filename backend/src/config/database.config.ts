@@ -8,5 +8,8 @@ export const databaseConfig = (): TypeOrmModuleOptions => ({
   // Can be controlled via DB_SYNCHRONIZE env var (defaults to true for initial setup)
   synchronize: process.env.DB_SYNCHRONIZE !== 'false',
   logging: process.env.NODE_ENV === 'development',
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  ssl:
+    process.env.NODE_ENV === 'production'
+      ? { rejectUnauthorized: false }
+      : false,
 });

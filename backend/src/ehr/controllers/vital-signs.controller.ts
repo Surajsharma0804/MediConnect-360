@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+  Query,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { VitalSignsService } from '../services/vital-signs.service';
 import { CreateVitalSignsDto } from '../dto/create-vital-signs.dto';
@@ -21,7 +32,10 @@ export class VitalSignsController {
 
   @Get()
   async findAll(@Request() req, @Query('limit') limit?: string) {
-    return this.vitalSignsService.findAll(req.user.userId, limit ? parseInt(limit) : 50);
+    return this.vitalSignsService.findAll(
+      req.user.userId,
+      limit ? parseInt(limit) : 50,
+    );
   }
 
   @Get('latest')

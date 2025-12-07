@@ -69,7 +69,11 @@ describe('AuthService', () => {
       mockUserRepository.create.mockReturnValue(mockUser);
       mockUserRepository.save.mockResolvedValue(mockUser);
 
-      const result = await service.register('test@example.com', 'password123', 'Test User');
+      const result = await service.register(
+        'test@example.com',
+        'password123',
+        'Test User',
+      );
 
       expect(result.user.email).toBe('test@example.com');
       expect(result.message).toContain('Registration successful');
@@ -77,7 +81,9 @@ describe('AuthService', () => {
     });
 
     it('should throw ConflictException if email already exists', async () => {
-      mockUserRepository.findOne.mockResolvedValue({ email: 'test@example.com' });
+      mockUserRepository.findOne.mockResolvedValue({
+        email: 'test@example.com',
+      });
 
       await expect(
         service.register('test@example.com', 'password123', 'Test User'),
@@ -123,7 +129,10 @@ describe('AuthService', () => {
 
       mockJwtService.verify.mockReturnValue({ sub: '1', type: 'verification' });
       mockUserRepository.findOne.mockResolvedValue(mockUser);
-      mockUserRepository.save.mockResolvedValue({ ...mockUser, isVerified: true });
+      mockUserRepository.save.mockResolvedValue({
+        ...mockUser,
+        isVerified: true,
+      });
 
       const result = await service.verifyEmail('valid-token');
 

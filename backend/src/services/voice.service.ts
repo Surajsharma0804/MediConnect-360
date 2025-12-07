@@ -33,7 +33,9 @@ export class VoiceService {
   }
 
   getVoiceForLanguage(languageCode: string): string | null {
-    const language = this.supportedLanguages.find((lang) => lang.code === languageCode);
+    const language = this.supportedLanguages.find(
+      (lang) => lang.code === languageCode,
+    );
     return language ? language.voice : null;
   }
 
@@ -41,10 +43,13 @@ export class VoiceService {
    * Transcribe audio to text using Google Speech-to-Text
    * This is a placeholder - actual implementation would use Google Cloud Speech-to-Text API
    */
-  async transcribeAudio(audioBuffer: Buffer, languageCode: string): Promise<string> {
+  async transcribeAudio(
+    audioBuffer: Buffer,
+    languageCode: string,
+  ): Promise<string> {
     try {
       this.logger.log(`Transcribing audio in language: ${languageCode}`);
-      
+
       // TODO: Implement actual Google Speech-to-Text API integration
       // const speech = require('@google-cloud/speech');
       // const client = new speech.SpeechClient();
@@ -72,7 +77,7 @@ export class VoiceService {
   async synthesizeSpeech(text: string, languageCode: string): Promise<Buffer> {
     try {
       this.logger.log(`Synthesizing speech in language: ${languageCode}`);
-      
+
       const voice = this.getVoiceForLanguage(languageCode);
       if (!voice) {
         throw new Error(`Unsupported language: ${languageCode}`);
@@ -100,10 +105,14 @@ export class VoiceService {
    * Translate text between languages
    * This is a placeholder - actual implementation would use Google Translate API
    */
-  async translateText(text: string, targetLanguage: string, sourceLanguage?: string): Promise<string> {
+  async translateText(
+    text: string,
+    targetLanguage: string,
+    sourceLanguage?: string,
+  ): Promise<string> {
     try {
       this.logger.log(`Translating text to ${targetLanguage}`);
-      
+
       // TODO: Implement actual Google Translate API integration
       // const { Translate } = require('@google-cloud/translate').v2;
       // const translate = new Translate();

@@ -24,7 +24,10 @@ export class ProviderService {
     }
   }
 
-  async findAll(limit = 50, offset = 0): Promise<{ providers: Provider[]; total: number }> {
+  async findAll(
+    limit = 50,
+    offset = 0,
+  ): Promise<{ providers: Provider[]; total: number }> {
     try {
       const [providers, total] = await this.providerRepository.findAndCount({
         where: { status: ProviderStatus.ACTIVE },
@@ -88,7 +91,9 @@ export class ProviderService {
       return await this.providerRepository
         .createQueryBuilder('provider')
         .where('provider.status = :status', { status: ProviderStatus.ACTIVE })
-        .andWhere(':specialization = ANY(provider.specializations)', { specialization })
+        .andWhere(':specialization = ANY(provider.specializations)', {
+          specialization,
+        })
         .orderBy('provider.rating', 'DESC')
         .getMany();
     } catch (error) {
@@ -97,7 +102,11 @@ export class ProviderService {
     }
   }
 
-  async updateRating(providerId: string, newRating: number, totalReviews: number): Promise<void> {
+  async updateRating(
+    providerId: string,
+    newRating: number,
+    totalReviews: number,
+  ): Promise<void> {
     try {
       await this.providerRepository.update(providerId, {
         rating: newRating,

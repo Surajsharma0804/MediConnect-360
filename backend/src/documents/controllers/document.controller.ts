@@ -15,7 +15,10 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { DocumentService } from '../services/document.service';
-import { DocumentType, DocumentStatus } from '../../entities/medical-document.entity';
+import {
+  DocumentType,
+  DocumentStatus,
+} from '../../entities/medical-document.entity';
 
 @Controller('documents')
 @UseGuards(JwtAuthGuard)
@@ -127,7 +130,11 @@ export class DocumentController {
   }
 
   @Delete(':id/tag/:tag')
-  removeTag(@Request() req, @Param('id') id: string, @Param('tag') tag: string) {
+  removeTag(
+    @Request() req,
+    @Param('id') id: string,
+    @Param('tag') tag: string,
+  ) {
     return this.documentService.removeTag(id, req.user.userId, tag);
   }
 

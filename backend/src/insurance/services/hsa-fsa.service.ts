@@ -12,7 +12,10 @@ export class HsaFsaService {
     private hsaFsaRepository: Repository<HsaFsaAccount>,
   ) {}
 
-  async create(userId: string, accountData: Partial<HsaFsaAccount>): Promise<HsaFsaAccount> {
+  async create(
+    userId: string,
+    accountData: Partial<HsaFsaAccount>,
+  ): Promise<HsaFsaAccount> {
     try {
       const account = this.hsaFsaRepository.create({
         ...accountData,
@@ -67,7 +70,8 @@ export class HsaFsaService {
 
       if (type === 'contribution') {
         account.currentBalance = Number(account.currentBalance) + amount;
-        account.contributedThisYear = Number(account.contributedThisYear) + amount;
+        account.contributedThisYear =
+          Number(account.contributedThisYear) + amount;
       } else {
         account.currentBalance = Number(account.currentBalance) - amount;
       }
@@ -84,12 +88,17 @@ export class HsaFsaService {
 
       return await this.hsaFsaRepository.save(account);
     } catch (error) {
-      this.logger.error(`Error processing HSA/FSA transaction: ${error.message}`);
+      this.logger.error(
+        `Error processing HSA/FSA transaction: ${error.message}`,
+      );
       throw error;
     }
   }
 
-  async getBalance(id: string, userId: string): Promise<{
+  async getBalance(
+    id: string,
+    userId: string,
+  ): Promise<{
     currentBalance: number;
     contributedThisYear: number;
     remainingContributionLimit: number;
@@ -101,7 +110,8 @@ export class HsaFsaService {
         currentBalance: Number(account.currentBalance),
         contributedThisYear: Number(account.contributedThisYear),
         remainingContributionLimit:
-          Number(account.annualContributionLimit) - Number(account.contributedThisYear),
+          Number(account.annualContributionLimit) -
+          Number(account.contributedThisYear),
       };
     } catch (error) {
       this.logger.error(`Error getting HSA/FSA balance: ${error.message}`);

@@ -16,7 +16,10 @@ export class InvoiceService {
     private storageService: StorageService,
   ) {}
 
-  async create(userId: string, invoiceData: Partial<Invoice>): Promise<Invoice> {
+  async create(
+    userId: string,
+    invoiceData: Partial<Invoice>,
+  ): Promise<Invoice> {
     try {
       const invoiceNumber = this.generateInvoiceNumber();
       const invoice = this.invoiceRepository.create({
@@ -68,7 +71,11 @@ export class InvoiceService {
     }
   }
 
-  async markAsPaid(id: string, userId: string, paymentDetails: any): Promise<Invoice> {
+  async markAsPaid(
+    id: string,
+    userId: string,
+    paymentDetails: any,
+  ): Promise<Invoice> {
     try {
       const invoice = await this.findById(id, userId);
       invoice.status = InvoiceStatus.PAID;
@@ -83,7 +90,10 @@ export class InvoiceService {
         transactionId: paymentDetails.transactionId,
       };
 
-      invoice.paymentHistory = [...(invoice.paymentHistory || []), paymentRecord];
+      invoice.paymentHistory = [
+        ...(invoice.paymentHistory || []),
+        paymentRecord,
+      ];
 
       return await this.invoiceRepository.save(invoice);
     } catch (error) {
@@ -95,7 +105,7 @@ export class InvoiceService {
   async generateSuperbill(id: string, userId: string): Promise<string> {
     try {
       const invoice = await this.findById(id, userId);
-      
+
       // Generate superbill PDF (simplified version)
       const superbillData = {
         invoiceNumber: invoice.invoiceNumber,

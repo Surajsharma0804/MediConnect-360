@@ -1,4 +1,12 @@
-import { IsEnum, IsString, IsOptional, IsDateString, IsArray, IsObject, IsNumber } from 'class-validator';
+import {
+  IsEnum,
+  IsString,
+  IsOptional,
+  IsDateString,
+  IsArray,
+  IsObject,
+  IsNumber,
+} from 'class-validator';
 import { ImagingModality } from '../../entities/imaging-study.entity';
 
 export class CreateImagingStudyDto {

@@ -20,7 +20,7 @@ describe('AIService', () => {
 
   it('should throw error if GEMINI_API_KEY is not set', () => {
     delete process.env.GEMINI_API_KEY;
-    
+
     expect(() => {
       new AIService();
     }).toThrow('Gemini API key is required');
@@ -35,7 +35,9 @@ describe('AIService', () => {
         },
       };
 
-      jest.spyOn(service['model'], 'generateContent').mockResolvedValue(mockResponse as any);
+      jest
+        .spyOn(service['model'], 'generateContent')
+        .mockResolvedValue(mockResponse as any);
 
       const result = await service.analyzeSymptoms('headache and fever', 'en');
 
@@ -44,11 +46,13 @@ describe('AIService', () => {
     });
 
     it('should handle errors gracefully', async () => {
-      jest.spyOn(service['model'], 'generateContent').mockRejectedValue(new Error('API Error'));
+      jest
+        .spyOn(service['model'], 'generateContent')
+        .mockRejectedValue(new Error('API Error'));
 
-      await expect(
-        service.analyzeSymptoms('headache', 'en'),
-      ).rejects.toThrow('Failed to analyze symptoms');
+      await expect(service.analyzeSymptoms('headache', 'en')).rejects.toThrow(
+        'Failed to analyze symptoms',
+      );
     });
   });
 
@@ -60,9 +64,14 @@ describe('AIService', () => {
         },
       };
 
-      jest.spyOn(service['model'], 'generateContent').mockResolvedValue(mockResponse as any);
+      jest
+        .spyOn(service['model'], 'generateContent')
+        .mockResolvedValue(mockResponse as any);
 
-      const result = await service.getDrugInteractions(['Aspirin', 'Ibuprofen']);
+      const result = await service.getDrugInteractions([
+        'Aspirin',
+        'Ibuprofen',
+      ]);
 
       expect(result).toBe('Mock drug interaction analysis');
     });

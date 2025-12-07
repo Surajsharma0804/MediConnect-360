@@ -9,22 +9,9 @@ import { ProviderSearchService } from './services/provider-search.service';
 import { ProviderReviewService } from './services/provider-review.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Provider, ProviderReview]),
-  ],
-  controllers: [
-    ProviderController,
-    ProviderReviewController,
-  ],
-  providers: [
-    ProviderService,
-    ProviderSearchService,
-    ProviderReviewService,
-  ],
-  exports: [
-    ProviderService,
-    ProviderSearchService,
-    ProviderReviewService,
-  ],
+  imports: [TypeOrmModule.forFeature([Provider, ProviderReview])],
+  controllers: [ProviderController, ProviderReviewController],
+  providers: [ProviderService, ProviderSearchService, ProviderReviewService],
+  exports: [ProviderService, ProviderSearchService, ProviderReviewService],
 })
 export class ProvidersModule {}

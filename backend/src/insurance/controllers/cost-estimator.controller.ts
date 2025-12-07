@@ -1,6 +1,17 @@
-import { Controller, Get, Post, Body, Query, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Query,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { CostEstimatorService, CostEstimate } from '../services/cost-estimator.service';
+import {
+  CostEstimatorService,
+  CostEstimate,
+} from '../services/cost-estimator.service';
 
 @Controller('api/insurance/cost-estimator')
 @UseGuards(JwtAuthGuard)
@@ -18,7 +29,11 @@ export class CostEstimatorController {
     @Body('serviceType') serviceType: string,
     @Body('insuranceCardId') insuranceCardId?: string,
   ): Promise<CostEstimate> {
-    return this.costEstimatorService.estimateCost(req.user.userId, serviceType, insuranceCardId);
+    return this.costEstimatorService.estimateCost(
+      req.user.userId,
+      serviceType,
+      insuranceCardId,
+    );
   }
 
   @Post('compare')
@@ -27,7 +42,9 @@ export class CostEstimatorController {
     @Body('serviceType') serviceType: string,
     @Body('providerCosts') providerCosts: any[],
     @Body('insuranceCardId') insuranceCardId?: string,
-  ): Promise<Array<CostEstimate & { providerId: string; providerName: string }>> {
+  ): Promise<
+    Array<CostEstimate & { providerId: string; providerName: string }>
+  > {
     return this.costEstimatorService.compareProviders(
       req.user.userId,
       serviceType,

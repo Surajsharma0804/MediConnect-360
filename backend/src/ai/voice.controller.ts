@@ -61,10 +61,13 @@ export class VoiceController {
         analysis,
         audioResponse: audioResponse.toString('base64'),
         language,
-        disclaimer: 'This is NOT medical advice. Always consult a healthcare professional.',
+        disclaimer:
+          'This is NOT medical advice. Always consult a healthcare professional.',
       };
     } catch (error) {
-      throw new BadRequestException(`Voice symptom check failed: ${error.message}`);
+      throw new BadRequestException(
+        `Voice symptom check failed: ${error.message}`,
+      );
     }
   }
 
@@ -101,7 +104,8 @@ export class VoiceController {
         response: aiResponse,
         audioResponse: audioResponse.toString('base64'),
         language,
-        disclaimer: 'This is NOT medical advice. Always consult a healthcare professional.',
+        disclaimer:
+          'This is NOT medical advice. Always consult a healthcare professional.',
       };
     } catch (error) {
       throw new BadRequestException(`Voice chat failed: ${error.message}`);
@@ -148,7 +152,10 @@ export class VoiceController {
         throw new BadRequestException('Text is required');
       }
 
-      const audioBuffer = await this.voiceService.synthesizeSpeech(text, language);
+      const audioBuffer = await this.voiceService.synthesizeSpeech(
+        text,
+        language,
+      );
 
       return {
         text,

@@ -83,6 +83,9 @@ export class MessageController {
     @Request() req,
     @Param('conversationId') conversationId: string,
   ) {
-    await this.messageService.markConversationAsRead(conversationId, req.user.userId);
+    await this.messageService.markConversationAsRead(
+      conversationId,
+      req.user.userId,
+    );
   }
 }

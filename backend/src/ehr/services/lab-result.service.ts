@@ -18,17 +18,17 @@ export class LabResultService {
         ...data,
         user: { id: userId },
       });
-      
+
       const saved = await this.labResultRepository.save(labResult);
       this.logger.log(`Created lab result ${saved.id} for user ${userId}`);
-      
+
       // Check if any results are abnormal
-      const hasAbnormal = saved.results?.some(r => r.isAbnormal);
+      const hasAbnormal = saved.results?.some((r) => r.isAbnormal);
       if (hasAbnormal) {
         this.logger.warn(`Abnormal lab result detected for user ${userId}`);
         // TODO: Trigger notification
       }
-      
+
       return saved;
     } catch (error) {
       this.logger.error(`Error creating lab result: ${error.message}`);
@@ -68,7 +68,11 @@ export class LabResultService {
     }
   }
 
-  async update(id: string, userId: string, data: Partial<LabResult>): Promise<LabResult> {
+  async update(
+    id: string,
+    userId: string,
+    data: Partial<LabResult>,
+  ): Promise<LabResult> {
     try {
       const result = await this.findOne(id, userId);
       Object.assign(result, data);
@@ -95,7 +99,7 @@ export class LabResultService {
   async getTrends(userId: string, testName: string): Promise<LabResult[]> {
     try {
       return await this.labResultRepository.find({
-        where: { 
+        where: {
           user: { id: userId },
           testName,
         },

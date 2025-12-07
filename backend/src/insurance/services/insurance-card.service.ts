@@ -6,7 +6,10 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { InsuranceCard, InsuranceStatus } from '../../entities/insurance-card.entity';
+import {
+  InsuranceCard,
+  InsuranceStatus,
+} from '../../entities/insurance-card.entity';
 import { StorageService } from '../../services/storage.service';
 import { NotificationService } from '../../services/notification.service';
 
@@ -134,7 +137,9 @@ export class InsuranceCardService {
         .andWhere('card.deletedAt IS NULL')
         .getOne();
     } catch (error) {
-      this.logger.error(`Error finding primary insurance card: ${error.message}`);
+      this.logger.error(
+        `Error finding primary insurance card: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -279,7 +284,9 @@ export class InsuranceCardService {
     }
   }
 
-  async getExpiringCards(daysBeforeExpiration: number = 30): Promise<InsuranceCard[]> {
+  async getExpiringCards(
+    daysBeforeExpiration: number = 30,
+  ): Promise<InsuranceCard[]> {
     try {
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + daysBeforeExpiration);

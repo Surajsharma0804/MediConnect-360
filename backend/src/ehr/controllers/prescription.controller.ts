@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+  Query,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { PrescriptionService } from '../services/prescription.service';
 import { CreatePrescriptionDto } from '../dto/create-prescription.dto';
@@ -16,7 +27,10 @@ export class PrescriptionController {
 
   @Get()
   async findAll(@Request() req, @Query('activeOnly') activeOnly?: string) {
-    return this.prescriptionService.findAll(req.user.userId, activeOnly === 'true');
+    return this.prescriptionService.findAll(
+      req.user.userId,
+      activeOnly === 'true',
+    );
   }
 
   @Get('due-for-refill')
@@ -25,8 +39,14 @@ export class PrescriptionController {
   }
 
   @Get('adherence')
-  async getAdherence(@Request() req, @Query('prescriptionId') prescriptionId?: string) {
-    const rate = await this.prescriptionService.getAdherenceRate(req.user.userId, prescriptionId);
+  async getAdherence(
+    @Request() req,
+    @Query('prescriptionId') prescriptionId?: string,
+  ) {
+    const rate = await this.prescriptionService.getAdherenceRate(
+      req.user.userId,
+      prescriptionId,
+    );
     return { adherenceRate: rate };
   }
 

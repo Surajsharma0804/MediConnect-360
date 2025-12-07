@@ -120,7 +120,9 @@ export function validateEnvironment(): void {
   // Validate JWT_SECRET strength
   const jwtSecret = process.env.JWT_SECRET;
   if (jwtSecret && jwtSecret.length < 32) {
-    logger.warn('⚠️  JWT_SECRET is too short. Use at least 32 characters for production.');
+    logger.warn(
+      '⚠️  JWT_SECRET is too short. Use at least 32 characters for production.',
+    );
   }
 
   // Validate production settings
@@ -135,12 +137,16 @@ export function validateEnvironment(): void {
         message: 'Using default database password in production!',
       },
       {
-        condition: !process.env.CORS_ORIGIN || process.env.CORS_ORIGIN.includes('localhost'),
+        condition:
+          !process.env.CORS_ORIGIN ||
+          process.env.CORS_ORIGIN.includes('localhost'),
         message: 'CORS_ORIGIN not configured for production!',
       },
     ];
 
-    const productionWarnings = productionChecks.filter((check) => check.condition);
+    const productionWarnings = productionChecks.filter(
+      (check) => check.condition,
+    );
 
     if (productionWarnings.length > 0) {
       logger.error('\n🚨 PRODUCTION SECURITY WARNINGS:');

@@ -15,7 +15,9 @@ export class AnalyticsService {
   ): Promise<void> {
     try {
       // Log event for monitoring
-      this.logger.log(`Event: ${eventName} | User: ${userId} | Properties: ${JSON.stringify(properties)}`);
+      this.logger.log(
+        `Event: ${eventName} | User: ${userId} | Properties: ${JSON.stringify(properties)}`,
+      );
 
       // In production, you could send to:
       // - Google Analytics 4 Measurement Protocol (FREE)
@@ -32,7 +34,10 @@ export class AnalyticsService {
   /**
    * Track user registration
    */
-  async trackRegistration(userId: string, method: 'email' | 'google' | 'github'): Promise<void> {
+  async trackRegistration(
+    userId: string,
+    method: 'email' | 'google' | 'github',
+  ): Promise<void> {
     await this.trackEvent(userId, 'user_registered', {
       method,
       timestamp: new Date().toISOString(),
@@ -42,7 +47,10 @@ export class AnalyticsService {
   /**
    * Track login
    */
-  async trackLogin(userId: string, method: 'email' | 'google' | 'github'): Promise<void> {
+  async trackLogin(
+    userId: string,
+    method: 'email' | 'google' | 'github',
+  ): Promise<void> {
     await this.trackEvent(userId, 'user_login', {
       method,
       timestamp: new Date().toISOString(),
@@ -88,7 +96,7 @@ export class AnalyticsService {
     context?: Record<string, any>,
   ): Promise<void> {
     this.logger.error(`Error tracked: ${error.message}`, error.stack);
-    
+
     await this.trackEvent(userId || 'anonymous', 'error_occurred', {
       errorMessage: error.message,
       errorStack: error.stack,

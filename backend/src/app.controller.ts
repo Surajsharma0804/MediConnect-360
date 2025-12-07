@@ -29,13 +29,19 @@ export class AppController {
     // Check if critical services are configured
     try {
       // Database check
-      health.checks.database = process.env.DATABASE_URL ? 'configured' : 'not_configured';
+      health.checks.database = process.env.DATABASE_URL
+        ? 'configured'
+        : 'not_configured';
 
       // AI service check
-      health.checks.ai = process.env.GEMINI_API_KEY ? 'configured' : 'not_configured';
+      health.checks.ai = process.env.GEMINI_API_KEY
+        ? 'configured'
+        : 'not_configured';
 
       // Email service check
-      health.checks.email = process.env.RESEND_API_KEY ? 'configured' : 'not_configured';
+      health.checks.email = process.env.RESEND_API_KEY
+        ? 'configured'
+        : 'not_configured';
     } catch (error) {
       health.status = 'degraded';
     }

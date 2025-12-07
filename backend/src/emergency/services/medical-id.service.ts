@@ -15,7 +15,9 @@ export class MedicalIDService {
   async create(userId: string, data: any): Promise<MedicalID> {
     try {
       // Check if user already has a medical ID
-      const existing = await this.medicalIDRepository.findOne({ where: { userId } });
+      const existing = await this.medicalIDRepository.findOne({
+        where: { userId },
+      });
       if (existing) {
         return this.update(userId, data);
       }
@@ -62,7 +64,9 @@ export class MedicalIDService {
 
   async findByUserId(userId: string): Promise<MedicalID> {
     try {
-      const medicalID = await this.medicalIDRepository.findOne({ where: { userId } });
+      const medicalID = await this.medicalIDRepository.findOne({
+        where: { userId },
+      });
 
       if (!medicalID) {
         throw new NotFoundException('Medical ID not found');
@@ -114,7 +118,8 @@ export class MedicalIDService {
   async toggleVisibility(userId: string): Promise<MedicalID> {
     try {
       const medicalID = await this.findByUserId(userId);
-      medicalID.isVisibleToEmergencyServices = !medicalID.isVisibleToEmergencyServices;
+      medicalID.isVisibleToEmergencyServices =
+        !medicalID.isVisibleToEmergencyServices;
       const updated = await this.medicalIDRepository.save(medicalID);
       this.logger.log(
         `Toggled visibility to ${medicalID.isVisibleToEmergencyServices} for user ${userId}`,

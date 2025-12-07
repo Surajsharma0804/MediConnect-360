@@ -179,7 +179,8 @@ export class CarePlanService {
       startDate: plan.startDate,
       endDate: plan.endDate,
       daysActive: Math.floor(
-        (new Date().getTime() - plan.startDate.getTime()) / (1000 * 60 * 60 * 24),
+        (new Date().getTime() - plan.startDate.getTime()) /
+          (1000 * 60 * 60 * 24),
       ),
     };
   }

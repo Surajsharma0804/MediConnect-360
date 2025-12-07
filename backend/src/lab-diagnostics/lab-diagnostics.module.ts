@@ -25,11 +25,7 @@ import { StorageService } from '../services/storage.service';
       Provider,
     ]),
   ],
-  controllers: [
-    LabTestOrderController,
-    ImagingController,
-    LabResultController,
-  ],
+  controllers: [LabTestOrderController, ImagingController, LabResultController],
   providers: [
     LabTestOrderService,
     ImagingService,

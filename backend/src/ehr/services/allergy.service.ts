@@ -18,7 +18,7 @@ export class AllergyService {
         ...data,
         user: { id: userId },
       });
-      
+
       const saved = await this.allergyRepository.save(allergy);
       this.logger.log(`Created allergy ${saved.id} for user ${userId}`);
       return saved;
@@ -60,7 +60,11 @@ export class AllergyService {
     }
   }
 
-  async update(id: string, userId: string, data: Partial<Allergy>): Promise<Allergy> {
+  async update(
+    id: string,
+    userId: string,
+    data: Partial<Allergy>,
+  ): Promise<Allergy> {
     try {
       const allergy = await this.findOne(id, userId);
       Object.assign(allergy, data);
@@ -84,16 +88,24 @@ export class AllergyService {
     }
   }
 
-  async checkMedicationConflicts(userId: string, medicationName: string): Promise<Allergy[]> {
+  async checkMedicationConflicts(
+    userId: string,
+    medicationName: string,
+  ): Promise<Allergy[]> {
     try {
       const allergies = await this.findAll(userId);
       // Simplified conflict check - in production, use drug database
-      return allergies.filter(allergy => 
-        allergy.allergen.toLowerCase().includes(medicationName.toLowerCase()) ||
-        medicationName.toLowerCase().includes(allergy.allergen.toLowerCase())
+      return allergies.filter(
+        (allergy) =>
+          allergy.allergen
+            .toLowerCase()
+            .includes(medicationName.toLowerCase()) ||
+          medicationName.toLowerCase().includes(allergy.allergen.toLowerCase()),
       );
     } catch (error) {
-      this.logger.error(`Error checking medication conflicts: ${error.message}`);
+      this.logger.error(
+        `Error checking medication conflicts: ${error.message}`,
+      );
       throw new Error('Failed to check medication conflicts');
     }
   }
@@ -101,7 +113,7 @@ export class AllergyService {
   async getSevereAllergies(userId: string): Promise<Allergy[]> {
     try {
       return await this.allergyRepository.find({
-        where: { 
+        where: {
           user: { id: userId },
           severity: AllergySeverity.SEVERE,
         },

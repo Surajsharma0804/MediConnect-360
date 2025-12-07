@@ -63,7 +63,11 @@ export class FamilyMemberController {
     @Param('id') id: string,
     @Body() grantAccessDto: GrantAccessDto,
   ) {
-    return this.familyMemberService.grantAccess(id, req.user.userId, grantAccessDto);
+    return this.familyMemberService.grantAccess(
+      id,
+      req.user.userId,
+      grantAccessDto,
+    );
   }
 
   @Delete(':id/access')

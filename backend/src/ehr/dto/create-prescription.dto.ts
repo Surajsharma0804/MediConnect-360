@@ -1,6 +1,20 @@
-import { IsString, IsNotEmpty, IsOptional, IsDate, IsEnum, IsNumber, Min, MaxLength, IsBoolean, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsDate,
+  IsEnum,
+  IsNumber,
+  Min,
+  MaxLength,
+  IsBoolean,
+  IsArray,
+} from 'class-validator';
 import { Type } from 'class-transformer';
-import { PrescriptionStatus, PrescriptionFrequency } from '../../entities/prescription.entity';
+import {
+  PrescriptionStatus,
+  PrescriptionFrequency,
+} from '../../entities/prescription.entity';
 
 export class CreatePrescriptionDto {
   @IsString()

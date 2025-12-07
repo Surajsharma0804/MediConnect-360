@@ -17,21 +17,21 @@ export class FDAService {
   async searchDrug(drugName: string): Promise<any> {
     try {
       const url = `${this.baseUrl}/drug/label.json?search=openfda.brand_name:"${drugName}"&limit=1`;
-      
+
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error(`FDA API error: ${response.statusText}`);
       }
 
       const data = await response.json();
-      
+
       if (!data.results || data.results.length === 0) {
         return null;
       }
 
       const drug = data.results[0];
-      
+
       return {
         brandName: drug.openfda?.brand_name?.[0],
         genericName: drug.openfda?.generic_name?.[0],
@@ -78,24 +78,28 @@ export class FDAService {
   /**
    * Search for adverse events (side effects reported)
    */
-  async searchAdverseEvents(drugName: string, limit: number = 10): Promise<any[]> {
+  async searchAdverseEvents(
+    drugName: string,
+    limit: number = 10,
+  ): Promise<any[]> {
     try {
       const url = `${this.baseUrl}/drug/event.json?search=patient.drug.medicinalproduct:"${drugName}"&limit=${limit}`;
-      
+
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error(`FDA API error: ${response.statusText}`);
       }
 
       const data = await response.json();
-      
+
       if (!data.results) {
         return [];
       }
 
       return data.results.map((event: any) => ({
-        reactions: event.patient?.reaction?.map((r: any) => r.reactionmeddrapt) || [],
+        reactions:
+          event.patient?.reaction?.map((r: any) => r.reactionmeddrapt) || [],
         seriousness: event.serious,
         reportDate: event.receiptdate,
         patientAge: event.patient?.patientonsetage,
@@ -113,15 +117,15 @@ export class FDAService {
   async getDrugRecalls(drugName: string): Promise<any[]> {
     try {
       const url = `${this.baseUrl}/drug/enforcement.json?search=openfda.brand_name:"${drugName}"&limit=10`;
-      
+
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error(`FDA API error: ${response.statusText}`);
       }
 
       const data = await response.json();
-      
+
       if (!data.results) {
         return [];
       }
@@ -166,7 +170,9 @@ export class FDAService {
         aiAnalysis: 'Use AIService.getDrugInteractions() for AI analysis',
       };
     } catch (error) {
-      this.logger.error(`Error in enhanced interaction check: ${error.message}`);
+      this.logger.error(
+        `Error in enhanced interaction check: ${error.message}`,
+      );
       throw error;
     }
   }

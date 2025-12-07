@@ -1,7 +1,16 @@
-import { Injectable, Logger, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Message, MessageType, MessageStatus } from '../../entities/message.entity';
+import {
+  Message,
+  MessageType,
+  MessageStatus,
+} from '../../entities/message.entity';
 import { ConversationService } from './conversation.service';
 import { NotificationService } from '../../services/notification.service';
 
@@ -39,9 +48,14 @@ export class MessageService {
       );
 
       // Send notifications to other participants
-      const conversation = await this.conversationService.findOne(data.conversationId, userId);
-      const otherParticipants = conversation.participants.filter(id => id !== userId);
-      
+      const conversation = await this.conversationService.findOne(
+        data.conversationId,
+        userId,
+      );
+      const otherParticipants = conversation.participants.filter(
+        (id) => id !== userId,
+      );
+
       for (const participantId of otherParticipants) {
         await this.notificationService.sendPushNotification(participantId, {
           title: 'New Message',
@@ -55,7 +69,9 @@ export class MessageService {
         });
       }
 
-      this.logger.log(`Created message ${saved.id} in conversation ${data.conversationId}`);
+      this.logger.log(
+        `Created message ${saved.id} in conversation ${data.conversationId}`,
+      );
       return saved;
     } catch (error) {
       this.logger.error(`Error creating message: ${error.message}`);
@@ -80,7 +96,9 @@ export class MessageService {
         .take(limit);
 
       if (before) {
-        query.andWhere('message.createdAt < :before', { before: new Date(before) });
+        query.andWhere('message.createdAt < :before', {
+          before: new Date(before),
+        });
       }
 
       const messages = await query.getMany();
@@ -106,7 +124,10 @@ export class MessageService {
 
       return message;
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
         throw error;
       }
       this.logger.error(`Error fetching message: ${error.message}`);
@@ -172,7 +193,10 @@ export class MessageService {
     }
   }
 
-  async markConversationAsRead(conversationId: string, userId: string): Promise<void> {
+  async markConversationAsRead(
+    conversationId: string,
+    userId: string,
+  ): Promise<void> {
     try {
       // Verify user is participant
       await this.conversationService.findOne(conversationId, userId);
@@ -190,14 +214,20 @@ export class MessageService {
 
       await this.messageRepository.save(messages);
       await this.conversationService.markAsRead(conversationId, userId);
-      this.logger.log(`Marked all messages in conversation ${conversationId} as read`);
+      this.logger.log(
+        `Marked all messages in conversation ${conversationId} as read`,
+      );
     } catch (error) {
       this.logger.error(`Error marking conversation as read: ${error.message}`);
       throw error;
     }
   }
 
-  async search(userId: string, query: string, conversationId?: string): Promise<Message[]> {
+  async search(
+    userId: string,
+    query: string,
+    conversationId?: string,
+  ): Promise<Message[]> {
     try {
       const queryBuilder = this.messageRepository
         .createQueryBuilder('message')
@@ -207,7 +237,9 @@ export class MessageService {
         .take(50);
 
       if (conversationId) {
-        queryBuilder.andWhere('message.conversationId = :conversationId', { conversationId });
+        queryBuilder.andWhere('message.conversationId = :conversationId', {
+          conversationId,
+        });
         // Verify user is participant
         await this.conversationService.findOne(conversationId, userId);
       }

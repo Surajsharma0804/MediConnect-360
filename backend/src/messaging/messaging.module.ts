@@ -12,7 +12,12 @@ import { EmailService } from '../services/email.service';
 @Module({
   imports: [TypeOrmModule.forFeature([Message, Conversation])],
   controllers: [MessageController, ConversationController],
-  providers: [MessageService, ConversationService, NotificationService, EmailService],
+  providers: [
+    MessageService,
+    ConversationService,
+    NotificationService,
+    EmailService,
+  ],
   exports: [MessageService, ConversationService],
 })
 export class MessagingModule {}

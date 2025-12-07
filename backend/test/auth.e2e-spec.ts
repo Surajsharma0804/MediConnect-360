@@ -113,9 +113,7 @@ describe('Authentication (e2e)', () => {
     });
 
     it('should fail without token', () => {
-      return request(app.getHttpServer())
-        .get('/api/auth/me')
-        .expect(401);
+      return request(app.getHttpServer()).get('/api/auth/me').expect(401);
     });
   });
 });

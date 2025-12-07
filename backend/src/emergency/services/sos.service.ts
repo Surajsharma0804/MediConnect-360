@@ -119,7 +119,10 @@ export class SOSService {
       // Notify contacts that SOS was cancelled
       const contacts = await this.emergencyContactService.findAll(userId);
       for (const contact of contacts) {
-        if (session.contactsNotified.includes(contact.id) && contact.primaryPhone) {
+        if (
+          session.contactsNotified.includes(contact.id) &&
+          contact.primaryPhone
+        ) {
           await this.smsService.sendAppointmentReminder(contact.primaryPhone, {
             doctorName: 'Emergency',
             time: 'SOS Alert Cancelled - User is safe',

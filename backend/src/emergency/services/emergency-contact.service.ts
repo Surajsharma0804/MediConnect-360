@@ -16,7 +16,9 @@ export class EmergencyContactService {
     try {
       // Auto-assign priority if not provided
       if (!data.priority) {
-        const count = await this.emergencyContactRepository.count({ where: { userId } });
+        const count = await this.emergencyContactRepository.count({
+          where: { userId },
+        });
         data.priority = count + 1;
       }
 
@@ -32,13 +34,16 @@ export class EmergencyContactService {
         priority: data.priority,
         canMakeMedicalDecisions: data.canMakeMedicalDecisions ?? true,
         notifyOnEmergency: data.notifyOnEmergency ?? true,
-        hasHealthcarePowerOfAttorney: data.hasHealthcarePowerOfAttorney ?? false,
+        hasHealthcarePowerOfAttorney:
+          data.hasHealthcarePowerOfAttorney ?? false,
         notes: data.notes,
         metadata: data.metadata,
       });
 
       const saved = await this.emergencyContactRepository.save(contact);
-      this.logger.log(`Created emergency contact ${saved.id} for user ${userId}`);
+      this.logger.log(
+        `Created emergency contact ${saved.id} for user ${userId}`,
+      );
       return saved;
     } catch (error) {
       this.logger.error(`Error creating emergency contact: ${error.message}`);
@@ -78,7 +83,11 @@ export class EmergencyContactService {
     }
   }
 
-  async update(id: string, userId: string, data: any): Promise<EmergencyContact> {
+  async update(
+    id: string,
+    userId: string,
+    data: any,
+  ): Promise<EmergencyContact> {
     try {
       const contact = await this.findOne(id, userId);
       Object.assign(contact, data);
@@ -102,7 +111,10 @@ export class EmergencyContactService {
     }
   }
 
-  async reorder(userId: string, orderedIds: string[]): Promise<EmergencyContact[]> {
+  async reorder(
+    userId: string,
+    orderedIds: string[],
+  ): Promise<EmergencyContact[]> {
     try {
       const contacts = await this.findAll(userId);
 

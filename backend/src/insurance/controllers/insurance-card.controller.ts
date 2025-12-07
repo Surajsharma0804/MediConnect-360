@@ -33,13 +33,21 @@ export class InsuranceCardController {
       { name: 'back', maxCount: 1 },
     ]),
   )
-  async scanCard(@Request() req, @UploadedFiles() files: { front?: Express.Multer.File[]; back?: Express.Multer.File[] }) {
+  async scanCard(
+    @Request() req,
+    @UploadedFiles()
+    files: { front?: Express.Multer.File[]; back?: Express.Multer.File[] },
+  ) {
     const frontImage = files.front?.[0]?.buffer;
     const backImage = files.back?.[0]?.buffer;
     if (!frontImage) {
       throw new Error('Front image is required');
     }
-    return this.insuranceCardService.scanCard(req.user.userId, frontImage, backImage);
+    return this.insuranceCardService.scanCard(
+      req.user.userId,
+      frontImage,
+      backImage,
+    );
   }
 
   @Get()
@@ -58,7 +66,11 @@ export class InsuranceCardController {
   }
 
   @Put(':id')
-  async update(@Request() req, @Param('id') id: string, @Body() dto: Partial<CreateInsuranceCardDto>) {
+  async update(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() dto: Partial<CreateInsuranceCardDto>,
+  ) {
     return this.insuranceCardService.update(id, req.user.userId, dto);
   }
 
@@ -74,7 +86,15 @@ export class InsuranceCardController {
   }
 
   @Post(':id/check-eligibility')
-  async checkEligibility(@Request() req, @Param('id') id: string, @Body('serviceType') serviceType: string) {
-    return this.insuranceCardService.checkEligibility(id, req.user.userId, serviceType);
+  async checkEligibility(
+    @Request() req,
+    @Param('id') id: string,
+    @Body('serviceType') serviceType: string,
+  ) {
+    return this.insuranceCardService.checkEligibility(
+      id,
+      req.user.userId,
+      serviceType,
+    );
   }
 }
