@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
+import { AllExceptionsFilter } from './common/filters/http-exception.filter';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -23,6 +25,12 @@ async function bootstrap() {
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     });
+
+    // Global Exception Filter
+    app.useGlobalFilters(new AllExceptionsFilter());
+
+    // Global Logging Interceptor
+    app.useGlobalInterceptors(new LoggingInterceptor());
 
     // Global Validation Pipe with strict settings
     app.useGlobalPipes(

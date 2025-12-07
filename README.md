@@ -7,34 +7,56 @@
 [![NestJS](https://img.shields.io/badge/NestJS-11+-E0234E?logo=nestjs)](https://nestjs.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 
-## ✨ Features
+## ✨ Features (100% FREE!)
 
-- 🤖 **AI Symptom Checker** - Powered by Google Gemini 2.5 Flash
-- 💬 **AI Health Assistant** - 24/7 medical guidance
-- 💊 **Drug Interaction Checker** - Medication safety analysis
-- 👨‍⚕️ **Video Consultations** - HD quality with Jitsi
+### Core Features
+- 🤖 **AI Symptom Checker** - Powered by Google Gemini 2.5 Flash (FREE)
+- 💬 **AI Health Assistant** - 24/7 medical guidance (FREE)
+- 💊 **Drug Interaction Checker** - FDA official database (FREE)
+- 👨‍⚕️ **Video Consultations** - Unlimited HD calls with Jitsi (FREE)
 - 📊 **Health Dashboard** - Track vitals and metrics
-- 🔐 **Secure Authentication** - Email, Google, GitHub OAuth
-- 💳 **Stripe Payments** - Subscriptions and one-time payments
+- 🔐 **Secure Authentication** - Email, Google, GitHub OAuth (FREE)
+- 💳 **Stripe Payments** - Test mode (FREE)
+- 📧 **Email Notifications** - Resend 3,000/month (FREE)
+- 🔔 **Push Notifications** - Firebase 10M/month (FREE)
+- 📈 **Analytics** - Google Analytics unlimited (FREE)
+- 🐛 **Error Tracking** - Sentry 5,000 errors/month (FREE)
 - 🌐 **Multi-language Support** - 50+ languages (coming soon)
 - 🔒 **HIPAA Compliant** - Enterprise-grade security
 
+**Total Monthly Cost: $0** 🎉
+
 ## 🚀 Quick Start
 
-### Prerequisites
+### Automated Setup (Recommended)
+
+**Windows:**
+```bash
+scripts\setup.bat
+```
+
+**macOS/Linux:**
+```bash
+chmod +x scripts/setup.sh
+./scripts/setup.sh
+```
+
+### Manual Setup
+
+#### Prerequisites
 
 - Node.js 18+
 - Docker & Docker Compose
 - Git
 
-### 1. Clone Repository
+#### 1. Clone Repository
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/MediConnect-360.git
 cd MediConnect-360
 ```
 
-### 2. Start Docker Services
+#### 2. Start Docker Services
 
 ```bash
 docker-compose up -d
@@ -46,19 +68,18 @@ This starts:
 - MinIO S3 (port 9000, 9001)
 - MongoDB (port 27017)
 
-### 3. Setup Backend
+#### 3. Setup Backend
 
 ```bash
 cd backend
 npm install
-cp .env.example .env
-# Edit .env with your API keys
+# Edit backend/.env with your API keys
 npm run start:dev
 ```
 
 Backend runs at: http://localhost:5000
 
-### 4. Setup Frontend
+#### 4. Setup Frontend
 
 ```bash
 # In project root
@@ -93,7 +114,21 @@ See [docs/GET_API_KEYS.md](docs/GET_API_KEYS.md) for detailed instructions.
 
 ## 📚 Documentation
 
-- **[Deployment Guide](docs/DEPLOYMENT_GUIDE.md)** - Deploy to Vercel + Render (FREE)
+### 🚀 Deployment (Start Here!)
+- **[Deploy NOW Guide](DEPLOY_NOW.md)** - Deploy in 30 minutes (FREE)
+- **[Deployment Quick Start](DEPLOYMENT_QUICK_START.md)** - Visual step-by-step guide
+- **[Full Deployment Guide](DEPLOYMENT.md)** - All deployment options
+
+### 🆓 FREE Features Setup
+- **[FREE API Setup Guide](FREE_API_SETUP_GUIDE.md)** - Get all FREE API keys (25 min)
+- **[FREE Features Complete](FREE_FEATURES_COMPLETE.md)** - All FREE features implemented
+- **[Quick Reference](QUICK_REFERENCE.md)** - Quick commands and tips
+
+### Essential Guides
+- **[Testing Guide](TESTING_GUIDE.md)** - Complete testing documentation
+- **[Improvements Summary](IMPROVEMENTS_SUMMARY.md)** - What's new in v1.1.0
+
+### Additional Resources
 - **[OAuth & Payments Setup](docs/OAUTH_PAYMENT_SETUP.md)** - Google, GitHub, Stripe
 - **[API Keys Guide](docs/GET_API_KEYS.md)** - Get all required keys
 - **[Contributing](docs/CONTRIBUTING.md)** - How to contribute

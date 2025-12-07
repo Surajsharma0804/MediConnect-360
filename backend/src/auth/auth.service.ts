@@ -15,7 +15,7 @@ export class AuthService {
     private emailService: EmailService,
   ) {}
 
-  async register(email: string, password: string, name: string) {
+  async register(email: string, password: string, name: string, role?: string) {
     // Check if user exists
     const existingUser = await this.usersRepository.findOne({ where: { email } });
     if (existingUser) {
@@ -30,6 +30,7 @@ export class AuthService {
       email,
       password: hashedPassword,
       name,
+      role: role as any,
     });
 
     await this.usersRepository.save(user);
