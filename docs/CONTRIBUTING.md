@@ -1,160 +1,224 @@
-# Contributing to MediConnect 360
+# 🤝 Contributing to MediConnect 360
 
-First off, thank you for considering contributing to MediConnect 360! It's people like you that make this platform a reality and help make healthcare accessible to everyone worldwide.
+Thank you for your interest in contributing to MediConnect 360! This guide will help you get started.
 
-## 🌟 How Can I Contribute?
+---
 
-### 1. Code Contributions
-- Implement new features
-- Fix bugs
-- Improve performance
-- Write tests
-- Refactor code
+## 📋 Table of Contents
 
-### 2. Translation Contributions
-- Translate UI strings to your native language
-- Review existing translations
-- Add cultural adaptations
-- Improve medical terminology
+1. [Code of Conduct](#code-of-conduct)
+2. [Getting Started](#getting-started)
+3. [Development Setup](#development-setup)
+4. [How to Contribute](#how-to-contribute)
+5. [Coding Standards](#coding-standards)
+6. [Pull Request Process](#pull-request-process)
+7. [Reporting Bugs](#reporting-bugs)
+8. [Suggesting Features](#suggesting-features)
+9. [Community](#community)
 
-### 3. Documentation
-- Improve README and guides
-- Write tutorials
-- Create video walkthroughs
-- Document APIs
+---
 
-### 4. Design Contributions
-- UI/UX improvements
-- Create icons and graphics
-- Design new features
-- Improve accessibility
+## 📜 Code of Conduct
 
-### 5. Medical Expertise
-- Review medical content
-- Suggest health features
-- Validate AI responses
-- Ensure compliance
+### Our Pledge
 
-### 6. Testing & Bug Reports
-- Test new features
-- Report bugs
-- Suggest improvements
-- Perform security audits
+We are committed to providing a welcoming and inclusive environment for all contributors, regardless of:
+- Experience level
+- Gender identity and expression
+- Sexual orientation
+- Disability
+- Personal appearance
+- Body size
+- Race
+- Ethnicity
+- Age
+- Religion
+- Nationality
+
+### Our Standards
+
+**Positive behavior includes:**
+- Using welcoming and inclusive language
+- Being respectful of differing viewpoints
+- Gracefully accepting constructive criticism
+- Focusing on what is best for the community
+- Showing empathy towards other community members
+
+**Unacceptable behavior includes:**
+- Trolling, insulting/derogatory comments, and personal attacks
+- Public or private harassment
+- Publishing others' private information without permission
+- Other conduct which could reasonably be considered inappropriate
+
+### Enforcement
+
+Violations of the Code of Conduct may be reported to support@mediconnect360.com. All complaints will be reviewed and investigated promptly and fairly.
+
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 20+
-- Git
-- Code editor (VS Code recommended)
-- Basic knowledge of React and TypeScript
 
-### Setup Development Environment
+Before contributing, ensure you have:
+- Node.js 18+ installed
+- Docker Desktop installed
+- Git installed
+- A GitHub account
+- Basic knowledge of TypeScript, React, and NestJS
 
-1. **Fork the repository**
+### Fork and Clone
+
+1. **Fork the repository:**
+   - Go to https://github.com/YOUR_USERNAME/MediConnect-360
+   - Click "Fork" button
+
+2. **Clone your fork:**
    ```bash
-   # Click the "Fork" button on GitHub
+   git clone https://github.com/YOUR_USERNAME/MediConnect-360.git
+   cd MediConnect-360
    ```
 
-2. **Clone your fork**
+3. **Add upstream remote:**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/mediconnect-360.git
-   cd mediconnect-360
+   git remote add upstream https://github.com/ORIGINAL_OWNER/MediConnect-360.git
    ```
 
-3. **Add upstream remote**
+4. **Verify remotes:**
    ```bash
-   git remote add upstream https://github.com/ORIGINAL_OWNER/mediconnect-360.git
+   git remote -v
+   # origin    https://github.com/YOUR_USERNAME/MediConnect-360.git (fetch)
+   # origin    https://github.com/YOUR_USERNAME/MediConnect-360.git (push)
+   # upstream  https://github.com/ORIGINAL_OWNER/MediConnect-360.git (fetch)
+   # upstream  https://github.com/ORIGINAL_OWNER/MediConnect-360.git (push)
    ```
 
-4. **Install dependencies**
-   ```bash
-   npm install
-   ```
+---
 
-5. **Create a branch**
+## 💻 Development Setup
+
+### 1. Install Dependencies
+
+```bash
+# Install frontend dependencies
+npm install
+
+# Install backend dependencies
+cd backend
+npm install
+cd ..
+```
+
+### 2. Setup Environment
+
+```bash
+# Copy environment files
+cp .env.example .env
+cp backend/.env.example backend/.env
+
+# Edit .env files with your API keys
+# See docs/GET_API_KEYS.md for how to get keys
+```
+
+### 3. Start Services
+
+```bash
+# Start Docker services (PostgreSQL, Redis, MinIO)
+docker-compose up -d
+
+# Start backend (in one terminal)
+cd backend
+npm run start:dev
+
+# Start frontend (in another terminal)
+npm run dev
+```
+
+### 4. Verify Setup
+
+- Frontend: http://localhost:5173
+- Backend: http://localhost:5000
+- API Health: http://localhost:5000/api/health
+
+---
+
+## 🛠️ How to Contribute
+
+### Types of Contributions
+
+We welcome all types of contributions:
+
+1. **Bug Fixes** - Fix issues in existing code
+2. **New Features** - Add new functionality
+3. **Documentation** - Improve or add documentation
+4. **Tests** - Add or improve test coverage
+5. **Performance** - Optimize existing code
+6. **UI/UX** - Improve user interface and experience
+7. **Translations** - Add support for new languages
+8. **Code Review** - Review pull requests
+
+### Contribution Workflow
+
+1. **Check existing issues:**
+   - Look for existing issues or create a new one
+   - Comment that you're working on it
+
+2. **Create a branch:**
    ```bash
    git checkout -b feature/your-feature-name
+   # or
+   git checkout -b fix/bug-description
    ```
 
-6. **Start development server**
+3. **Make your changes:**
+   - Write clean, readable code
+   - Follow coding standards (see below)
+   - Add tests if applicable
+   - Update documentation
+
+4. **Test your changes:**
    ```bash
-   npm run dev
+   # Backend tests
+   cd backend
+   npm run test
+   npm run lint
+   
+   # Frontend tests
+   npm run lint
    ```
 
-## 📝 Development Workflow
+5. **Commit your changes:**
+   ```bash
+   git add .
+   git commit -m "feat: add new feature"
+   # or
+   git commit -m "fix: resolve bug in component"
+   ```
 
-### 1. Pick an Issue
-- Browse [open issues](https://github.com/yourusername/mediconnect-360/issues)
-- Look for issues labeled `good first issue` or `help wanted`
-- Comment on the issue to let others know you're working on it
+6. **Push to your fork:**
+   ```bash
+   git push origin feature/your-feature-name
+   ```
 
-### 2. Write Code
-- Follow our coding standards (see below)
-- Write clean, readable code
-- Add comments for complex logic
-- Keep commits small and focused
+7. **Create Pull Request:**
+   - Go to your fork on GitHub
+   - Click "New Pull Request"
+   - Fill in the PR template
+   - Link related issues
 
-### 3. Test Your Changes
-```bash
-# Run linter
-npm run lint
+---
 
-# Run tests (when available)
-npm run test
+## 📝 Coding Standards
 
-# Build to check for errors
-npm run build
-```
+### General Principles
 
-### 4. Commit Your Changes
-```bash
-git add .
-git commit -m "feat: add amazing feature"
-```
+- **DRY (Don't Repeat Yourself)** - Avoid code duplication
+- **KISS (Keep It Simple, Stupid)** - Simple solutions are better
+- **YAGNI (You Aren't Gonna Need It)** - Don't add unnecessary features
+- **SOLID Principles** - Follow object-oriented design principles
 
-**Commit Message Format:**
-```
-<type>: <subject>
+### TypeScript
 
-<body>
-
-<footer>
-```
-
-**Types:**
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes (formatting, etc.)
-- `refactor`: Code refactoring
-- `test`: Adding tests
-- `chore`: Maintenance tasks
-
-**Examples:**
-```
-feat: add Spanish translation for symptom checker
-
-fix: resolve video call connection issue on Safari
-
-docs: update installation instructions in README
-```
-
-### 5. Push to Your Fork
-```bash
-git push origin feature/your-feature-name
-```
-
-### 6. Create Pull Request
-- Go to your fork on GitHub
-- Click "New Pull Request"
-- Fill out the PR template
-- Link related issues
-- Wait for review
-
-## 💻 Coding Standards
-
-### TypeScript/JavaScript
 ```typescript
 // ✅ Good
 interface User {
@@ -163,127 +227,284 @@ interface User {
   email: string;
 }
 
-const getUserById = async (id: string): Promise<User> => {
-  const response = await fetch(`/api/users/${id}`);
-  return response.json();
+const getUser = async (id: string): Promise<User> => {
+  // Implementation
 };
 
 // ❌ Bad
-const getUserById = async (id) => {
-  const response = await fetch(`/api/users/${id}`);
-  return response.json();
+const getUser = async (id: any): Promise<any> => {
+  // Implementation
 };
 ```
 
 ### React Components
+
 ```typescript
 // ✅ Good - Functional component with TypeScript
 interface ButtonProps {
   label: string;
   onClick: () => void;
-  variant?: 'primary' | 'secondary';
+  disabled?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({ 
   label, 
   onClick, 
-  variant = 'primary' 
+  disabled = false 
 }) => {
   return (
     <button 
-      onClick={onClick}
-      className={`btn btn-${variant}`}
+      onClick={onClick} 
+      disabled={disabled}
+      className="btn btn-primary"
     >
       {label}
     </button>
   );
 };
 
-// ❌ Bad - No types, unclear naming
-export const Btn = ({ l, o, v = 'p' }) => {
-  return <button onClick={o} className={`btn btn-${v}`}>{l}</button>;
+// ❌ Bad - No types, unclear props
+export const Button = (props) => {
+  return <button onClick={props.onClick}>{props.label}</button>;
 };
 ```
 
-### File Naming
-- Components: `PascalCase.tsx` (e.g., `SymptomChecker.tsx`)
-- Utilities: `camelCase.ts` (e.g., `formatDate.ts`)
-- Hooks: `useCamelCase.tsx` (e.g., `useAuth.tsx`)
-- Types: `camelCase.ts` (e.g., `user.ts`)
+### NestJS Services
 
-### Folder Structure
+```typescript
+// ✅ Good
+@Injectable()
+export class UserService {
+  private readonly logger = new Logger(UserService.name);
+
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) {}
+
+  async findById(id: string): Promise<User> {
+    try {
+      const user = await this.userRepository.findOne({ where: { id } });
+      if (!user) {
+        throw new NotFoundException(`User with ID ${id} not found`);
+      }
+      return user;
+    } catch (error) {
+      this.logger.error(`Error finding user: ${error.message}`);
+      throw error;
+    }
+  }
+}
+
+// ❌ Bad - No error handling, no logging
+@Injectable()
+export class UserService {
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) {}
+
+  async findById(id: string) {
+    return await this.userRepository.findOne({ where: { id } });
+  }
+}
 ```
-src/
-├── components/
-│   ├── common/          # Shared components
-│   ├── feature/         # Feature-specific components
-│   └── layout/          # Layout components
-├── hooks/               # Custom hooks
-├── pages/               # Page components
-├── services/            # API services
-├── store/               # State management
-├── types/               # TypeScript types
-├── utils/               # Utility functions
-└── i18n/                # Internationalization
+
+### Naming Conventions
+
+**Files:**
+```
+✅ user.service.ts
+✅ user.controller.ts
+✅ user.entity.ts
+✅ create-user.dto.ts
+✅ UserProfile.tsx
+✅ useAuth.ts
+
+❌ UserService.ts (backend)
+❌ user-profile.tsx (React component)
+❌ auth.ts (hook should be useAuth.ts)
 ```
 
-## 🌍 Translation Guidelines
+**Variables:**
+```typescript
+// ✅ Good
+const userName = 'John';
+const isActive = true;
+const userList = [];
+const MAX_RETRIES = 3;
 
-### Adding a New Language
+// ❌ Bad
+const user_name = 'John';
+const active = true;
+const list = [];
+const maxretries = 3;
+```
 
-1. **Create translation file**
-   ```bash
-   # Create file: src/i18n/locales/[language-code]/common.json
-   ```
+**Functions:**
+```typescript
+// ✅ Good
+const getUserById = (id: string) => {};
+const handleSubmit = () => {};
+const validateEmail = (email: string) => {};
 
-2. **Add translations**
-   ```json
-   {
-     "welcome": "Welcome to MediConnect 360",
-     "login": "Login",
-     "signup": "Sign Up",
-     "symptomChecker": "Symptom Checker"
-   }
-   ```
+// ❌ Bad
+const get_user = (id: string) => {};
+const submit = () => {};
+const validate = (email: string) => {};
+```
 
-3. **Register language**
-   ```typescript
-   // src/i18n/config.ts
-   export const languages = [
-     { code: 'en', name: 'English', nativeName: 'English' },
-     { code: 'es', name: 'Spanish', nativeName: 'Español' },
-     { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी' },
-     // Add your language here
-   ];
-   ```
+### Comments
 
-4. **Test thoroughly**
-   - Check all pages
-   - Verify RTL support (if applicable)
-   - Test date/number formatting
-   - Ensure medical terms are accurate
+```typescript
+// ✅ Good - Explain WHY, not WHAT
+// Calculate discount based on user's loyalty tier
+// Premium users get 20% off, regular users get 10%
+const discount = user.isPremium ? 0.2 : 0.1;
 
-### Translation Best Practices
-- Use native speakers for translations
-- Maintain consistent terminology
-- Consider cultural context
-- Keep medical accuracy
-- Test with real users
+// ❌ Bad - Obvious comment
+// Set discount to 0.2 if premium, else 0.1
+const discount = user.isPremium ? 0.2 : 0.1;
+```
 
-## 🐛 Bug Reports
+### Error Handling
+
+```typescript
+// ✅ Good
+try {
+  const result = await riskyOperation();
+  return result;
+} catch (error) {
+  this.logger.error(`Operation failed: ${error.message}`, error.stack);
+  throw new InternalServerErrorException('Failed to complete operation');
+}
+
+// ❌ Bad
+try {
+  const result = await riskyOperation();
+  return result;
+} catch (error) {
+  console.log(error);
+  throw error;
+}
+```
+
+### Medical Disclaimers
+
+**CRITICAL:** All AI-generated medical content MUST include disclaimers:
+
+```typescript
+// ✅ Good
+return {
+  diagnosis: aiResponse,
+  disclaimer: 'This is NOT medical advice. Always consult a healthcare professional for medical concerns.',
+  confidence: 0.85,
+};
+
+// ❌ Bad - Missing disclaimer
+return {
+  diagnosis: aiResponse,
+  confidence: 0.85,
+};
+```
+
+---
+
+## 🔄 Pull Request Process
 
 ### Before Submitting
-- Check if the bug has already been reported
-- Try to reproduce the bug
-- Gather relevant information
+
+- [ ] Code follows project style guidelines
+- [ ] Self-review of code completed
+- [ ] Comments added for complex logic
+- [ ] Documentation updated
+- [ ] Tests added/updated
+- [ ] All tests pass
+- [ ] No console.log() statements
+- [ ] No commented-out code
+- [ ] Medical disclaimers added (if applicable)
+
+### PR Title Format
+
+Use conventional commits format:
+
+```
+feat: add user profile page
+fix: resolve login redirect issue
+docs: update API documentation
+style: format code with prettier
+refactor: simplify authentication logic
+test: add tests for user service
+chore: update dependencies
+```
+
+### PR Description Template
+
+```markdown
+## Description
+Brief description of changes
+
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation update
+
+## Related Issues
+Closes #123
+
+## How Has This Been Tested?
+- [ ] Unit tests
+- [ ] Integration tests
+- [ ] Manual testing
+
+## Screenshots (if applicable)
+Add screenshots here
+
+## Checklist
+- [ ] Code follows style guidelines
+- [ ] Self-review completed
+- [ ] Comments added
+- [ ] Documentation updated
+- [ ] Tests added
+- [ ] All tests pass
+```
+
+### Review Process
+
+1. **Automated Checks:**
+   - Linting (ESLint)
+   - Type checking (TypeScript)
+   - Tests (Jest)
+   - Build verification
+
+2. **Code Review:**
+   - At least one maintainer approval required
+   - Address all review comments
+   - Keep discussions professional
+
+3. **Merge:**
+   - Squash and merge (default)
+   - Delete branch after merge
+
+---
+
+## 🐛 Reporting Bugs
+
+### Before Reporting
+
+1. **Check existing issues** - Your bug might already be reported
+2. **Try latest version** - Bug might be fixed
+3. **Reproduce** - Ensure bug is reproducible
 
 ### Bug Report Template
+
 ```markdown
 **Describe the bug**
 A clear description of what the bug is.
 
 **To Reproduce**
-Steps to reproduce the behavior:
+Steps to reproduce:
 1. Go to '...'
 2. Click on '...'
 3. Scroll down to '...'
@@ -296,142 +517,118 @@ What you expected to happen.
 If applicable, add screenshots.
 
 **Environment:**
-- OS: [e.g., Windows 11, macOS 13]
-- Browser: [e.g., Chrome 120, Safari 17]
-- Version: [e.g., 1.0.0]
+- OS: [e.g., Windows 11]
+- Browser: [e.g., Chrome 120]
+- Node version: [e.g., 18.17.0]
+- App version: [e.g., 1.0.0]
 
 **Additional context**
 Any other relevant information.
 ```
 
-## 💡 Feature Requests
+### Security Vulnerabilities
+
+**DO NOT** create public issues for security vulnerabilities.
+
+Instead, email: security@mediconnect360.com
+
+Include:
+- Description of vulnerability
+- Steps to reproduce
+- Potential impact
+- Suggested fix (if any)
+
+---
+
+## 💡 Suggesting Features
+
+### Before Suggesting
+
+1. **Check existing issues** - Feature might be planned
+2. **Check roadmap** - Feature might be in progress
+3. **Consider scope** - Is it aligned with project goals?
 
 ### Feature Request Template
+
 ```markdown
 **Is your feature request related to a problem?**
 A clear description of the problem.
 
 **Describe the solution you'd like**
-What you want to happen.
+A clear description of what you want to happen.
 
 **Describe alternatives you've considered**
-Other solutions you've thought about.
+Other solutions or features you've considered.
 
 **Additional context**
-Mockups, examples, or other relevant information.
+Any other context, screenshots, or mockups.
+
+**Would you like to implement this feature?**
+- [ ] Yes, I can implement this
+- [ ] No, just suggesting
 ```
 
-## 🔍 Code Review Process
+---
 
-### What We Look For
-- ✅ Code quality and readability
-- ✅ Proper TypeScript types
-- ✅ Test coverage
-- ✅ Documentation
-- ✅ Performance considerations
-- ✅ Security best practices
-- ✅ Accessibility compliance
+## 🌍 Community
 
-### Review Timeline
-- Initial review: Within 2-3 days
-- Follow-up reviews: Within 1-2 days
-- Merge: After approval from 2 maintainers
+### Communication Channels
 
-### Addressing Feedback
-- Be open to suggestions
-- Ask questions if unclear
-- Make requested changes
-- Push updates to the same branch
+- **GitHub Issues:** Bug reports and feature requests
+- **GitHub Discussions:** Questions and general discussion
+- **Email:** support@mediconnect360.com
+- **Discord:** (Coming soon)
+
+### Getting Help
+
+**For development questions:**
+1. Check documentation first
+2. Search existing issues
+3. Ask in GitHub Discussions
+4. Email support
+
+**For urgent issues:**
+- Email: support@mediconnect360.com
+- Include: OS, Node version, error logs
+
+---
 
 ## 🏆 Recognition
 
-Contributors will be:
-- Listed in our README
+### Contributors
+
+All contributors will be:
+- Listed in CONTRIBUTORS.md
 - Mentioned in release notes
-- Invited to our Discord community
-- Eligible for contributor swag (coming soon)
+- Credited in documentation
 
-## 📜 Code of Conduct
+### Top Contributors
 
-### Our Pledge
-We pledge to make participation in our project a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity, level of experience, nationality, personal appearance, race, religion, or sexual identity and orientation.
+Special recognition for:
+- Most commits
+- Most impactful features
+- Best code reviews
+- Documentation improvements
 
-### Our Standards
-**Positive behavior:**
-- Using welcoming and inclusive language
-- Being respectful of differing viewpoints
-- Gracefully accepting constructive criticism
-- Focusing on what is best for the community
-- Showing empathy towards others
+---
 
-**Unacceptable behavior:**
-- Trolling, insulting, or derogatory comments
-- Public or private harassment
-- Publishing others' private information
-- Other conduct which could reasonably be considered inappropriate
+## 📚 Additional Resources
 
-### Enforcement
-Violations may result in:
-1. Warning
-2. Temporary ban
-3. Permanent ban
+### Documentation
+- [README.md](../README.md) - Project overview
+- [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md) - Development setup
+- [API_ENDPOINTS.md](../API_ENDPOINTS.md) - API documentation
+- [GET_API_KEYS.md](GET_API_KEYS.md) - API keys guide
 
-Report violations to: conduct@mediconnect360.com
+### Learning Resources
+- [NestJS Docs](https://docs.nestjs.com/)
+- [React Docs](https://react.dev/)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [TypeORM Docs](https://typeorm.io/)
 
-## 📞 Getting Help
+---
 
-### Resources
-- 📖 [Documentation](./README.md)
-- 💬 [Discord Community](https://discord.gg/mediconnect360)
-- 📧 [Email Support](mailto:support@mediconnect360.com)
-- 🐦 [Twitter](https://twitter.com/mediconnect360)
-
-### Questions?
-- Check existing issues and discussions
-- Ask in our Discord community
-- Create a new issue with the `question` label
-
-## 🎯 Priority Areas
-
-We especially need help with:
-1. **Translations** - Native speakers for 50+ languages
-2. **Medical Expertise** - Healthcare professionals for content review
-3. **Testing** - QA and bug reporting
-4. **Documentation** - Tutorials and guides
-5. **Accessibility** - WCAG compliance improvements
-
-## 📊 Development Metrics
-
-### Definition of Done
-- [ ] Code is written and tested
-- [ ] Tests pass locally
-- [ ] Code follows style guidelines
-- [ ] Documentation is updated
-- [ ] PR description is complete
-- [ ] No merge conflicts
-- [ ] Approved by 2 maintainers
-
-### Quality Standards
-- Code coverage: 80%+
-- Performance: No regressions
-- Accessibility: WCAG 2.1 AA
-- Security: No vulnerabilities
-- Browser support: Last 2 versions
-
-## 🚀 Release Process
-
-### Versioning
-We use [Semantic Versioning](https://semver.org/):
-- MAJOR: Breaking changes
-- MINOR: New features
-- PATCH: Bug fixes
-
-### Release Schedule
-- Patch releases: Weekly
-- Minor releases: Monthly
-- Major releases: Quarterly
-
-## 📝 License
+## 📄 License
 
 By contributing, you agree that your contributions will be licensed under the MIT License.
 
@@ -439,16 +636,11 @@ By contributing, you agree that your contributions will be licensed under the MI
 
 ## 🙏 Thank You!
 
-Your contributions make MediConnect 360 better for everyone. Together, we're making healthcare accessible to the world!
+Thank you for contributing to MediConnect 360! Your efforts help make healthcare more accessible to everyone.
 
-**Questions?** Reach out to us at contribute@mediconnect360.com
+**Questions?** Email: support@mediconnect360.com
 
 ---
 
-<div align="center">
-
-**Happy Contributing! 🎉**
-
-[Back to README](./README.md) | [View Issues](https://github.com/yourusername/mediconnect-360/issues) | [Join Discord](https://discord.gg/mediconnect360)
-
-</div>
+**Last Updated:** December 2025  
+**Status:** Complete ✅

@@ -1,469 +1,846 @@
-# 🚀 MediConnect 360 - Complete Deployment Guide
+# 🚀 Deployment Guide - Deploy MediConnect 360 to Production
 
-## 100% FREE Forever: Vercel (Frontend) + Render (Backend) + Neon (Database)
+## 📋 Overview
 
----
-
-## 📋 Prerequisites
-
-- [ ] GitHub account
-- [ ] Vercel account (FREE forever)
-- [ ] Render account (FREE forever)
-- [ ] Neon account (FREE forever - PostgreSQL)
-- [ ] Upstash account (FREE forever - Redis)
-- [ ] All API keys ready (Gemini, Resend, etc.)
-
-## 💰 Total Cost: $0/month FOREVER! ✅
+This guide shows you how to deploy MediConnect 360 to production using **FREE or low-cost services**. Total cost: **$0-21/month** for 1,000 users!
 
 ---
 
-## Part 1: Create FREE Database (Neon PostgreSQL)
+## 🎯 **Deployment Options**
 
-### Step 1: Create Neon Account
-1. Go to: https://neon.tech
-2. Click **"Sign Up"**
-3. Sign in with GitHub (easiest)
-4. No credit card required! ✅
-
-### Step 2: Create Database
-1. Click **"Create a project"**
-2. Project name: **mediconnect-360**
-3. Region: Choose closest to your users
-4. PostgreSQL version: **15** (latest)
-5. Click **"Create project"**
-
-### Step 3: Get Connection String
-1. Go to **"Dashboard"**
-2. Copy **"Connection string"**
-3. It looks like: `postgresql://user:pass@host.neon.tech/dbname`
-4. Save this for later!
+| Option | Cost | Difficulty | Best For |
+|--------|------|------------|----------|
+| **Option 1: Vercel + Render** | $0-21/month | Easy | Recommended for beginners |
+| **Option 2: VPS (DigitalOcean)** | $20/month | Medium | Full control, scalable |
+| **Option 3: AWS/GCP** | $50+/month | Hard | Enterprise, high traffic |
+| **Option 4: Docker VPS** | $20/month | Medium | Docker experience |
 
 ---
 
-## Part 2: Create FREE Redis (Upstash)
+## ✅ **Pre-Deployment Checklist**
 
-### Step 1: Create Upstash Account
-1. Go to: https://upstash.com
-2. Click **"Sign Up"**
-3. Sign in with GitHub
-4. No credit card required! ✅
+Before deploying, ensure you have:
 
-### Step 2: Create Redis Database
-1. Click **"Create Database"**
-2. Name: **mediconnect-redis**
-3. Type: **Regional**
-4. Region: Choose closest to your backend
-5. Click **"Create"**
-
-### Step 3: Get Redis URL
-1. Go to your database
-2. Scroll to **"REST API"** section
-3. Copy **"UPSTASH_REDIS_REST_URL"**
-4. Save this for later!
+- [ ] All API keys ready (see [GET_API_KEYS.md](GET_API_KEYS.md))
+- [ ] GitHub repository with latest code
+- [ ] Production environment variables prepared
+- [ ] Database backup strategy planned
+- [ ] Domain name (optional but recommended)
+- [ ] SSL certificate (free with Let's Encrypt)
+- [ ] Monitoring setup (optional)
 
 ---
 
-## Part 3: Deploy Backend to Render
+## 🌟 **OPTION 1: Vercel + Render (Recommended)**
 
-### Step 1: Create Render Account
-1. Go to: https://render.com
-2. Click **"Get Started"**
-3. Sign in with GitHub
-4. **No credit card required!** ✅
+**Cost:** $0-21/month  
+**Difficulty:** ⭐ Easy  
+**Best for:** Quick deployment, automatic scaling
 
-### Step 2: Create Web Service
-1. Click **"New +"** → **"Web Service"**
-2. Connect your GitHub repository
-3. Select **MediConnect 360** repo
-4. Click **"Connect"**
+### **Architecture:**
+- **Frontend:** Vercel (FREE)
+- **Backend:** Render (FREE or $7/month)
+- **Database:** Neon PostgreSQL (FREE)
+- **Redis:** Upstash (FREE)
+- **Storage:** AWS S3 or Cloudflare R2 (FREE 10GB)
 
-### Step 3: Configure Service
-Fill in these settings:
+### **Step 1: Deploy Database (Neon)**
 
-- **Name:** `mediconnect-backend`
-- **Region:** Choose closest to your users
-- **Branch:** `main`
-- **Root Directory:** `backend`
-- **Runtime:** `Node`
-- **Build Command:** `npm install && npm run build`
-- **Start Command:** `npm run start:prod`
-- **Instance Type:** **FREE** ✅
+1. Go to [Neon](https://neon.tech/)
+2. Sign up (FREE tier: 0.5GB storage, 1 project)
+3. Create new project:
+   - Name: `mediconnect-360`
+   - Region: Choose closest to your users
+4. Copy connection string:
+   ```
+   postgresql://user:pass@ep-xxx.neon.tech/mediconnect?sslmode=require
+   ```
+5. Save for later
 
-### Step 4: Add Environment Variables (IMPORTANT!)
-Click **"Advanced"** → **"Add Environment Variable"**
+### **Step 2: Deploy Redis (Upstash)**
 
-Add these one by one:
+1. Go to [Upstash](https://upstash.com/)
+2. Sign up (FREE tier: 10K commands/day)
+3. Create Redis database:
+   - Name: `mediconnect-redis`
+   - Region: Same as Neon
+4. Copy connection string:
+   ```
+   rediss://default:xxx@xxx.upstash.io:6379
+   ```
+5. Save for later
 
-```env
-# Node
-NODE_ENV=production
-PORT=10000
+### **Step 3: Setup Storage (Cloudflare R2)**
 
-# Database (from Neon)
-DATABASE_URL=postgresql://user:pass@host.neon.tech/dbname
-
-# Redis (from Upstash)
-REDIS_URL=https://your-redis.upstash.io
-
-# JWT
-JWT_SECRET=your-super-secret-production-key-change-this
-JWT_EXPIRES_IN=7d
-
-# Google Gemini AI
-GEMINI_API_KEY=your-gemini-api-key-here
-
-# Resend Email
-RESEND_API_KEY=your-resend-api-key-here
-FROM_EMAIL=noreply@yourdomain.com
-
-# Google OAuth (update with production URLs)
-GOOGLE_CLIENT_ID=your-production-client-id
-GOOGLE_CLIENT_SECRET=your-production-secret
-GOOGLE_CALLBACK_URL=https://your-backend.onrender.com/api/auth/google/callback
-
-# GitHub OAuth
-GITHUB_CLIENT_ID=your-github-client-id
-GITHUB_CLIENT_SECRET=your-github-secret
-GITHUB_CALLBACK_URL=https://your-backend.onrender.com/api/auth/github/callback
-
-# Stripe
-STRIPE_SECRET_KEY=sk_live_your-production-key
-STRIPE_PUBLISHABLE_KEY=pk_live_your-production-key
-STRIPE_WEBHOOK_SECRET=whsec_your-webhook-secret
-
-# CORS (update after deploying frontend)
-CORS_ORIGIN=https://your-frontend.vercel.app
-
-# Storage (if using external S3)
-AWS_ACCESS_KEY_ID=your-key
-AWS_SECRET_ACCESS_KEY=your-secret
-AWS_S3_BUCKET=mediconnect-files
-AWS_REGION=us-east-1
-AWS_ENDPOINT=https://your-s3-endpoint.com
-```
-
-### Step 5: Deploy
-1. Click **"Create Web Service"**
-2. Render will start building (~3-5 minutes)
-3. Wait for **"Live"** status
-4. Copy your backend URL: `https://your-app.onrender.com`
-
-### Step 6: Test Backend
-```bash
-curl https://your-app.onrender.com/api/health
-```
-
-Should return: `{"status":"ok"}`
-
-### ⚠️ Important: Free Tier Limitations
-- **Spins down after 15 minutes** of inactivity
-- **First request after sleep takes ~30 seconds** (cold start)
-- **750 hours/month** (enough for 1 service running 24/7)
-
-**Solution:** Use a free uptime monitor (like UptimeRobot) to ping your backend every 14 minutes to keep it awake during business hours.
-
----
-
-## Part 4: Deploy Frontend to Vercel
-
-### Step 1: Create Vercel Account
-1. Go to: https://vercel.com
-2. Click **"Sign Up"**
-3. Sign in with GitHub
-
-### Step 2: Import Project
-1. Click **"Add New..."** → **"Project"**
-2. Import your **MediConnect 360** repository
-3. Vercel will detect it's a Vite project
-
-### Step 3: Configure Build Settings
-1. **Framework Preset:** Vite
-2. **Root Directory:** `./` (leave as root)
-3. **Build Command:** `npm run build`
-4. **Output Directory:** `dist`
-5. **Install Command:** `npm install`
-
-### Step 4: Set Environment Variables
-Click **"Environment Variables"** and add:
-
-```env
-VITE_API_URL=https://your-backend.onrender.com/api
-VITE_APP_NAME=MediConnect 360
-VITE_APP_VERSION=1.0.0
-VITE_STRIPE_PUBLISHABLE_KEY=pk_live_your-key
-```
-
-### Step 5: Deploy
-1. Click **"Deploy"**
-2. Wait for build (~1-2 minutes)
-3. Your app will be live at: `https://your-app.vercel.app`
-
-### Step 6: Add Custom Domain (Optional)
-1. Go to **"Settings"** → **"Domains"**
-2. Add your domain: `mediconnect360.com`
-3. Follow DNS instructions
-4. SSL certificate is automatic!
-
----
-
-## Part 5: Update OAuth Redirect URLs
-
-### Google OAuth
-1. Go to: https://console.cloud.google.com/apis/credentials
-2. Edit your OAuth Client ID
-3. Update **Authorized redirect URIs:**
-   - Add: `https://your-backend.onrender.com/api/auth/google/callback`
-   - Add: `https://your-frontend.vercel.app/auth/callback`
-4. Save
-
-### GitHub OAuth
-1. Go to: https://github.com/settings/developers
-2. Edit your OAuth App
-3. Update **Authorization callback URL:**
-   - `https://your-backend.onrender.com/api/auth/github/callback`
-4. Save
-
-### Stripe Webhook
-1. Go to: https://dashboard.stripe.com/webhooks
-2. Edit your webhook endpoint
-3. Update URL: `https://your-backend.onrender.com/api/payment/webhook`
-4. Save
-
----
-
-## Part 6: Update Frontend API URL
-
-### Update Environment Variable
-1. Go to Vercel dashboard
-2. Click your project
-3. Go to **"Settings"** → **"Environment Variables"**
-4. Update `VITE_API_URL` to your Render backend URL
-5. Redeploy
-
-### Update CORS in Backend
-1. Go to Render dashboard
-2. Go to **"Environment"**
-3. Update `CORS_ORIGIN` variable to your Vercel URL
-4. Click **"Save Changes"**
-5. Render will auto-redeploy
-
----
-
-## Part 7: Keep Backend Awake (Optional but Recommended)
-
-### Use UptimeRobot (FREE)
-1. Go to: https://uptimerobot.com
-2. Sign up (FREE forever)
-3. Click **"Add New Monitor"**
-4. Monitor Type: **HTTP(s)**
-5. Friendly Name: **MediConnect Backend**
-6. URL: `https://your-backend.onrender.com/api/health`
-7. Monitoring Interval: **5 minutes**
-8. Click **"Create Monitor"**
-
-This will ping your backend every 5 minutes to prevent it from sleeping!
-
----
-
-## Part 8: Database Migration
-
-### Run Migrations on Render
-1. Go to Render dashboard
-2. Click your backend service
-3. Go to **"Shell"** tab
-4. Run migration command:
-   ```bash
-   npm run typeorm migration:run
+1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com/)
+2. Navigate to R2 Object Storage
+3. Create bucket:
+   - Name: `mediconnect-files`
+   - Location: Automatic
+4. Create API token:
+   - Permissions: Object Read & Write
+5. Copy credentials:
+   ```
+   Access Key ID: xxx
+   Secret Access Key: xxx
+   Endpoint: https://xxx.r2.cloudflarestorage.com
    ```
 
-Or update Build Command to include migration:
+### **Step 4: Deploy Backend (Render)**
+
+1. Go to [Render](https://render.com/)
+2. Sign up with GitHub
+3. Click "New +" → "Web Service"
+4. Connect your repository
+5. Configure:
+   ```
+   Name: mediconnect-backend
+   Region: Oregon (US West)
+   Branch: main
+   Root Directory: backend
+   Runtime: Node
+   Build Command: npm install && npm run build
+   Start Command: npm run start:prod
+   Instance Type: Free (or Starter $7/month for better performance)
+   ```
+
+6. Add Environment Variables:
+   ```bash
+   NODE_ENV=production
+   PORT=5000
+   
+   # Database (from Neon)
+   DATABASE_URL=postgresql://user:pass@ep-xxx.neon.tech/mediconnect?sslmode=require
+   
+   # Redis (from Upstash)
+   REDIS_URL=rediss://default:xxx@xxx.upstash.io:6379
+   
+   # JWT Secrets (generate new ones!)
+   JWT_SECRET=<generate-with-openssl-rand-base64-32>
+   JWT_REFRESH_SECRET=<generate-with-openssl-rand-base64-32>
+   JWT_EXPIRES_IN=7d
+   JWT_REFRESH_EXPIRES_IN=30d
+   
+   # AI (Gemini - FREE)
+   AI_PROVIDER=gemini
+   GEMINI_API_KEY=<your-gemini-key>
+   
+   # Email (Resend - FREE 3K/month)
+   EMAIL_PROVIDER=resend
+   RESEND_API_KEY=<your-resend-key>
+   FROM_EMAIL=noreply@yourdomain.com
+   FROM_NAME=MediConnect 360
+   
+   # Storage (Cloudflare R2)
+   AWS_ACCESS_KEY_ID=<r2-access-key>
+   AWS_SECRET_ACCESS_KEY=<r2-secret-key>
+   AWS_S3_BUCKET=mediconnect-files
+   AWS_REGION=auto
+   AWS_ENDPOINT=https://xxx.r2.cloudflarestorage.com
+   
+   # Stripe (Production keys!)
+   STRIPE_SECRET_KEY=sk_live_xxx
+   STRIPE_PUBLISHABLE_KEY=pk_live_xxx
+   STRIPE_WEBHOOK_SECRET=whsec_xxx
+   
+   # OAuth (Production URLs!)
+   GOOGLE_CLIENT_ID=<your-google-client-id>
+   GOOGLE_CLIENT_SECRET=<your-google-client-secret>
+   GOOGLE_CALLBACK_URL=https://mediconnect-backend.onrender.com/api/auth/google/callback
+   
+   GITHUB_CLIENT_ID=<your-github-client-id>
+   GITHUB_CLIENT_SECRET=<your-github-client-secret>
+   GITHUB_CALLBACK_URL=https://mediconnect-backend.onrender.com/api/auth/github/callback
+   
+   # Security
+   ENCRYPTION_KEY=<32-character-key>
+   CORS_ORIGIN=https://yourdomain.com
+   CORS_CREDENTIALS=true
+   
+   # Video (Jitsi - FREE)
+   VIDEO_PROVIDER=jitsi
+   JITSI_DOMAIN=meet.jit.si
+   
+   # SMS (Console for now, upgrade later)
+   SMS_PROVIDER=console_log
+   
+   # Features
+   ENABLE_REGISTRATION=true
+   ENABLE_EMAIL_VERIFICATION=true
+   ENABLE_AI_DIAGNOSTICS=true
+   ```
+
+7. Click "Create Web Service"
+8. Wait for deployment (5-10 minutes)
+9. Copy your backend URL: `https://mediconnect-backend.onrender.com`
+
+### **Step 5: Deploy Frontend (Vercel)**
+
+1. Go to [Vercel](https://vercel.com/)
+2. Sign up with GitHub
+3. Click "Add New..." → "Project"
+4. Import your repository
+5. Configure:
+   ```
+   Framework Preset: Vite
+   Root Directory: ./
+   Build Command: npm run build
+   Output Directory: dist
+   Install Command: npm install
+   ```
+
+6. Add Environment Variables:
+   ```bash
+   VITE_API_URL=https://mediconnect-backend.onrender.com
+   VITE_WS_URL=wss://mediconnect-backend.onrender.com
+   VITE_GOOGLE_CLIENT_ID=<your-google-client-id>
+   VITE_STRIPE_PUBLISHABLE_KEY=pk_live_xxx
+   VITE_ENV=production
+   ```
+
+7. Click "Deploy"
+8. Wait for deployment (2-5 minutes)
+9. Your site is live! `https://your-project.vercel.app`
+
+### **Step 6: Configure Custom Domain (Optional)**
+
+**On Vercel:**
+1. Go to Project Settings → Domains
+2. Add your domain: `mediconnect360.com`
+3. Follow DNS instructions
+4. SSL certificate auto-generated (FREE)
+
+**On Render:**
+1. Go to Service Settings → Custom Domain
+2. Add: `api.mediconnect360.com`
+3. Update DNS records
+4. SSL certificate auto-generated (FREE)
+
+**Update Environment Variables:**
+- Vercel: `VITE_API_URL=https://api.mediconnect360.com`
+- Render: `CORS_ORIGIN=https://mediconnect360.com`
+
+### **Step 7: Setup Stripe Webhooks**
+
+1. Go to [Stripe Dashboard](https://dashboard.stripe.com/webhooks)
+2. Click "Add endpoint"
+3. Endpoint URL: `https://api.mediconnect360.com/api/payment/webhook`
+4. Select events:
+   - `payment_intent.succeeded`
+   - `payment_intent.payment_failed`
+   - `customer.subscription.created`
+   - `customer.subscription.updated`
+   - `customer.subscription.deleted`
+5. Copy webhook secret
+6. Update Render env: `STRIPE_WEBHOOK_SECRET=whsec_xxx`
+
+### **Step 8: Test Production**
+
+1. Visit your site: `https://mediconnect360.com`
+2. Test registration
+3. Test login
+4. Test AI symptom checker
+5. Test appointment booking
+6. Test payment (use Stripe test card: 4242 4242 4242 4242)
+7. Check backend logs on Render
+8. Monitor errors
+
+---
+
+## 💻 **OPTION 2: VPS Deployment (DigitalOcean/Linode)**
+
+**Cost:** $20/month  
+**Difficulty:** ⭐⭐ Medium  
+**Best for:** Full control, custom configuration
+
+### **Step 1: Create VPS**
+
+1. Go to [DigitalOcean](https://www.digitalocean.com/) or [Linode](https://www.linode.com/)
+2. Create Droplet/Linode:
+   - **Image:** Ubuntu 22.04 LTS
+   - **Plan:** Basic $20/month (4GB RAM, 2 vCPUs)
+   - **Region:** Closest to your users
+   - **SSH Key:** Add your public key
+3. Note your server IP: `123.456.789.0`
+
+### **Step 2: Initial Server Setup**
+
 ```bash
-npm install && npm run build && npm run typeorm migration:run
+# SSH into server
+ssh root@123.456.789.0
+
+# Update system
+apt update && apt upgrade -y
+
+# Install Node.js 18
+curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+apt install -y nodejs
+
+# Install Docker
+curl -fsSL https://get.docker.com | sh
+systemctl enable docker
+systemctl start docker
+
+# Install Docker Compose
+apt install -y docker-compose
+
+# Install Nginx
+apt install -y nginx
+
+# Install Certbot (for SSL)
+apt install -y certbot python3-certbot-nginx
+
+# Create app user
+adduser --disabled-password --gecos "" mediconnect
+usermod -aG docker mediconnect
+```
+
+### **Step 3: Setup Application**
+
+```bash
+# Switch to app user
+su - mediconnect
+
+# Clone repository
+git clone https://github.com/yourusername/mediconnect-360.git
+cd mediconnect-360
+
+# Setup environment
+cp .env.example .env
+cp backend/.env.example backend/.env
+
+# Edit .env files with production values
+nano .env
+nano backend/.env
+
+# Start Docker services
+docker-compose up -d
+
+# Install dependencies
+npm install
+cd backend && npm install && cd ..
+
+# Build backend
+cd backend && npm run build && cd ..
+
+# Build frontend
+npm run build
+```
+
+### **Step 4: Setup PM2 (Process Manager)**
+
+```bash
+# Install PM2
+npm install -g pm2
+
+# Start backend
+cd backend
+pm2 start dist/main.js --name mediconnect-backend
+
+# Save PM2 config
+pm2 save
+pm2 startup
+
+# Check status
+pm2 status
+pm2 logs mediconnect-backend
+```
+
+### **Step 5: Configure Nginx**
+
+```bash
+# Exit to root user
+exit
+
+# Create Nginx config
+nano /etc/nginx/sites-available/mediconnect
+```
+
+Add this configuration:
+
+```nginx
+# Backend API
+server {
+    listen 80;
+    server_name api.mediconnect360.com;
+
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+# Frontend
+server {
+    listen 80;
+    server_name mediconnect360.com www.mediconnect360.com;
+
+    root /home/mediconnect/mediconnect-360/dist;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Cache static assets
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Gzip compression
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+}
+```
+
+Enable site:
+
+```bash
+# Enable site
+ln -s /etc/nginx/sites-available/mediconnect /etc/nginx/sites-enabled/
+
+# Test config
+nginx -t
+
+# Restart Nginx
+systemctl restart nginx
+```
+
+### **Step 6: Setup SSL (Let's Encrypt)**
+
+```bash
+# Get SSL certificates
+certbot --nginx -d mediconnect360.com -d www.mediconnect360.com -d api.mediconnect360.com
+
+# Follow prompts
+# Email: your-email@example.com
+# Agree to terms: Yes
+# Redirect HTTP to HTTPS: Yes
+
+# Auto-renewal is configured automatically
+# Test renewal:
+certbot renew --dry-run
+```
+
+### **Step 7: Setup Firewall**
+
+```bash
+# Configure UFW
+ufw allow 22/tcp    # SSH
+ufw allow 80/tcp    # HTTP
+ufw allow 443/tcp   # HTTPS
+ufw enable
+
+# Check status
+ufw status
+```
+
+### **Step 8: Setup Monitoring**
+
+```bash
+# Install monitoring tools
+apt install -y htop iotop nethogs
+
+# Setup log rotation
+nano /etc/logrotate.d/mediconnect
+```
+
+Add:
+
+```
+/home/mediconnect/mediconnect-360/backend/logs/*.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    create 0640 mediconnect mediconnect
+    sharedscripts
+}
+```
+
+### **Step 9: Setup Backups**
+
+```bash
+# Create backup script
+nano /home/mediconnect/backup.sh
+```
+
+Add:
+
+```bash
+#!/bin/bash
+DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_DIR="/home/mediconnect/backups"
+
+# Create backup directory
+mkdir -p $BACKUP_DIR
+
+# Backup PostgreSQL
+docker exec mediconnect-db pg_dump -U postgres mediconnect > $BACKUP_DIR/db_$DATE.sql
+
+# Backup MinIO
+docker exec mediconnect-minio mc mirror myminio/mediconnect-files $BACKUP_DIR/files_$DATE
+
+# Compress
+tar -czf $BACKUP_DIR/backup_$DATE.tar.gz $BACKUP_DIR/db_$DATE.sql $BACKUP_DIR/files_$DATE
+
+# Remove old backups (keep 7 days)
+find $BACKUP_DIR -name "backup_*.tar.gz" -mtime +7 -delete
+
+# Upload to cloud (optional)
+# aws s3 cp $BACKUP_DIR/backup_$DATE.tar.gz s3://your-backup-bucket/
+```
+
+Make executable and schedule:
+
+```bash
+chmod +x /home/mediconnect/backup.sh
+
+# Add to crontab (daily at 2 AM)
+crontab -e
+```
+
+Add:
+
+```
+0 2 * * * /home/mediconnect/backup.sh
 ```
 
 ---
 
-## 🎯 Post-Deployment Checklist
+## ☁️ **OPTION 3: AWS/GCP Deployment**
 
-### Backend
-- [ ] Health check works: `/api/health`
-- [ ] Database connected
-- [ ] Redis connected (if using)
-- [ ] Environment variables set
-- [ ] CORS configured
-- [ ] OAuth callbacks updated
-- [ ] Stripe webhook updated
+**Cost:** $50+/month  
+**Difficulty:** ⭐⭐⭐ Hard  
+**Best for:** Enterprise, high availability
 
-### Frontend
-- [ ] Site loads correctly
-- [ ] API calls work
-- [ ] Login/signup works
-- [ ] OAuth buttons work
-- [ ] AI features work
-- [ ] Custom domain configured (optional)
+### **AWS Architecture:**
 
-### Security
-- [ ] Change JWT_SECRET to strong random string
-- [ ] Use production API keys (not test keys)
+- **Frontend:** S3 + CloudFront
+- **Backend:** ECS Fargate or EC2
+- **Database:** RDS PostgreSQL
+- **Cache:** ElastiCache Redis
+- **Storage:** S3
+- **Load Balancer:** ALB
+- **DNS:** Route 53
+- **SSL:** ACM (FREE)
+
+### **Quick AWS Setup:**
+
+1. **Create RDS PostgreSQL:**
+   - Engine: PostgreSQL 16
+   - Instance: db.t3.micro ($15/month)
+   - Storage: 20GB SSD
+   - Multi-AZ: No (for cost savings)
+
+2. **Create ElastiCache Redis:**
+   - Node: cache.t3.micro ($12/month)
+   - Replicas: 0 (for cost savings)
+
+3. **Create S3 Buckets:**
+   - `mediconnect-frontend` (static site)
+   - `mediconnect-files` (user uploads)
+
+4. **Deploy Backend to ECS:**
+   - Create ECR repository
+   - Build Docker image
+   - Push to ECR
+   - Create ECS service
+
+5. **Setup CloudFront:**
+   - Origin: S3 bucket
+   - SSL: ACM certificate
+   - Custom domain
+
+6. **Configure Route 53:**
+   - Create hosted zone
+   - Add A records for CloudFront
+
+---
+
+## 🐳 **OPTION 4: Docker VPS Deployment**
+
+**Cost:** $20/month  
+**Difficulty:** ⭐⭐ Medium  
+**Best for:** Docker experience, easy updates
+
+### **docker-compose.prod.yml:**
+
+```yaml
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - mediconnect-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - backend
+    networks:
+      - mediconnect-network
+
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mediconnect-network
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    volumes:
+      - redis_data:/data
+    networks:
+      - mediconnect-network
+
+  minio:
+    image: minio/minio:latest
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - mediconnect-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+
+networks:
+  mediconnect-network:
+    driver: bridge
+```
+
+### **Deploy:**
+
+```bash
+# On VPS
+docker-compose -f docker-compose.prod.yml up -d
+
+# Check logs
+docker-compose -f docker-compose.prod.yml logs -f
+
+# Update
+git pull
+docker-compose -f docker-compose.prod.yml up -d --build
+```
+
+---
+
+## 📊 **Post-Deployment**
+
+### **1. Monitoring**
+
+**Free Options:**
+- **UptimeRobot:** Monitor uptime (FREE 50 monitors)
+- **Sentry:** Error tracking (FREE 5K events/month)
+- **Google Analytics:** User analytics (FREE)
+- **LogRocket:** Session replay (FREE 1K sessions/month)
+
+**Setup Sentry:**
+
+```bash
+# Install
+npm install @sentry/node @sentry/react
+
+# Configure backend (backend/src/main.ts)
+import * as Sentry from '@sentry/node';
+
+Sentry.init({
+  dsn: 'your-sentry-dsn',
+  environment: 'production',
+});
+
+# Configure frontend (src/main.tsx)
+import * as Sentry from '@sentry/react';
+
+Sentry.init({
+  dsn: 'your-sentry-dsn',
+  environment: 'production',
+});
+```
+
+### **2. Analytics**
+
+```html
+<!-- Add to index.html -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+</script>
+```
+
+### **3. Performance**
+
+- Enable Gzip compression
+- Setup CDN (Cloudflare FREE)
+- Optimize images
+- Enable browser caching
+- Minify assets
+
+### **4. Security**
+
+- [ ] Change all default passwords
 - [ ] Enable HTTPS only
-- [ ] Set secure CORS origins
-- [ ] Enable rate limiting
-- [ ] Set up monitoring
+- [ ] Setup rate limiting
+- [ ] Configure CORS properly
+- [ ] Enable security headers
+- [ ] Setup WAF (Cloudflare FREE)
+- [ ] Regular security updates
 
 ---
 
-## 💰 Cost Breakdown
+## 🔧 **Troubleshooting**
 
-### FREE Forever Tier ✅
-```
-Vercel:          $0/month FOREVER (100GB bandwidth)
-Render:          $0/month FOREVER (750 hours)
-Neon PostgreSQL: $0/month FOREVER (3GB storage)
-Upstash Redis:   $0/month FOREVER (10K commands/day)
-Gemini AI:       $0/month FOREVER (60 req/min)
-Resend:          $0/month FOREVER (3,000 emails)
-UptimeRobot:     $0/month FOREVER (50 monitors)
-────────────────────────────────────────────────
-Total:           $0/month FOREVER! 🎉
-```
+### **Backend won't start:**
 
-### When You Need to Scale (1000+ users)
-```
-Vercel Pro:      $20/month (unlimited bandwidth)
-Render Standard: $7/month (no cold starts)
-Neon Scale:      $19/month (10GB storage)
-Upstash Pro:     $10/month (1M commands/day)
-────────────────────────────────────────────────
-Total:           $56/month
+```bash
+# Check logs
+pm2 logs mediconnect-backend
+# or
+docker-compose logs backend
+
+# Common issues:
+# - Missing environment variables
+# - Database connection failed
+# - Port already in use
 ```
 
----
+### **Database connection failed:**
 
-## 🔧 Troubleshooting
+```bash
+# Test connection
+psql -h your-db-host -U postgres -d mediconnect
 
-### Backend Won't Start
-1. Check Render logs (click "Logs" tab)
-2. Verify all environment variables
-3. Check Neon database connection
-4. Ensure build command is correct
-5. Check if PORT is set to 10000
+# Check firewall
+# Check DATABASE_URL format
+# Verify credentials
+```
 
-### Frontend Can't Connect to Backend
-1. Check CORS settings
-2. Verify API URL in frontend env
-3. Check network tab in browser
-4. Ensure backend is running
+### **SSL certificate issues:**
 
-### Database Connection Failed
-1. Check DATABASE_URL format from Neon
-2. Verify Neon database is active
-3. Check connection string includes SSL
-4. Try restarting backend service
-5. Check Neon dashboard for connection limits
+```bash
+# Renew certificate
+certbot renew
 
-### OAuth Not Working
-1. Verify redirect URLs match exactly
-2. Check OAuth credentials
-3. Ensure HTTPS in production
-4. Check callback URL in provider settings
+# Check certificate
+certbot certificates
 
----
+# Force renewal
+certbot renew --force-renewal
+```
 
-## 📊 Monitoring & Analytics
+### **High memory usage:**
 
-### Render Monitoring
-- Built-in metrics dashboard
-- CPU, Memory usage
-- Logs in real-time
-- Email alerts for downtime
+```bash
+# Check processes
+htop
 
-### Vercel Analytics
-- Free analytics included
-- Page views, performance
-- Web Vitals
-- Geographic distribution
-
-### Recommended FREE Tools
-- **UptimeRobot** (Keep backend awake) - FREE ✅
-- **Sentry** (Error tracking) - FREE tier ✅
-- **LogRocket** (Session replay) - FREE tier ✅
-- **Google Analytics** (User analytics) - FREE ✅
+# Restart services
+pm2 restart all
+# or
+docker-compose restart
+```
 
 ---
 
-## 🚀 Scaling Strategy
+## 💰 **Cost Comparison**
 
-### Phase 1: Launch (0-1K users)
-- Vercel FREE
-- Render FREE
-- Neon FREE
-- Upstash FREE
-- **Cost: $0/month** ✅
+### **Option 1: Vercel + Render**
+- Vercel: FREE
+- Render: FREE or $7/month
+- Neon: FREE
+- Upstash: FREE
+- R2: FREE (10GB)
+- **Total: $0-7/month**
 
-### Phase 2: Growth (1K-10K users)
-- Vercel Pro ($20)
-- Render Standard ($7)
-- Neon Scale ($19)
-- Upstash Pro ($10)
-- **Cost: $56/month**
+### **Option 2: VPS**
+- DigitalOcean: $20/month
+- Domain: $12/year ($1/month)
+- **Total: $21/month**
 
-### Phase 3: Scale (10K-100K users)
-- Vercel Pro ($20)
-- Render Pro ($25)
-- Neon Pro ($69)
-- Upstash Pro ($10)
-- **Cost: $124/month**
+### **Option 3: AWS**
+- RDS: $15/month
+- ElastiCache: $12/month
+- EC2: $20/month
+- S3: $5/month
+- CloudFront: $5/month
+- **Total: $57/month**
 
-### Phase 4: Enterprise (100K+ users)
-- Vercel Enterprise ($custom)
-- AWS/GCP with Kubernetes
-- Multi-region deployment
-- Dedicated infrastructure
-- **Cost: $500-2000/month**
+### **Option 4: Docker VPS**
+- VPS: $20/month
+- Domain: $1/month
+- **Total: $21/month**
 
 ---
 
-## 🎉 You're Live!
+## 📚 **Additional Resources**
 
-### Your URLs:
-- **Frontend:** https://your-app.vercel.app
-- **Backend:** https://your-app.onrender.com
-- **API:** https://your-app.onrender.com/api
-- **Database:** Neon Dashboard
-- **Redis:** Upstash Dashboard
-
-### Share Your App:
-- Add to Product Hunt
-- Share on Twitter
-- Post on Reddit
-- Submit to directories
+- [GET_API_KEYS.md](GET_API_KEYS.md) - Get all API keys
+- [OAUTH_PAYMENT_SETUP.md](OAUTH_PAYMENT_SETUP.md) - OAuth & Stripe setup
+- [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md) - Development guidelines
+- [Main README](../README.md) - Project overview
 
 ---
 
-## 📞 Support
+## 🆘 **Need Help?**
 
-### Render Support
-- Discord: https://discord.gg/render
-- Docs: https://render.com/docs
-
-### Vercel Support
-- Discord: https://vercel.com/discord
-- Docs: https://vercel.com/docs
-
-### Neon Support
-- Discord: https://discord.gg/neon
-- Docs: https://neon.tech/docs
-
-### Upstash Support
-- Discord: https://discord.gg/upstash
-- Docs: https://docs.upstash.com
+- **Issues:** [GitHub Issues](https://github.com/YOUR_USERNAME/MediConnect-360/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/YOUR_USERNAME/MediConnect-360/discussions)
+- **Email:** support@mediconnect360.com
 
 ---
 
-<div align="center">
+**Congratulations! Your app is now live! 🎉**
 
-**🚀 Your Healthcare Platform is Now Live! 🚀**
-
-**Built with ❤️ • Deployed in minutes • Ready to change healthcare**
-
-</div>
+**Last Updated:** December 2025  
+**Status:** Complete & Tested ✅

@@ -1,436 +1,665 @@
-# 🔐 OAuth & Payment Integration Setup Guide
+# 🔐 OAuth & Payment Setup Guide
 
-## Complete Setup for Google, GitHub OAuth & Stripe Payments
+## 📋 Overview
 
----
-
-## 🎯 What You're Adding
-
-### 1. Google OAuth ✅
-- Sign in with Google
-- Automatic account creation
-- Profile sync
-
-### 2. GitHub OAuth ✅
-- Sign in with GitHub
-- Developer-friendly login
-- Profile sync
-
-### 3. Stripe Payments ✅
-- One-time payments
-- Subscriptions
-- Secure checkout
-- Webhook handling
+Complete guide to configure Google OAuth, GitHub OAuth, and Stripe payments for MediConnect 360.
 
 ---
 
-## 🔐 Part 1: Google OAuth Setup
+## 🔑 **Part 1: Google OAuth Setup**
 
-### Step 1: Go to Google Cloud Console
-Visit: https://console.cloud.google.com/apis/credentials
+### **What You'll Get:**
+- Sign in with Google button
+- Access to user's Google profile
+- Email verification (automatic)
 
-### Step 2: Create Project (if needed)
-1. Click project dropdown (top left)
-2. Click **"New Project"**
-3. Name: **"MediConnect 360"**
-4. Click **"Create"**
-5. Wait for project creation
+### **Step 1: Create Google Cloud Project**
 
-### Step 3: Enable Google+ API
-1. Go to: https://console.cloud.google.com/apis/library
-2. Search for **"Google+ API"**
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Click "Select a project" → "New Project"
+3. Project name: `MediConnect 360`
+4. Click "Create"
+5. Wait for project creation (30 seconds)
+
+### **Step 2: Enable Google+ API**
+
+1. In the left sidebar, click "APIs & Services" → "Library"
+2. Search for "Google+ API"
 3. Click on it
-4. Click **"Enable"**
+4. Click "Enable"
+5. Wait for activation
 
-### Step 4: Configure OAuth Consent Screen
-1. Go to: https://console.cloud.google.com/apis/credentials/consent
-2. Select **"External"**
-3. Click **"Create"**
-4. Fill in:
-   - **App name:** MediConnect 360
-   - **User support email:** your@email.com
-   - **Developer contact:** your@email.com
-5. Click **"Save and Continue"**
-6. **Scopes:** Click "Save and Continue" (skip)
-7. **Test users:** Add your email
-8. Click **"Save and Continue"**
-9. Click **"Back to Dashboard"**
+### **Step 3: Configure OAuth Consent Screen**
 
-### Step 5: Create OAuth Client ID
-1. Go to: https://console.cloud.google.com/apis/credentials
-2. Click **"Create Credentials"** → **"OAuth 2.0 Client ID"**
-3. Application type: **"Web application"**
-4. Name: **"MediConnect 360 Web"**
-5. **Authorized JavaScript origins:**
-   - Add: `http://localhost:5173`
-   - Add: `http://localhost:5000`
-6. **Authorized redirect URIs:**
-   - Add: `http://localhost:5000/api/auth/google/callback`
-7. Click **"Create"**
-8. **Copy Client ID and Client Secret**
+1. Go to "APIs & Services" → "OAuth consent screen"
+2. Choose "External" (for public users)
+3. Click "Create"
 
-### Step 6: Add to Backend .env
-Edit `backend/.env`:
-```env
-GOOGLE_CLIENT_ID=123456789-abcdefg.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=GOCSPX-your-secret-here
+**Fill in the form:**
+
+```
+App name: MediConnect 360
+User support email: your-email@example.com
+App logo: (optional - upload your logo)
+
+App domain:
+  - Application home page: https://mediconnect360.com
+  - Application privacy policy: https://mediconnect360.com/privacy
+  - Application terms of service: https://mediconnect360.com/terms
+
+Authorized domains:
+  - mediconnect360.com
+  - localhost (for development)
+
+Developer contact: your-email@example.com
+```
+
+4. Click "Save and Continue"
+
+**Scopes:**
+5. Click "Add or Remove Scopes"
+6. Select these scopes:
+   - `userinfo.email`
+   - `userinfo.profile`
+   - `openid`
+7. Click "Update" → "Save and Continue"
+
+**Test users (for development):**
+8. Add your email and test users
+9. Click "Save and Continue"
+10. Review and click "Back to Dashboard"
+
+### **Step 4: Create OAuth Credentials**
+
+1. Go to "APIs & Services" → "Credentials"
+2. Click "Create Credentials" → "OAuth 2.0 Client ID"
+3. Application type: "Web application"
+4. Name: `MediConnect 360 Web Client`
+
+**Authorized JavaScript origins:**
+```
+http://localhost:5173
+http://localhost:5000
+https://mediconnect360.com
+https://api.mediconnect360.com
+```
+
+**Authorized redirect URIs:**
+```
+http://localhost:5000/api/auth/google/callback
+https://api.mediconnect360.com/api/auth/google/callback
+```
+
+5. Click "Create"
+6. **Copy your credentials:**
+   - Client ID: `123456789-abc.apps.googleusercontent.com`
+   - Client Secret: `GOCSPX-abc123xyz`
+
+### **Step 5: Add to Environment Variables**
+
+**Backend (.env):**
+```bash
+GOOGLE_CLIENT_ID=123456789-abc.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-abc123xyz
 GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
 ```
 
+**Frontend (.env):**
+```bash
+VITE_GOOGLE_CLIENT_ID=123456789-abc.apps.googleusercontent.com
+```
+
+**Production:**
+```bash
+# Backend
+GOOGLE_CALLBACK_URL=https://api.mediconnect360.com/api/auth/google/callback
+
+# Frontend - no changes needed
+```
+
+### **Step 6: Test Google OAuth**
+
+1. Start your app
+2. Click "Sign in with Google"
+3. Select your Google account
+4. Grant permissions
+5. You should be redirected back and logged in!
+
+### **Troubleshooting:**
+
+**"redirect_uri_mismatch" error:**
+- Check that redirect URI in code matches Google Console exactly
+- Include http:// or https://
+- No trailing slashes
+
+**"Access blocked" error:**
+- Add your email to test users in OAuth consent screen
+- Or publish your app (requires verification for production)
+
+**"invalid_client" error:**
+- Check Client ID and Secret are correct
+- Restart backend server after changing .env
+
 ---
 
-## 🐙 Part 2: GitHub OAuth Setup
+## 🐙 **Part 2: GitHub OAuth Setup**
 
-### Step 1: Go to GitHub Settings
-Visit: https://github.com/settings/developers
+### **What You'll Get:**
+- Sign in with GitHub button
+- Access to user's GitHub profile
+- Email from GitHub account
 
-### Step 2: Create OAuth App
-1. Click **"OAuth Apps"** in left menu
-2. Click **"New OAuth App"**
-3. Fill in:
-   - **Application name:** MediConnect 360
-   - **Homepage URL:** `http://localhost:5173`
-   - **Authorization callback URL:** `http://localhost:5000/api/auth/github/callback`
-   - **Application description:** Healthcare platform with AI diagnostics
-4. Click **"Register application"**
+### **Step 1: Create OAuth App**
 
-### Step 3: Get Client ID and Secret
-1. You'll see your **Client ID** immediately
-2. Click **"Generate a new client secret"**
-3. **Copy both Client ID and Client Secret** (secret shown only once!)
+1. Go to [GitHub Settings](https://github.com/settings/developers)
+2. Click "OAuth Apps" → "New OAuth App"
 
-### Step 4: Add to Backend .env
-Edit `backend/.env`:
-```env
-GITHUB_CLIENT_ID=Iv1.1234567890abcdef
-GITHUB_CLIENT_SECRET=1234567890abcdef1234567890abcdef12345678
+**Fill in the form:**
+
+```
+Application name: MediConnect 360
+Homepage URL: http://localhost:5173
+Application description: AI-Powered Healthcare Platform
+Authorization callback URL: http://localhost:5000/api/auth/github/callback
+```
+
+3. Click "Register application"
+
+### **Step 2: Get Credentials**
+
+1. You'll see your **Client ID**
+2. Click "Generate a new client secret"
+3. **Copy immediately** (you can't see it again):
+   - Client ID: `Iv1.abc123xyz`
+   - Client Secret: `abc123xyz789...`
+
+### **Step 3: Add to Environment Variables**
+
+**Backend (.env):**
+```bash
+GITHUB_CLIENT_ID=Iv1.abc123xyz
+GITHUB_CLIENT_SECRET=abc123xyz789...
 GITHUB_CALLBACK_URL=http://localhost:5000/api/auth/github/callback
 ```
 
+**Production:**
+```bash
+GITHUB_CALLBACK_URL=https://api.mediconnect360.com/api/auth/github/callback
+```
+
+### **Step 4: Update for Production**
+
+1. Go back to your OAuth App settings
+2. Update URLs:
+   ```
+   Homepage URL: https://mediconnect360.com
+   Authorization callback URL: https://api.mediconnect360.com/api/auth/github/callback
+   ```
+3. Click "Update application"
+
+### **Step 5: Test GitHub OAuth**
+
+1. Start your app
+2. Click "Sign in with GitHub"
+3. Authorize the app
+4. You should be redirected back and logged in!
+
+### **Troubleshooting:**
+
+**"redirect_uri_mismatch" error:**
+- Check callback URL matches exactly
+- Update in GitHub OAuth App settings
+
+**"bad_verification_code" error:**
+- Check Client ID and Secret are correct
+- Restart backend server
+
+**No email returned:**
+- User's email might be private
+- Request `user:email` scope
+- Handle missing email gracefully
+
 ---
 
-## 💳 Part 3: Stripe Payment Setup
+## 💳 **Part 3: Stripe Payment Setup**
 
-### Step 1: Create Stripe Account
-Visit: https://dashboard.stripe.com/register
+### **What You'll Get:**
+- Accept credit/debit cards
+- Subscription management
+- Payment history
+- Refunds
+- Webhooks for events
 
-1. Enter your email
-2. Create password
+### **Step 1: Create Stripe Account**
+
+1. Go to [Stripe](https://dashboard.stripe.com/register)
+2. Sign up with email
 3. Verify email
-4. Complete account setup
+4. Complete business profile (can skip for testing)
 
-### Step 2: Get Test API Keys
-1. Go to: https://dashboard.stripe.com/test/apikeys
+### **Step 2: Get Test API Keys**
+
+1. Go to [Developers → API Keys](https://dashboard.stripe.com/test/apikeys)
 2. You'll see two keys:
-   - **Publishable key** (starts with `pk_test_...`)
-   - **Secret key** (click "Reveal test key", starts with `sk_test_...`)
-3. **Copy both keys**
+   - **Publishable key** (starts with `pk_test_`)
+   - **Secret key** (starts with `sk_test_`)
+3. Click "Reveal test key" for secret key
+4. Copy both keys
 
-### Step 3: Get Webhook Secret (Optional but Recommended)
-1. Go to: https://dashboard.stripe.com/test/webhooks
-2. Click **"Add endpoint"**
-3. Endpoint URL: `http://localhost:5000/api/payment/webhook`
-4. Select events to listen to:
-   - `payment_intent.succeeded`
-   - `payment_intent.payment_failed`
-   - `customer.subscription.created`
-   - `customer.subscription.deleted`
-5. Click **"Add endpoint"**
-6. Click on your new webhook
-7. Click **"Reveal"** under "Signing secret"
-8. **Copy the webhook secret** (starts with `whsec_...`)
+### **Step 3: Add to Environment Variables**
 
-### Step 4: Add to Backend .env
-Edit `backend/.env`:
-```env
-STRIPE_SECRET_KEY=sk_test_51Abc...xyz
-STRIPE_PUBLISHABLE_KEY=pk_test_51Abc...xyz
-STRIPE_WEBHOOK_SECRET=whsec_1234567890abcdef
-```
-
----
-
-## 🧪 Testing Your Setup
-
-### Test Google OAuth
+**Backend (.env):**
 ```bash
-# Open in browser:
-http://localhost:5000/api/auth/google
-
-# Should redirect to Google login
-# After login, redirects back with token
+STRIPE_SECRET_KEY=sk_test_51abc123...
+STRIPE_PUBLISHABLE_KEY=pk_test_51abc123...
 ```
 
-### Test GitHub OAuth
+**Frontend (.env):**
 ```bash
-# Open in browser:
-http://localhost:5000/api/auth/github
-
-# Should redirect to GitHub login
-# After login, redirects back with token
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_51abc123...
 ```
 
-### Test Stripe Payment
-```bash
-# Create payment intent
-curl -X POST http://localhost:5000/api/payment/create-intent \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d '{"amount": 29.99, "currency": "usd"}'
+### **Step 4: Setup Webhook (Development)**
 
-# Response will include clientSecret for frontend
+**Option A: Stripe CLI (Recommended)**
+
+1. Install Stripe CLI:
+   ```bash
+   # macOS
+   brew install stripe/stripe-cli/stripe
+   
+   # Windows
+   scoop install stripe
+   
+   # Linux
+   wget https://github.com/stripe/stripe-cli/releases/download/v1.19.0/stripe_1.19.0_linux_x86_64.tar.gz
+   tar -xvf stripe_1.19.0_linux_x86_64.tar.gz
+   sudo mv stripe /usr/local/bin/
+   ```
+
+2. Login to Stripe:
+   ```bash
+   stripe login
+   ```
+
+3. Forward webhooks to local server:
+   ```bash
+   stripe listen --forward-to localhost:5000/api/payment/webhook
+   ```
+
+4. Copy the webhook signing secret (starts with `whsec_`)
+
+5. Add to backend/.env:
+   ```bash
+   STRIPE_WEBHOOK_SECRET=whsec_abc123...
+   ```
+
+**Option B: ngrok (Alternative)**
+
+1. Install ngrok: https://ngrok.com/download
+2. Start ngrok:
+   ```bash
+   ngrok http 5000
+   ```
+3. Copy the HTTPS URL: `https://abc123.ngrok.io`
+4. Go to Stripe Dashboard → Webhooks
+5. Add endpoint: `https://abc123.ngrok.io/api/payment/webhook`
+6. Select events (see Step 5)
+7. Copy webhook secret
+
+### **Step 5: Setup Webhook (Production)**
+
+1. Go to [Stripe Dashboard → Webhooks](https://dashboard.stripe.com/webhooks)
+2. Click "Add endpoint"
+3. Endpoint URL: `https://api.mediconnect360.com/api/payment/webhook`
+4. Description: `MediConnect 360 Production`
+
+**Select events to listen to:**
+```
+✓ payment_intent.succeeded
+✓ payment_intent.payment_failed
+✓ payment_intent.canceled
+✓ charge.succeeded
+✓ charge.failed
+✓ charge.refunded
+✓ customer.created
+✓ customer.updated
+✓ customer.deleted
+✓ customer.subscription.created
+✓ customer.subscription.updated
+✓ customer.subscription.deleted
+✓ customer.subscription.trial_will_end
+✓ invoice.paid
+✓ invoice.payment_failed
+✓ invoice.finalized
 ```
 
----
+5. Click "Add endpoint"
+6. Copy the **Signing secret** (starts with `whsec_`)
+7. Add to production environment:
+   ```bash
+   STRIPE_WEBHOOK_SECRET=whsec_abc123...
+   ```
 
-## 🎨 Frontend Integration
+### **Step 6: Create Products & Prices**
 
-### Update Login Page with OAuth Buttons
+1. Go to [Products](https://dashboard.stripe.com/test/products)
+2. Click "Add product"
 
-The frontend already has Google OAuth button. Now add GitHub:
+**Free Plan:**
+```
+Name: Free Plan
+Description: Basic features for individuals
+Pricing: $0.00 / month
+Recurring: Monthly
+```
+
+**Pro Plan:**
+```
+Name: Pro Plan
+Description: Advanced features for power users
+Pricing: $9.99 / month
+Recurring: Monthly
+```
+
+**Family Plan:**
+```
+Name: Family Plan
+Description: Up to 5 family members
+Pricing: $19.99 / month
+Recurring: Monthly
+```
+
+3. Copy the **Price ID** for each (starts with `price_`)
+4. Add to your code:
+   ```typescript
+   // backend/src/config/stripe.config.ts
+   export const STRIPE_PRICES = {
+     FREE: 'price_free',
+     PRO: 'price_1abc123',
+     FAMILY: 'price_1xyz789',
+   };
+   ```
+
+### **Step 7: Test Payments**
+
+**Test Card Numbers:**
+```
+Success: 4242 4242 4242 4242
+Decline: 4000 0000 0000 0002
+Insufficient funds: 4000 0000 0000 9995
+3D Secure: 4000 0025 0000 3155
+
+Expiry: Any future date (e.g., 12/34)
+CVC: Any 3 digits (e.g., 123)
+ZIP: Any 5 digits (e.g., 12345)
+```
+
+**Test Flow:**
+1. Start your app
+2. Go to subscription page
+3. Select a plan
+4. Enter test card: `4242 4242 4242 4242`
+5. Complete payment
+6. Check Stripe Dashboard → Payments
+7. Verify webhook received in backend logs
+
+### **Step 8: Go Live (Production)**
+
+1. Complete business profile in Stripe Dashboard
+2. Add bank account for payouts
+3. Verify identity (may require documents)
+4. Switch to live mode (toggle in top right)
+5. Get live API keys from [API Keys](https://dashboard.stripe.com/apikeys)
+6. Update production environment:
+   ```bash
+   STRIPE_SECRET_KEY=sk_live_abc123...
+   STRIPE_PUBLISHABLE_KEY=pk_live_abc123...
+   ```
+7. Update frontend:
+   ```bash
+   VITE_STRIPE_PUBLISHABLE_KEY=pk_live_abc123...
+   ```
+8. Setup production webhook (see Step 5)
+9. Test with real card (small amount)
+10. Refund test payment
+
+### **Step 9: Handle Webhooks in Code**
+
+**Backend webhook handler (already implemented):**
 
 ```typescript
-// In src/pages/LoginPage.tsx
+// backend/src/payment/payment.controller.ts
+@Post('webhook')
+async handleWebhook(
+  @Req() req: Request,
+  @Headers('stripe-signature') signature: string,
+) {
+  const event = this.stripe.webhooks.constructEvent(
+    req.body,
+    signature,
+    process.env.STRIPE_WEBHOOK_SECRET,
+  );
 
-// Add GitHub button after Google button:
-<button
-  onClick={() => window.location.href = 'http://localhost:5000/api/auth/github'}
-  className="w-full py-2 px-4 bg-gray-800 hover:bg-gray-900 text-white rounded-lg flex items-center justify-center gap-2 transition-colors"
->
-  <Github className="w-5 h-5" />
-  {isLogin ? "Sign in with GitHub" : "Sign up with GitHub"}
-</button>
+  switch (event.type) {
+    case 'payment_intent.succeeded':
+      await this.handlePaymentSuccess(event.data.object);
+      break;
+    case 'payment_intent.payment_failed':
+      await this.handlePaymentFailed(event.data.object);
+      break;
+    case 'customer.subscription.created':
+      await this.handleSubscriptionCreated(event.data.object);
+      break;
+    case 'customer.subscription.deleted':
+      await this.handleSubscriptionCanceled(event.data.object);
+      break;
+    // ... more events
+  }
+
+  return { received: true };
+}
 ```
 
-### Add Stripe Checkout
+### **Troubleshooting:**
 
-```typescript
-// Create new file: src/services/payment.ts
+**"No such customer" error:**
+- Create customer first before charging
+- Store Stripe customer ID in database
 
-export const createCheckoutSession = async (priceId: string) => {
-  const response = await fetch('http://localhost:5000/api/payment/create-checkout-session', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${getToken()}`,
-    },
-    body: JSON.stringify({
-      priceId,
-      successUrl: 'http://localhost:5173/payment/success',
-      cancelUrl: 'http://localhost:5173/payment/cancel',
-    }),
-  });
-  
-  const session = await response.json();
-  window.location.href = session.url;
-};
-```
+**Webhook signature verification failed:**
+- Check STRIPE_WEBHOOK_SECRET is correct
+- Ensure raw body is passed to webhook handler
+- Don't parse JSON before verification
+
+**Payment succeeded but webhook not received:**
+- Check webhook endpoint is accessible
+- Verify URL in Stripe Dashboard
+- Check firewall/security rules
+- Look for errors in Stripe Dashboard → Webhooks → Attempts
+
+**3D Secure not working:**
+- Use test card: 4000 0025 0000 3155
+- Ensure return_url is set in payment intent
+- Handle requires_action status
 
 ---
 
-## 📊 Available API Endpoints
+## 🔒 **Security Best Practices**
 
-### Authentication Endpoints
-```
-GET  /api/auth/google              - Initiate Google OAuth
-GET  /api/auth/google/callback     - Google OAuth callback
-GET  /api/auth/github              - Initiate GitHub OAuth
-GET  /api/auth/github/callback     - GitHub OAuth callback
-POST /api/auth/register            - Email/password registration
-POST /api/auth/login               - Email/password login
-```
+### **OAuth:**
 
-### Payment Endpoints
-```
-POST /api/payment/create-intent              - Create payment intent
-POST /api/payment/create-checkout-session    - Create Stripe checkout
-POST /api/payment/create-customer            - Create Stripe customer
-POST /api/payment/create-subscription        - Create subscription
-POST /api/payment/cancel-subscription/:id    - Cancel subscription
-GET  /api/payment/intent/:id                 - Get payment intent
-POST /api/payment/webhook                    - Stripe webhook handler
-```
+1. **Never expose client secrets:**
+   - Keep in backend .env only
+   - Never commit to Git
+   - Never send to frontend
+
+2. **Validate redirect URIs:**
+   - Whitelist exact URLs
+   - No wildcards in production
+   - Use HTTPS in production
+
+3. **Verify tokens:**
+   - Always verify OAuth tokens on backend
+   - Don't trust frontend data
+   - Check token expiration
+
+4. **Handle errors gracefully:**
+   - Don't expose error details to users
+   - Log errors for debugging
+   - Show user-friendly messages
+
+### **Stripe:**
+
+1. **Never expose secret key:**
+   - Backend only
+   - Never in frontend code
+   - Never in Git
+
+2. **Always verify webhooks:**
+   - Use signature verification
+   - Check event type
+   - Idempotency (handle duplicates)
+
+3. **Use HTTPS in production:**
+   - Required for PCI compliance
+   - Protects card data
+   - Required for webhooks
+
+4. **Store minimal card data:**
+   - Never store full card numbers
+   - Use Stripe tokens/payment methods
+   - Let Stripe handle PCI compliance
+
+5. **Test thoroughly:**
+   - Use test mode first
+   - Test all card scenarios
+   - Test webhook events
+   - Test refunds
 
 ---
 
-## 🔒 Security Best Practices
+## 📊 **Testing Checklist**
 
-### 1. Environment Variables
-- ✅ Never commit `.env` files
-- ✅ Use different keys for dev/prod
-- ✅ Rotate secrets regularly
+### **Google OAuth:**
+- [ ] Sign in with Google works
+- [ ] User profile data received
+- [ ] Email verified automatically
+- [ ] Logout works
+- [ ] Re-login works
+- [ ] Error handling works
 
-### 2. OAuth Security
-- ✅ Validate redirect URIs
-- ✅ Use state parameter (handled by Passport)
-- ✅ Verify tokens server-side
+### **GitHub OAuth:**
+- [ ] Sign in with GitHub works
+- [ ] User profile data received
+- [ ] Email received (if public)
+- [ ] Logout works
+- [ ] Re-login works
+- [ ] Error handling works
 
-### 3. Payment Security
-- ✅ Never expose secret keys to frontend
-- ✅ Validate webhook signatures
-- ✅ Use HTTPS in production
-- ✅ Implement idempotency keys
+### **Stripe Payments:**
+- [ ] Successful payment (4242...)
+- [ ] Declined payment (4000 0000 0000 0002)
+- [ ] Insufficient funds (4000 0000 0000 9995)
+- [ ] 3D Secure (4000 0025 0000 3155)
+- [ ] Subscription creation
+- [ ] Subscription cancellation
+- [ ] Webhook received
+- [ ] Payment history shows
+- [ ] Refund works
+- [ ] Invoice generated
 
 ---
 
-## 💰 Stripe Pricing Plans
+## 💰 **Pricing Strategy**
 
-### Recommended Plans for MediConnect 360
+### **Recommended Plans:**
 
-#### Free Tier
-```typescript
-// No payment needed
-- AI symptom checker
+**Free Plan ($0/month):**
+- Basic AI symptom checker
+- 3 appointments/month
 - Basic health tracking
-- Limited consultations
-```
+- 1 family member
+- Email support
 
-#### Premium Plan ($9.99/month)
-```typescript
-const PREMIUM_PRICE_ID = 'price_1234...'; // Create in Stripe Dashboard
-
-Features:
-- Unlimited AI consultations
-- Video consultations
-- Health records storage
+**Pro Plan ($9.99/month):**
+- Unlimited AI features
+- Unlimited appointments
+- Advanced health tracking
+- 3 family members
 - Priority support
-```
+- Lab result analysis
+- Prescription management
 
-#### Pro Plan ($29.99/month)
-```typescript
-const PRO_PRICE_ID = 'price_5678...'; // Create in Stripe Dashboard
+**Family Plan ($19.99/month):**
+- Everything in Pro
+- Up to 5 family members
+- Shared health records
+- Family calendar
+- Dedicated support
 
-Features:
-- Everything in Premium
-- Family accounts (up to 5 members)
-- Advanced analytics
-- Dedicated health coach
+**Enterprise (Custom):**
+- Custom features
+- Unlimited users
 - API access
-```
+- White-label option
+- SLA guarantee
 
-### Create Prices in Stripe Dashboard
-1. Go to: https://dashboard.stripe.com/test/products
-2. Click **"Add product"**
-3. Name: "MediConnect 360 Premium"
-4. Price: $9.99
-5. Billing period: Monthly
-6. Click **"Save product"**
-7. Copy the **Price ID** (starts with `price_...`)
+### **Stripe Fees:**
+- 2.9% + $0.30 per transaction
+- No monthly fees
+- No setup fees
+- Instant payouts available
 
----
-
-## 🧪 Test Cards for Stripe
-
-### Successful Payment
-```
-Card: 4242 4242 4242 4242
-Exp: Any future date
-CVC: Any 3 digits
-ZIP: Any 5 digits
-```
-
-### Payment Requires Authentication
-```
-Card: 4000 0025 0000 3155
-Exp: Any future date
-CVC: Any 3 digits
-```
-
-### Payment Declined
-```
-Card: 4000 0000 0000 0002
-Exp: Any future date
-CVC: Any 3 digits
-```
+**Example:**
+- $9.99 subscription
+- Stripe fee: $0.59
+- Your revenue: $9.40
 
 ---
 
-## 🚀 Production Deployment
+## 📚 **Additional Resources**
 
-### Before Going Live:
+### **Google OAuth:**
+- [Official Docs](https://developers.google.com/identity/protocols/oauth2)
+- [OAuth Playground](https://developers.google.com/oauthplayground/)
+- [Scopes Reference](https://developers.google.com/identity/protocols/oauth2/scopes)
 
-#### 1. Google OAuth
-- Switch to production credentials
-- Update redirect URIs to production domain
-- Complete OAuth consent screen verification
+### **GitHub OAuth:**
+- [Official Docs](https://docs.github.com/en/developers/apps/building-oauth-apps)
+- [Scopes Reference](https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps)
 
-#### 2. GitHub OAuth
-- Create new OAuth app for production
-- Update callback URL to production domain
+### **Stripe:**
+- [Official Docs](https://stripe.com/docs)
+- [Testing Guide](https://stripe.com/docs/testing)
+- [Webhook Guide](https://stripe.com/docs/webhooks)
+- [API Reference](https://stripe.com/docs/api)
 
-#### 3. Stripe
-- Switch from test keys to live keys
-- Update webhook endpoint to production URL
-- Complete Stripe account verification
-- Set up proper error handling
-
-#### 4. Environment Variables
-```env
-# Production .env
-GOOGLE_CLIENT_ID=prod-client-id
-GOOGLE_CLIENT_SECRET=prod-secret
-GITHUB_CLIENT_ID=prod-client-id
-GITHUB_CLIENT_SECRET=prod-secret
-STRIPE_SECRET_KEY=sk_live_...
-STRIPE_PUBLISHABLE_KEY=pk_live_...
-```
+### **Related Guides:**
+- [GET_API_KEYS.md](GET_API_KEYS.md) - Get all API keys
+- [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) - Deploy to production
+- [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md) - Development setup
 
 ---
 
-## 📝 Quick Reference
+## 🆘 **Need Help?**
 
-### Backend .env Template
-```env
-# Google OAuth
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-secret
-GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
+**Common Issues:**
+- Check environment variables are set correctly
+- Restart backend server after .env changes
+- Verify URLs match exactly (no trailing slashes)
+- Check firewall/security rules
+- Look for errors in browser console
+- Check backend logs
 
-# GitHub OAuth
-GITHUB_CLIENT_ID=your-github-client-id
-GITHUB_CLIENT_SECRET=your-github-secret
-GITHUB_CALLBACK_URL=http://localhost:5000/api/auth/github/callback
-
-# Stripe
-STRIPE_SECRET_KEY=sk_test_your-key
-STRIPE_PUBLISHABLE_KEY=pk_test_your-key
-STRIPE_WEBHOOK_SECRET=whsec_your-secret
-```
-
-### Testing Checklist
-- [ ] Google OAuth login works
-- [ ] GitHub OAuth login works
-- [ ] Payment intent creation works
-- [ ] Checkout session creation works
-- [ ] Webhook receives events
-- [ ] User accounts link properly
-- [ ] Tokens are generated correctly
+**Still stuck?**
+- [GitHub Issues](https://github.com/YOUR_USERNAME/MediConnect-360/issues)
+- [GitHub Discussions](https://github.com/YOUR_USERNAME/MediConnect-360/discussions)
+- Email: support@mediconnect360.com
 
 ---
 
-## 🎉 You're All Set!
+**Congratulations! OAuth and payments are now configured! 🎉**
 
-### What You Can Do Now:
-1. ✅ Users can sign in with Google
-2. ✅ Users can sign in with GitHub
-3. ✅ Accept one-time payments
-4. ✅ Create subscriptions
-5. ✅ Handle webhooks
-6. ✅ Manage customers
-
-### Next Steps:
-1. Test all OAuth flows
-2. Test payment flows
-3. Implement subscription UI
-4. Add payment success/cancel pages
-5. Deploy to production!
-
----
-
-<div align="center">
-
-**🔐 OAuth & Payments Fully Integrated! 🔐**
-
-**Built with ❤️ for secure, seamless user experience**
-
-</div>
+**Last Updated:** December 2025  
+**Status:** Complete & Tested ✅
