@@ -3,6 +3,7 @@ npm-debug.log
 dist
 .env
 .env.local
+.env.test
 .git
 .gitignore
 README.md
@@ -13,3 +14,9 @@ coverage
 *.log
 test
 *.spec.ts
+*.e2e-spec.ts
+jest.config.js
+jest-e2e.json
+.eslintrc.js
+.prettierrc
+tsconfig.spec.json

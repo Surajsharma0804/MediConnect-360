@@ -3,11 +3,11 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files first for better caching
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci && npm cache clean --force
+# Install ALL dependencies (including dev dependencies for build)
+RUN npm ci --prefer-offline --no-audit && npm cache clean --force
 
 # Copy source code
 COPY . .
@@ -20,19 +20,19 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Install production dependencies only
+# Copy package files
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+
+# Install production dependencies only
+RUN npm ci --only=production --prefer-offline --no-audit && npm cache clean --force
 
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nestjs -u 1001
-
-# Change ownership
-RUN chown -R nestjs:nodejs /app
+    adduser -S nestjs -u 1001 && \
+    chown -R nestjs:nodejs /app
 
 # Switch to non-root user
 USER nestjs
