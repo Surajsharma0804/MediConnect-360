@@ -1,32 +1,32 @@
-import { IsString, MinLength, MaxLength, IsOptional, IsIn } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsArray, MinLength, MaxLength } from 'class-validator';
 
 export class SymptomCheckDto {
   @IsString()
+  @IsNotEmpty()
   @MinLength(3)
   @MaxLength(1000)
   symptoms: string;
 
   @IsOptional()
   @IsString()
-  @IsIn(['en', 'es', 'fr', 'de', 'it', 'pt', 'zh', 'ja', 'ko', 'ar', 'hi'])
   language?: string;
 }
 
 export class ChatDto {
   @IsString()
+  @IsNotEmpty()
   @MinLength(1)
   @MaxLength(1000)
   message: string;
 
   @IsOptional()
   @IsString()
-  @IsIn(['en', 'es', 'fr', 'de', 'it', 'pt', 'zh', 'ja', 'ko', 'ar', 'hi'])
   language?: string;
 }
 
 export class DrugInteractionDto {
+  @IsArray()
+  @IsNotEmpty()
   @IsString({ each: true })
-  @MinLength(2, { each: true })
-  @MaxLength(100, { each: true })
   medications: string[];
 }

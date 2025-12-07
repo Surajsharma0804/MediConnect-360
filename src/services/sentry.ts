@@ -21,13 +21,23 @@ class SentryService {
   /**
    * Initialize Sentry
    * FREE - 5,000 errors/month
+   * 
+   * NOTE: Sentry SDK not installed by default to reduce bundle size.
+   * To enable error tracking:
+   * 1. Install: npm install @sentry/react @sentry/tracing
+   * 2. Configure VITE_SENTRY_DSN environment variable
+   * 3. Uncomment the implementation below
    */
   async init(): Promise<void> {
     if (this.initialized || !this.config.dsn) {
-      console.log('Sentry not initialized: DSN not configured');
+      console.log('Sentry not initialized: DSN not configured or Sentry not installed');
       return;
     }
 
+    console.warn('Sentry integration is disabled. Install @sentry/react to enable error tracking.');
+    return;
+
+    /* Uncomment to enable Sentry:
     try {
       // Dynamically import Sentry to reduce bundle size
       const Sentry = await import('@sentry/react');
@@ -61,6 +71,7 @@ class SentryService {
     } catch (error) {
       console.error('Failed to initialize Sentry:', error);
     }
+    */
   }
 
   /**

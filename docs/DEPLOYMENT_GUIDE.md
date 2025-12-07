@@ -110,10 +110,10 @@ JWT_SECRET=your-super-secret-production-key-change-this
 JWT_EXPIRES_IN=7d
 
 # Google Gemini AI
-GEMINI_API_KEY=AIzaSyBTp_mSZ4_3UGtvaSkYzHhoR8R0tIzKXMA
+GEMINI_API_KEY=your-gemini-api-key-here
 
 # Resend Email
-RESEND_API_KEY=re_bnt1s9pQ_2j8jmcVTMG3bVRb8LAYdx6Wo
+RESEND_API_KEY=your-resend-api-key-here
 FROM_EMAIL=noreply@yourdomain.com
 
 # Google OAuth (update with production URLs)

@@ -30,13 +30,23 @@ class FirebaseService {
   /**
    * Initialize Firebase
    * FREE - 10M messages/month
+   * 
+   * NOTE: Firebase SDK not installed by default to reduce bundle size.
+   * To enable Firebase notifications:
+   * 1. Install: npm install firebase
+   * 2. Configure environment variables
+   * 3. Uncomment the implementation below
    */
   async init(): Promise<void> {
     if (this.initialized || !this.config.apiKey) {
-      console.log('Firebase not initialized: Config not complete');
+      console.log('Firebase not initialized: Config not complete or Firebase not installed');
       return;
     }
 
+    console.warn('Firebase integration is disabled. Install firebase package to enable push notifications.');
+    return;
+
+    /* Uncomment to enable Firebase:
     try {
       // Dynamically import Firebase to reduce bundle size
       const { initializeApp } = await import('firebase/app');
@@ -66,6 +76,7 @@ class FirebaseService {
     } catch (error) {
       console.error('Failed to initialize Firebase:', error);
     }
+    */
   }
 
   /**

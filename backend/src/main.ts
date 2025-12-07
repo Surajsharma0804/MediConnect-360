@@ -4,11 +4,15 @@ import { AppModule } from './app.module';
 import helmet from 'helmet';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { validateEnvironment } from './config/env.validation';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
   try {
+    // Validate environment variables before starting
+    validateEnvironment();
+
     const app = await NestFactory.create(AppModule, {
       logger: ['error', 'warn', 'log', 'debug', 'verbose'],
     });

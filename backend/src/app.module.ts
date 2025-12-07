@@ -13,11 +13,27 @@ import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { GoogleStrategy } from './auth/strategies/google.strategy';
 import { GitHubStrategy } from './auth/strategies/github.strategy';
 import { PaymentController } from './payment/payment.controller';
+import { AIModule } from './ai/ai.module';
+import { EHRModule } from './ehr/ehr.module';
+import { ProvidersModule } from './providers/providers.module';
+import { AppointmentsModule } from './appointments/appointments.module';
+import { MessagingModule } from './messaging/messaging.module';
+import { FamilyModule } from './family/family.module';
+import { EmergencyModule } from './emergency/emergency.module';
+import { HealthTrackingModule } from './health-tracking/health-tracking.module';
+import { PharmacyModule } from './pharmacy/pharmacy.module';
+import { InsuranceModule } from './insurance/insurance.module';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AIService } from './services/ai.service';
+import { VoiceService } from './services/voice.service';
 import { StorageService } from './services/storage.service';
 import { EmailService } from './services/email.service';
 import { SMSService } from './services/sms.service';
 import { PaymentService } from './services/payment.service';
+import { FDAService } from './services/fda.service';
+import { NotificationService } from './services/notification.service';
+import { AnalyticsService } from './services/analytics.service';
+import { VideoService } from './services/video.service';
 
 // Conditionally add OAuth strategies only if credentials are configured
 const oauthProviders: any[] = [];
@@ -41,6 +57,17 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
       secret: process.env.JWT_SECRET || 'super-secret-key',
       signOptions: { expiresIn: '7d' },
     }),
+    ScheduleModule.forRoot(),
+    AIModule,
+    EHRModule,
+    ProvidersModule,
+    AppointmentsModule,
+    MessagingModule,
+    FamilyModule,
+    EmergencyModule,
+    HealthTrackingModule,
+    PharmacyModule,
+    InsuranceModule,
   ],
   controllers: [AppController, AuthController, PaymentController],
   providers: [
@@ -53,6 +80,11 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
     EmailService,
     SMSService,
     PaymentService,
+    FDAService,
+    NotificationService,
+    AnalyticsService,
+    VideoService,
+    VoiceService,
   ],
 })
 export class AppModule {}

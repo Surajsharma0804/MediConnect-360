@@ -1,14 +1,9 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
-import { AIService } from './services/ai.service';
-import { SymptomCheckDto, ChatDto, DrugInteractionDto } from './auth/dto/symptom-check.dto';
 
 @Controller()
 export class AppController {
-  constructor(
-    private readonly appService: AppService,
-    private readonly aiService: AIService,
-  ) {}
+  constructor(private readonly appService: AppService) {}
 
   @Get()
   getHello(): string {
@@ -16,36 +11,35 @@ export class AppController {
   }
 
   @Get('health')
-  healthCheck() {
-    return {
+  async healthCheck() {
+    const health = {
       status: 'ok',
       timestamp: new Date().toISOString(),
       service: 'MediConnect 360 API',
       version: '1.0.0',
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV || 'development',
+      checks: {
+        database: 'not_checked',
+        ai: 'not_checked',
+        email: 'not_checked',
+      },
     };
-  }
 
-  @Post('ai/symptom-check')
-  async analyzeSymptoms(@Body() dto: SymptomCheckDto) {
-    const response = await this.aiService.analyzeSymptoms(
-      dto.symptoms,
-      dto.language || 'en',
-    );
-    return { response };
-  }
+    // Check if critical services are configured
+    try {
+      // Database check
+      health.checks.database = process.env.DATABASE_URL ? 'configured' : 'not_configured';
 
-  @Post('ai/chat')
-  async chatWithAI(@Body() dto: ChatDto) {
-    const response = await this.aiService.chatWithAI(
-      [{ role: 'user', content: dto.message }],
-      dto.language || 'en',
-    );
-    return { response };
-  }
+      // AI service check
+      health.checks.ai = process.env.GEMINI_API_KEY ? 'configured' : 'not_configured';
 
-  @Post('ai/drug-interactions')
-  async checkDrugInteractions(@Body() dto: DrugInteractionDto) {
-    const response = await this.aiService.getDrugInteractions(dto.medications);
-    return { response };
+      // Email service check
+      health.checks.email = process.env.RESEND_API_KEY ? 'configured' : 'not_configured';
+    } catch (error) {
+      health.status = 'degraded';
+    }
+
+    return health;
   }
 }
