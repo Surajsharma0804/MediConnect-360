@@ -21,10 +21,17 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  // Initialize theme from localStorage or default to light (professional)
+  // Initialize theme from localStorage or system preference
   const [theme, setTheme] = useState<Theme>(() => {
     const savedTheme = localStorage.getItem('theme');
-    return (savedTheme as Theme) || 'light';
+    if (savedTheme) {
+      return savedTheme as Theme;
+    }
+    // Check system preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+    return 'light';
   });
 
   // Initialize motion preference from localStorage or system preference
@@ -36,11 +43,16 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   });
 
-  // Apply theme to body element
+  // Apply theme to html element for Tailwind dark mode
   useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove('dark', 'light');
+    root.classList.add(theme);
+    localStorage.setItem('theme', theme);
+    
+    // Also update body for any non-Tailwind styles
     document.body.classList.remove('dark', 'light');
     document.body.classList.add(theme);
-    localStorage.setItem('theme', theme);
   }, [theme]);
 
   // Save motion preference
