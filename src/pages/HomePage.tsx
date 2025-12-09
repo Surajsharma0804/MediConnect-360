@@ -19,16 +19,16 @@ const HomePage: React.FC = () => {
     {
       title: "Virtual Consultations",
       description: "Connect with healthcare providers through secure, high-quality video appointments.",
-      icon: <Video className="h-6 w-6 text-purple-400" />,
+      icon: <Video className="h-6 w-6 text-blue-600" />,
       link: "/virtual-consult",
-      color: "from-purple-500 to-indigo-500"
+      color: "from-blue-500 to-indigo-500"
     },
     {
       title: "Health Dashboard",
       description: "Monitor your health metrics, track progress, and visualize your journey in an interactive galaxy view.",
-      icon: <BarChart className="h-6 w-6 text-pink-400" />,
+      icon: <BarChart className="h-6 w-6 text-emerald-600" />,
       link: "/dashboard",
-      color: "from-pink-500 to-purple-500"
+      color: "from-emerald-500 to-teal-500"
     },
     {
       title: "Medical Specialists",
@@ -62,7 +62,7 @@ const HomePage: React.FC = () => {
         <div className="absolute top-0 right-4 md:right-8 -mt-6 md:-mt-8 z-20">
           <Link 
             to="/emergency"
-            className="flex items-center justify-center px-4 py-2 md:px-6 md:py-3 rounded-full bg-red-600 text-white font-bold shadow-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 animate-pulse-glow"
+            className="flex items-center justify-center px-4 py-2 md:px-6 md:py-3 rounded-full bg-red-600 text-white font-bold shadow-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
           >
             <Heart className="h-5 w-5 mr-2" fill="white" />
             Emergency SOS
@@ -74,19 +74,19 @@ const HomePage: React.FC = () => {
       <section className="py-12 px-4 sm:px-6 lg:px-8 glass-panel mt-4 mx-4 sm:mx-8 lg:mx-auto max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="text-center">
-            <div className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
               2,500+
             </div>
             <p className="mt-2 text-slate-400">Active Healthcare Providers</p>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
               1M+
             </div>
             <p className="mt-2 text-slate-400">Patients Served</p>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-red-400 bg-clip-text text-transparent">
+            <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
               98%
             </div>
             <p className="mt-2 text-slate-400">Patient Satisfaction</p>
