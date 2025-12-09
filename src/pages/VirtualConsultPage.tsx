@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Video, Mic, MicOff, VideoOff, Phone, MessageSquare, UserPlus, Share2, Clock, AlertCircle } from 'lucide-react';
+import { Video, Mic, MicOff, VideoOff, Phone, MessageSquare, UserPlus, Share2, Clock, AlertCircle, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const VirtualConsultPage: React.FC = () => {
@@ -298,9 +298,7 @@ const VirtualConsultPage: React.FC = () => {
                   </div>
                   
                   <div className="flex items-center">
-                    <div className="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center mr-2">
-                      <span className="text-xs">⭐</span>
-                    </div>
+                    <Star className="w-4 h-4 text-yellow-500 mr-2" />
                     <span>4.9/5 (243 reviews)</span>
                   </div>
                   
