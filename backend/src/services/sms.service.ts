@@ -17,10 +17,8 @@ export class SMSService {
     this.logger.log(`OTP sent to ${phone}: ${otp}`);
     return { success: true, provider: 'console' };
 
-    // TODO: Add real SMS provider when ready
-    // if (process.env.SMS_PROVIDER === 'twilio') {
-    //   return this.sendViaTwilio(phone, `Your verification code is: ${otp}`);
-    // }
+    // Production: Integrate with Twilio or AWS SNS for SMS delivery
+    // Requires: SMS provider credentials in environment variables
   }
 
   sendAppointmentReminder(

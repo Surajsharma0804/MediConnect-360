@@ -74,19 +74,19 @@ const LoginPage: React.FC = () => {
   
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full glass-panel p-8 animate-float">
+      <div className="max-w-md w-full glass-panel p-8">
         <div className="flex justify-between items-center mb-6">
           <div className="text-center">
             <div className="flex justify-center">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center mb-2">
+              <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center mb-2">
                 <Activity className="h-6 w-6 text-white" />
               </div>
             </div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
               {isLogin ? 'Sign in to MediConnect' : 'Join MediConnect'}
             </h2>
-            <p className="mt-2 text-sm text-slate-400">
-              {isLogin ? 'Access your health universe' : 'Begin your health journey'}
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+              {isLogin ? 'Access your healthcare dashboard' : 'Begin your healthcare journey'}
             </p>
           </div>
           
@@ -249,7 +249,7 @@ const LoginPage: React.FC = () => {
             >
               {isLoading ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
                   <span>Processing...</span>
                 </>
               ) : (

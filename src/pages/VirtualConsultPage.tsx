@@ -142,7 +142,7 @@ const VirtualConsultPage: React.FC = () => {
               
               {isWaiting && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <div className="w-20 h-20 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin mb-4"></div>
+                  <div className="w-20 h-20 rounded-full border-4 border-blue-600 border-t-transparent mb-4"></div>
                   <h2 className="text-xl font-semibold mb-2">Waiting for Doctor</h2>
                   <p className="text-slate-400 text-center max-w-md">
                     Dr. Sarah Johnson will join your consultation shortly. Please stay on this screen.

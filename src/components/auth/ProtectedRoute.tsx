@@ -15,7 +15,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       <div className="min-h-screen flex justify-center items-center">
         <div className="glass-panel p-8">
           <div className="flex flex-col items-center space-y-4">
-            <div className="w-12 h-12 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
+            <div className="w-12 h-12 rounded-full border-4 border-blue-600 border-t-transparent"></div>
             <p className="text-lg">Loading...</p>
           </div>
         </div>

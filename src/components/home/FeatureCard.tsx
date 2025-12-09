@@ -34,7 +34,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
       className={`card group ${prefersReducedMotion ? '' : 'hover:translate-y-[-5px]'} transition-all duration-300`}
       onClick={requiresAuth ? handleClick : undefined}
     >
-      <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${color} flex items-center justify-center mb-4`}>
+      <div className={`w-12 h-12 rounded-full ${color} flex items-center justify-center mb-4 text-white`}>
         {icon}
       </div>
       

@@ -5,12 +5,12 @@ import { Skeleton, SkeletonGroup, CardSkeleton } from '../SkeletonLoader';
 describe('SkeletonLoader', () => {
   it('renders Skeleton component', () => {
     const { container } = render(<Skeleton />);
-    expect(container.firstChild).toHaveClass('animate-pulse');
+    expect(container.firstChild).toHaveClass('bg-gray-300');
   });
 
   it('renders SkeletonGroup with correct count', () => {
     const { container } = render(<SkeletonGroup count={5} />);
-    const skeletons = container.querySelectorAll('.animate-pulse');
+    const skeletons = container.querySelectorAll('.bg-gray-300');
     expect(skeletons).toHaveLength(5);
   });
 

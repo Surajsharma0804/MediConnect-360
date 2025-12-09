@@ -71,19 +71,13 @@ export class InsuranceCardService {
         );
       }
 
-      // OCR processing would go here
-      // For now, return the image URLs and let user fill in details
-      // In production, integrate with Google Cloud Vision API or AWS Textract
-
+      // Production: Integrate OCR with Google Cloud Vision API or AWS Textract
+      // Requires: OCR service credentials and text extraction logic
       const extractedData: Partial<InsuranceCard> = {
         frontImageUrl,
         backImageUrl,
         status: InsuranceStatus.PENDING_VERIFICATION,
       };
-
-      // TODO: Implement OCR extraction
-      // const ocrData = await this.extractDataFromImages(frontImage, backImage);
-      // Object.assign(extractedData, ocrData);
 
       this.logger.log(`Insurance card scanned for user ${userId}`);
       return extractedData;

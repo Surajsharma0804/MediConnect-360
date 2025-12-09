@@ -21,19 +21,9 @@ export class NotificationService {
    */
   sendPushNotification(userId: string, notification: PushNotification): void {
     try {
-      // This would integrate with Firebase Cloud Messaging
-      // For now, log it
+      // Production: Integrate with Firebase Cloud Messaging
+      // Requires: firebase-admin package and service account credentials
       this.logger.log(`Push notification to ${userId}: ${notification.title}`);
-
-      // TODO: Implement Firebase Admin SDK
-      // const message = {
-      //   notification: {
-      //     title: notification.title,
-      //     body: notification.body,
-      //   },
-      //   token: userFCMToken,
-      // };
-      // await admin.messaging().send(message);
     } catch (error) {
       this.logger.error(`Failed to send push notification: ${error.message}`);
     }

@@ -47,19 +47,8 @@ export class VoiceService {
     try {
       this.logger.log(`Transcribing audio in language: ${languageCode}`);
 
-      // TODO: Implement actual Google Speech-to-Text API integration
-      // const speech = require('@google-cloud/speech');
-      // const client = new speech.SpeechClient();
-      // const audio = { content: audioBuffer.toString('base64') };
-      // const config = {
-      //   encoding: 'LINEAR16',
-      //   sampleRateHertz: 16000,
-      //   languageCode: languageCode,
-      // };
-      // const request = { audio, config };
-      // const [response] = await client.recognize(request);
-      // return response.results.map(result => result.alternatives[0].transcript).join('\n');
-
+      // Production: Integrate with Google Cloud Speech-to-Text API
+      // Requires: @google-cloud/speech package and service account credentials
       return 'Transcribed text placeholder';
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -81,17 +70,8 @@ export class VoiceService {
         throw new Error(`Unsupported language: ${languageCode}`);
       }
 
-      // TODO: Implement actual Google Text-to-Speech API integration
-      // const textToSpeech = require('@google-cloud/text-to-speech');
-      // const client = new textToSpeech.TextToSpeechClient();
-      // const request = {
-      //   input: { text },
-      //   voice: { languageCode, name: voice },
-      //   audioConfig: { audioEncoding: 'MP3' },
-      // };
-      // const [response] = await client.synthesizeSpeech(request);
-      // return Buffer.from(response.audioContent, 'binary');
-
+      // Production: Integrate with Google Cloud Text-to-Speech API
+      // Requires: @google-cloud/text-to-speech package and service account credentials
       return Buffer.from('Audio placeholder');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -112,15 +92,8 @@ export class VoiceService {
     try {
       this.logger.log(`Translating text to ${targetLanguage}`);
 
-      // TODO: Implement actual Google Translate API integration
-      // const { Translate } = require('@google-cloud/translate').v2;
-      // const translate = new Translate();
-      // const [translation] = await translate.translate(text, {
-      //   from: sourceLanguage,
-      //   to: targetLanguage,
-      // });
-      // return translation;
-
+      // Production: Integrate with Google Cloud Translation API
+      // Requires: @google-cloud/translate package and service account credentials
       return `Translated: ${text}`;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';

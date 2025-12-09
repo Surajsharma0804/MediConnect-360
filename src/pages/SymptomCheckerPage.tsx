@@ -241,9 +241,9 @@ const SymptomCheckerPage: React.FC = () => {
                       <span className="text-xs font-medium text-indigo-400">MediConnect AI</span>
                     </div>
                     <div className="flex space-x-1">
-                      <div className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                      <div className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '200ms' }}></div>
-                      <div className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '400ms' }}></div>
+                      <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                      <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                      <div className="w-2 h-2 rounded-full bg-blue-600"></div>
                     </div>
                   </div>
                 </div>

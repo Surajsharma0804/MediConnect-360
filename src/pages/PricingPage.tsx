@@ -116,10 +116,10 @@ const PricingPage: React.FC = () => {
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-slate-900 dark:text-white">
             Choose Your Plan
           </h1>
-          <p className="text-xl text-slate-400 mb-8">
+          <p className="text-xl text-slate-600 dark:text-slate-400 mb-8">
             Select the perfect plan for your healthcare needs
           </p>
 
@@ -129,7 +129,7 @@ const PricingPage: React.FC = () => {
               onClick={() => setBillingCycle('monthly')}
               className={`px-6 py-2 rounded-md transition-all ${
                 billingCycle === 'monthly'
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
+                  ? 'bg-blue-600 text-white'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -139,7 +139,7 @@ const PricingPage: React.FC = () => {
               onClick={() => setBillingCycle('yearly')}
               className={`px-6 py-2 rounded-md transition-all ${
                 billingCycle === 'yearly'
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
+                  ? 'bg-blue-600 text-white'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -156,19 +156,19 @@ const PricingPage: React.FC = () => {
             <div
               key={tier.name}
               className={`glass-panel p-8 rounded-2xl relative ${
-                tier.popular ? 'ring-2 ring-purple-500 scale-105' : ''
+                tier.popular ? 'ring-2 ring-blue-500 scale-105' : ''
               }`}
             >
               {tier.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-1 rounded-full text-sm font-medium">
+                  <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium">
                     Most Popular
                   </span>
                 </div>
               )}
 
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white">
                   {tier.icon}
                 </div>
                 <h3 className="text-2xl font-bold">{tier.name}</h3>
@@ -192,7 +192,7 @@ const PricingPage: React.FC = () => {
               >
                 {loading === tier.priceId ? (
                   <div className="flex items-center justify-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
                     Processing...
                   </div>
                 ) : tier.name === 'Basic' ? (

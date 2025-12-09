@@ -43,7 +43,7 @@ const AuthCallbackPage: React.FC = () => {
         <h2 className="text-2xl font-bold mb-2">Completing Sign In...</h2>
         <p className="text-slate-400">Please wait while we redirect you.</p>
         <div className="mt-6 flex justify-center">
-          <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
         </div>
       </div>
     </div>

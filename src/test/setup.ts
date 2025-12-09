@@ -41,3 +41,21 @@ global.ResizeObserver = class ResizeObserver implements ResizeObserver {
   observe() {}
   unobserve() {}
 };
+
+// Mock localStorage
+const localStorageMock = {
+  getItem: vi.fn((key: string) => {
+    if (key === 'theme') return 'dark';
+    return null;
+  }),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+  length: 0,
+  key: vi.fn(),
+};
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+  writable: true,
+});

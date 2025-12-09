@@ -22,11 +22,11 @@ export class LabResultService {
       const saved = await this.labResultRepository.save(labResult);
       this.logger.log(`Created lab result ${saved.id} for user ${userId}`);
 
-      // Check if any results are abnormal
+      // Check if any results are abnormal and log for notification
       const hasAbnormal = saved.results?.some((r) => r.isAbnormal);
       if (hasAbnormal) {
         this.logger.warn(`Abnormal lab result detected for user ${userId}`);
-        // TODO: Trigger notification
+        // Production: Trigger notification service to alert user and doctor
       }
 
       return saved;
