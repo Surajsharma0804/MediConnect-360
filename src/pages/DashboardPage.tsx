@@ -184,7 +184,7 @@ const DashboardPage: React.FC = () => {
                       <div key={appointment.id} className="glass-panel p-4 rounded-xl">
                         <div className="flex justify-between items-start">
                           <div className="flex items-center">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center mr-3">
+                            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center mr-3">
                               <span className="text-white font-medium">
                                 {appointment.doctor.split(' ').map(n => n[0]).join('')}
                               </span>

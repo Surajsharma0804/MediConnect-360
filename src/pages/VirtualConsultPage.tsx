@@ -103,7 +103,7 @@ const VirtualConsultPage: React.FC = () => {
   return (
     <div className="min-h-[calc(100vh-4rem)] py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+        <h1 className="text-3xl font-bold mb-8 text-slate-900 dark:text-white">
           Virtual Consultation
         </h1>
         
@@ -114,7 +114,7 @@ const VirtualConsultPage: React.FC = () => {
               {isConnecting && !isWaiting && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
                   <div className="mb-4">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center">
                       <Video className="h-8 w-8 text-white" />
                     </div>
                   </div>

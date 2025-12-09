@@ -62,7 +62,7 @@ const SymptomCheckerPage: React.FC = () => {
   return (
     <div className="min-h-[calc(100vh-4rem)] py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+        <h1 className="text-3xl font-bold mb-8 text-slate-900 dark:text-white">
           AI Symptom Checker
         </h1>
         
@@ -86,7 +86,7 @@ const SymptomCheckerPage: React.FC = () => {
                     fill={bodyPart === 'head' ? 'rgba(139, 92, 246, 0.5)' : 'none'} 
                     stroke={bodyPart === 'head' ? '#8b5cf6' : 'currentColor'} 
                     strokeWidth="1.5"
-                    className={bodyPart === 'head' ? 'animate-pulse-glow' : ''}
+                    className={bodyPart === 'head' ? 'opacity-80' : ''}
                   />
                   
                   {/* Neck */}
@@ -102,7 +102,7 @@ const SymptomCheckerPage: React.FC = () => {
                     fill={bodyPart === 'chest' ? 'rgba(139, 92, 246, 0.5)' : 'none'} 
                     stroke={bodyPart === 'chest' ? '#8b5cf6' : 'currentColor'} 
                     strokeWidth="1.5"
-                    className={bodyPart === 'chest' ? 'animate-pulse-glow' : ''}
+                    className={bodyPart === 'chest' ? 'opacity-80' : ''}
                   />
                   
                   {/* Abdomen */}
@@ -115,7 +115,7 @@ const SymptomCheckerPage: React.FC = () => {
                     fill={bodyPart === 'abdomen' ? 'rgba(139, 92, 246, 0.5)' : 'none'} 
                     stroke={bodyPart === 'abdomen' ? '#8b5cf6' : 'currentColor'} 
                     strokeWidth="1.5"
-                    className={bodyPart === 'abdomen' ? 'animate-pulse-glow' : ''}
+                    className={bodyPart === 'abdomen' ? 'opacity-80' : ''}
                   />
                   
                   {/* Arms */}
@@ -191,7 +191,7 @@ const SymptomCheckerPage: React.FC = () => {
           <div className="glass-panel p-6 col-span-1 lg:col-span-2 flex flex-col h-[600px]">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center mr-3">
+                <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center mr-3">
                   <Brain className="h-5 w-5 text-white" />
                 </div>
                 <div>
