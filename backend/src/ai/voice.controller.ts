@@ -13,6 +13,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AIService } from '../services/ai.service';
 import { VoiceService } from '../services/voice.service';
+import '../types/multer';
 
 @Controller('ai/voice')
 export class VoiceController {

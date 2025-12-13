@@ -13,6 +13,7 @@ import {
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { ImagingService } from '../services/imaging.service';
+import '../../types/multer';
 import { CreateImagingStudyDto } from '../dto/create-imaging-study.dto';
 import { UpdateImagingStudyDto } from '../dto/update-imaging-study.dto';
 

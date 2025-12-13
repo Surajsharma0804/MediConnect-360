@@ -16,6 +16,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { InsuranceCardService } from '../services/insurance-card.service';
 import { CreateInsuranceCardDto } from '../dto/create-insurance-card.dto';
 import { UpdateInsuranceCardDto } from '../dto/update-insurance-card.dto';
+import '../../types/multer';
 
 @Controller('insurance/cards')
 @UseGuards(JwtAuthGuard)

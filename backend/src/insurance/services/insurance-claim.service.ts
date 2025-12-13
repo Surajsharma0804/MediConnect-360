@@ -6,6 +6,7 @@ import { CreateClaimDto } from '../dto/create-claim.dto';
 import { UpdateClaimDto } from '../dto/update-claim.dto';
 import { StorageService } from '../../services/storage.service';
 import { NotificationService } from '../../services/notification.service';
+import '../../types/multer';
 
 @Injectable()
 export class InsuranceClaimService {

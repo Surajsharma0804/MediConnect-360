@@ -9,6 +9,7 @@ import { CreateImagingStudyDto } from '../dto/create-imaging-study.dto';
 import { AIService } from '../../services/ai.service';
 import { NotificationService } from '../../services/notification.service';
 import { StorageService } from '../../services/storage.service';
+import '../../types/multer';
 
 @Injectable()
 export class ImagingService {

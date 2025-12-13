@@ -8,6 +8,7 @@ import {
 } from '../../entities/medical-document.entity';
 import { StorageService } from '../../services/storage.service';
 import { NotificationService } from '../../services/notification.service';
+import '../../types/multer';
 
 @Injectable()
 export class DocumentService {

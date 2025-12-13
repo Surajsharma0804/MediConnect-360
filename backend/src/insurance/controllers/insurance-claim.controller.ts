@@ -13,6 +13,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { InsuranceClaimService } from '../services/insurance-claim.service';
+import '../../types/multer';
 import { CreateClaimDto } from '../dto/create-claim.dto';
 import { UpdateClaimDto } from '../dto/update-claim.dto';
 

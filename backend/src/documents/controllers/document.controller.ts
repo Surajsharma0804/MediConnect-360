@@ -17,6 +17,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { DocumentService } from '../services/document.service';
 import { CreateDocumentDto } from '../dto/create-document.dto';
 import { UpdateDocumentDto } from '../dto/update-document.dto';
+import '../../types/multer';
 
 @Controller('documents')
 @UseGuards(JwtAuthGuard)
