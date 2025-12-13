@@ -1,0 +1,56 @@
+# Render.com deployment configuration
+services:
+  # Backend API
+  - type: web
+    name: mediconnect-backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd backend && npm install && npm run build
+    startCommand: cd backend && npm run start:prod
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mediconnect-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: mediconnect-redis
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: ENCRYPTION_KEY
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: CORS_ORIGIN
+        value: https://medi-connect-360.vercel.app
+
+databases:
+  # PostgreSQL Database
+  - name: mediconnect-db
+    databaseName: mediconnect
+    plan: free
+    region: oregon
+
+  # Redis Cache
+  - name: mediconnect-redis
+    plan: free
+    region: oregon
+    maxmemoryPolicy: allkeys-lru
