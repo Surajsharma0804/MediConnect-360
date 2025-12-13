@@ -80,11 +80,25 @@ STRIPE_PUBLISHABLE_KEY=pk_test_your-test-key
    - **Region**: Choose closest to you
    - **PostgreSQL Version**: 16
 4. **Copy** connection string from dashboard
-5. **Save it**: Looks like `postgresql://user:pass@host/db`
 
+## 🔗 **CRITICAL: WHAT DATABASE_URL SHOULD LOOK LIKE**
+
+**❌ WRONG (localhost - won't work on Render):**
 ```
-DATABASE_URL=postgresql://user:password@ep-cool-name.us-east-2.aws.neon.tech/mediconnect?sslmode=require
+postgres://localhost:5432
+postgresql://localhost:5432/mediconnect
 ```
+
+**✅ CORRECT (Neon format - copy EXACTLY from Neon dashboard):**
+```
+postgresql://neondb_owner:AbC123XyZ@ep-cool-morning-12345.us-east-1.aws.neon.tech/mediconnect?sslmode=require
+```
+
+**Your DATABASE_URL must:**
+- Start with `postgresql://` (not `postgres://`)
+- Include `@ep-xxxx-xxxx.us-east-1.aws.neon.tech` (Neon hostname)
+- End with `?sslmode=require`
+- Have your actual username, password, and database name
 
 ## 2.2 Create Upstash Redis Cache
 
@@ -156,25 +170,35 @@ CLOUDINARY_API_SECRET=your-api-secret
 
 ## 4.3 Add Environment Variables
 
-In Render dashboard, go to **Environment** and add:
+In Render dashboard, go to **Environment** and add these **EXACT** values:
 
 ```env
 NODE_ENV=production
 PORT=10000
-DATABASE_URL=your-neon-postgresql-url
-REDIS_URL=your-upstash-redis-url
-JWT_SECRET=your-super-secret-jwt-key-32-chars-minimum
+DATABASE_URL=postgresql://neondb_owner:YOUR_PASSWORD@ep-xxxx-xxxx.us-east-1.aws.neon.tech/mediconnect?sslmode=require
+JWT_SECRET=hNrt9KTHbPcSfzZ6Yod8v3BmOe7uJV24X9kL2mP8qR5sT1wY
 JWT_EXPIRES_IN=7d
-GEMINI_API_KEY=your-gemini-api-key
-RESEND_API_KEY=your-resend-api-key
-FROM_EMAIL=noreply@yourdomain.com
+GEMINI_API_KEY=AIzaSyC-YOUR-ACTUAL-GEMINI-KEY
+RESEND_API_KEY=re_YOUR-ACTUAL-RESEND-KEY
+FROM_EMAIL=noreply@mediconnect360.com
 CORS_ORIGIN=https://your-app.vercel.app
-ENCRYPTION_KEY=your-32-character-encryption-key
-CLOUDINARY_CLOUD_NAME=your-cloud-name
-CLOUDINARY_API_KEY=your-api-key
-CLOUDINARY_API_SECRET=your-api-secret
-STRIPE_SECRET_KEY=your-stripe-secret-key
+ENCRYPTION_KEY=1LUF6KmSI5An8rhpJNHwsEdeykZBfoDX
 ```
+
+## 🚨 **CRITICAL REPLACEMENTS NEEDED:**
+
+1. **DATABASE_URL**: Copy EXACTLY from Neon dashboard
+   - ❌ `localhost:5432` 
+   - ✅ `ep-xxxx-xxxx.us-east-1.aws.neon.tech`
+
+2. **GEMINI_API_KEY**: From Google AI Studio (Step 1)
+   - Must start with `AIzaSyC`
+
+3. **RESEND_API_KEY**: From Resend dashboard (Step 1)  
+   - Must start with `re_`
+
+4. **CORS_ORIGIN**: Your Vercel URL (Step 5)
+   - Will be `https://your-app-name.vercel.app`
 
 **Generate secure secrets:**
 ```bash
@@ -189,8 +213,18 @@ ENCRYPTION_KEY=1LUF6KmSI5An8rhpJNHwsEdeykZBfoDX
 
 1. **Click** "Create Web Service"
 2. **Wait** 5-10 minutes for deployment
-3. **Check** logs for any errors
-4. **Test** your backend: `https://your-app.onrender.com/api/health`
+3. **Check** logs - you'll see database connection errors (this is normal!)
+4. **Your backend URL**: `https://your-app-name.onrender.com`
+
+**✅ Success Indicators:**
+- Build completes without TypeScript errors
+- Server starts and shows "MediConnect 360 Backend Server"
+- Database connection errors (expected until Step 2)
+
+**❌ If build fails:**
+- Check logs for TypeScript errors
+- Ensure all dependencies are installed
+- Try manual redeploy
 
 ---
 
@@ -349,6 +383,29 @@ All features are production-ready and fully integrated!
 ---
 
 # 🐛 **Troubleshooting**
+
+## Current Error: Database Connection Failed ✅
+
+**If you see this error in Render logs:**
+```
+ERROR [TypeOrmModule] Unable to connect to the database. Retrying...
+AggregateError [ECONNREFUSED]
+connect ECONNREFUSED 127.0.0.1:5432
+```
+
+## 🔍 **What This Error Means:**
+
+- ✅ **Build successful** - Your code compiled perfectly
+- ✅ **Server starting** - NestJS is running  
+- ❌ **Wrong database URL** - Using localhost instead of Neon
+
+## 🛠️ **How to Fix:**
+
+1. **Check your DATABASE_URL** in Render environment variables
+2. **Must look like**: `postgresql://neondb_owner:pass@ep-xxxx.aws.neon.tech/db?sslmode=require`
+3. **NOT like**: `localhost:5432` or `127.0.0.1:5432`
+4. **Copy EXACTLY** from your Neon dashboard
+5. **Save** and wait for automatic redeploy
 
 ## Backend Issues
 
