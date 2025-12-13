@@ -1,66 +1,38 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsEnum,
-  IsOptional,
-  IsDate,
-  IsBoolean,
-  IsNumber,
-} from 'class-validator';
-import { Type } from 'class-transformer';
-import { InsuranceType } from '../../entities/insurance-card.entity';
+import { IsString, IsOptional, IsDateString } from 'class-validator';
 
 export class CreateInsuranceCardDto {
-  @IsEnum(InsuranceType)
-  type: InsuranceType;
-
   @IsString()
-  @IsNotEmpty()
   insuranceProvider: string;
 
   @IsString()
-  @IsNotEmpty()
-  planName: string;
+  policyNumber: string;
 
   @IsString()
-  @IsNotEmpty()
+  groupNumber: string;
+
+  @IsString()
+  memberName: string;
+
+  @IsString()
   memberId: string;
 
+  @IsOptional()
+  @IsDateString()
+  effectiveDate?: string;
+
+  @IsOptional()
+  @IsDateString()
+  expirationDate?: string;
+
+  @IsOptional()
   @IsString()
-  @IsOptional()
-  groupNumber?: string;
+  planType?: string;
 
+  @IsOptional()
   @IsString()
-  @IsOptional()
-  policyNumber?: string;
+  copayAmount?: string;
 
-  @IsDate()
-  @Type(() => Date)
   @IsOptional()
-  effectiveDate?: Date;
-
-  @IsDate()
-  @Type(() => Date)
-  @IsOptional()
-  expirationDate?: Date;
-
-  @IsBoolean()
-  @IsOptional()
-  isPrimary?: boolean;
-
-  @IsNumber()
-  @IsOptional()
-  copayPrimaryCare?: number;
-
-  @IsNumber()
-  @IsOptional()
-  copaySpecialist?: number;
-
-  @IsNumber()
-  @IsOptional()
-  deductible?: number;
-
-  @IsNumber()
-  @IsOptional()
-  outOfPocketMax?: number;
+  @IsString()
+  deductibleAmount?: string;
 }

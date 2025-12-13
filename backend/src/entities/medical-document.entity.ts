@@ -116,6 +116,21 @@ export class MedicalDocument {
   @Column({ name: 'parent_document_id', nullable: true })
   parentDocumentId: string; // For versioning
 
+  @Column({ name: 'parent_id', nullable: true })
+  parentId: string; // Alternative naming for parent document
+
+  @Column({ name: 'share_token', nullable: true })
+  shareToken?: string;
+
+  @Column({ name: 'share_expires_at', nullable: true })
+  shareExpiresAt?: Date;
+
+  @Column({ name: 'deleted_at', nullable: true })
+  deletedAt: Date;
+
+  @Column({ name: 'uploaded_at', nullable: true })
+  uploadedAt: Date;
+
   @Column({ type: 'jsonb', nullable: true })
   metadata: Record<string, any>;
 

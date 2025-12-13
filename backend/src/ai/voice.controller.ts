@@ -21,52 +21,36 @@ export class VoiceController {
     private readonly voiceService: VoiceService,
   ) {}
 
-  @Get('languages')
-  getSupportedLanguages() {
-    return {
-      languages: this.voiceService.getSupportedLanguages(),
-      message: 'Voice chat supported in 20+ languages',
-    };
-  }
-
   @Post('symptom-check')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('audio'))
   async voiceSymptomCheck(
     @UploadedFile() file: Express.Multer.File,
+    @Body('userId') userId: string,
     @Query('language') language: string = 'en-US',
   ) {
-    try {
-      if (!file) {
-        throw new BadRequestException('Audio file is required');
-      }
+    if (!file) {
+      throw new BadRequestException('Audio file is required');
+    }
 
-      // Transcribe audio to text
-      const transcribedText = this.voiceService.transcribeAudio(
+    try {
+      // Convert audio to text
+      const transcript = await this.voiceService.speechToText(
         file.buffer,
         language,
       );
 
-      // Get AI symptom analysis
-      const analysis = await this.aiService.analyzeSymptoms(transcribedText);
-
-      // Convert response to speech
-      const audioResponse = this.voiceService.synthesizeSpeech(
-        analysis,
-        language,
-      );
+      // Process symptoms with AI
+      const analysis = await this.aiService.analyzeSymptoms(transcript);
 
       return {
-        transcription: transcribedText,
+        transcript,
         analysis,
-        audioResponse: audioResponse.toString('base64'),
-        language,
-        disclaimer:
-          'This is NOT medical advice. Always consult a healthcare professional.',
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       throw new BadRequestException(
-        `Voice symptom check failed: ${error.message}`,
+        `Voice processing failed: ${error.message}`,
       );
     }
   }
@@ -76,92 +60,43 @@ export class VoiceController {
   @UseInterceptors(FileInterceptor('audio'))
   async voiceChat(
     @UploadedFile() file: Express.Multer.File,
+    @Body('userId') userId: string,
     @Query('language') language: string = 'en-US',
     @Body('conversationHistory') _conversationHistory?: string,
   ) {
-    try {
-      if (!file) {
-        throw new BadRequestException('Audio file is required');
-      }
+    if (!file) {
+      throw new BadRequestException('Audio file is required');
+    }
 
-      // Transcribe audio to text
-      const transcribedText = this.voiceService.transcribeAudio(
+    try {
+      // Convert audio to text
+      const transcript = await this.voiceService.speechToText(
         file.buffer,
         language,
       );
 
-      // Get AI response (using symptom analysis as chat for now)
-      const aiResponse = await this.aiService.analyzeSymptoms(transcribedText);
+      // Process with AI chat
+      const response = await this.aiService.chatWithAI(transcript, userId);
 
-      // Convert response to speech
-      const audioResponse = this.voiceService.synthesizeSpeech(
-        aiResponse,
+      // Convert response back to speech
+      const audioResponse = await this.voiceService.textToSpeech(
+        response.message,
         language,
       );
 
       return {
-        transcription: transcribedText,
-        response: aiResponse,
+        transcript,
+        response: response.message,
         audioResponse: audioResponse.toString('base64'),
-        language,
-        disclaimer:
-          'This is NOT medical advice. Always consult a healthcare professional.',
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       throw new BadRequestException(`Voice chat failed: ${error.message}`);
     }
   }
 
-  @Post('translate')
-  @UseGuards(JwtAuthGuard)
-  translateText(
-    @Body('text') text: string,
-    @Body('targetLanguage') targetLanguage: string,
-    @Body('sourceLanguage') sourceLanguage?: string,
-  ) {
-    try {
-      if (!text || !targetLanguage) {
-        throw new BadRequestException('Text and target language are required');
-      }
-
-      const translation = this.voiceService.translateText(
-        text,
-        targetLanguage,
-        sourceLanguage,
-      );
-
-      return {
-        originalText: text,
-        translatedText: translation,
-        sourceLanguage: sourceLanguage || 'auto-detected',
-        targetLanguage,
-      };
-    } catch (error) {
-      throw new BadRequestException(`Translation failed: ${error.message}`);
-    }
-  }
-
-  @Post('text-to-speech')
-  @UseGuards(JwtAuthGuard)
-  textToSpeech(
-    @Body('text') text: string,
-    @Body('language') language: string = 'en-US',
-  ) {
-    try {
-      if (!text) {
-        throw new BadRequestException('Text is required');
-      }
-
-      const audioBuffer = this.voiceService.synthesizeSpeech(text, language);
-
-      return {
-        text,
-        language,
-        audio: audioBuffer.toString('base64'),
-        format: 'mp3',
-      };
-    } catch (error) {
-      throw new BadRequestException(`Text-to-speech failed: ${error.message}`);
-    }
+  @Get('supported-languages')
+  getSupportedLanguages() {
+    return this.voiceService.getSupportedLanguages();
   }
 }

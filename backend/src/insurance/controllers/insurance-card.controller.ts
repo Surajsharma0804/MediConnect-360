@@ -15,86 +15,90 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { InsuranceCardService } from '../services/insurance-card.service';
 import { CreateInsuranceCardDto } from '../dto/create-insurance-card.dto';
+import { UpdateInsuranceCardDto } from '../dto/update-insurance-card.dto';
 
-@Controller('api/insurance/cards')
+@Controller('insurance/cards')
 @UseGuards(JwtAuthGuard)
 export class InsuranceCardController {
-  constructor(private readonly insuranceCardService: InsuranceCardService) {}
+  constructor(
+    private readonly insuranceCardService: InsuranceCardService,
+  ) {}
 
-  @Post()
-  async create(@Request() req, @Body() dto: CreateInsuranceCardDto) {
-    return this.insuranceCardService.create(req.user.userId, dto);
+  @Get()
+  findAll(@Request() req) {
+    return this.insuranceCardService.findAll(req.user.userId);
   }
 
-  @Post('scan')
+  @Get(':id')
+  findOne(@Request() req, @Param('id') id: string) {
+    return this.insuranceCardService.findOne(id, req.user.userId);
+  }
+
+  @Post()
+  create(
+    @Request() req,
+    @Body() createInsuranceCardDto: CreateInsuranceCardDto,
+  ) {
+    return this.insuranceCardService.create(
+      req.user.userId,
+      createInsuranceCardDto,
+    );
+  }
+
+  @Post(':id/upload-images')
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'front', maxCount: 1 },
       { name: 'back', maxCount: 1 },
     ]),
   )
-  async scanCard(
+  uploadImages(
     @Request() req,
+    @Param('id') id: string,
     @UploadedFiles()
     files: { front?: Express.Multer.File[]; back?: Express.Multer.File[] },
   ) {
     const frontImage = files.front?.[0]?.buffer;
     const backImage = files.back?.[0]?.buffer;
-    if (!frontImage) {
-      throw new Error('Front image is required');
-    }
-    return this.insuranceCardService.scanCard(
+
+    return this.insuranceCardService.uploadImages(
+      id,
       req.user.userId,
       frontImage,
       backImage,
     );
   }
 
-  @Get()
-  async findAll(@Request() req) {
-    return this.insuranceCardService.findByUser(req.user.userId);
-  }
-
-  @Get('primary')
-  async getPrimary(@Request() req) {
-    return this.insuranceCardService.getPrimaryCard(req.user.userId);
-  }
-
-  @Get(':id')
-  async findOne(@Request() req, @Param('id') id: string) {
-    return this.insuranceCardService.findById(id, req.user.userId);
-  }
-
   @Put(':id')
-  async update(
+  update(
     @Request() req,
     @Param('id') id: string,
-    @Body() dto: Partial<CreateInsuranceCardDto>,
+    @Body() updateInsuranceCardDto: UpdateInsuranceCardDto,
   ) {
-    return this.insuranceCardService.update(id, req.user.userId, dto);
+    return this.insuranceCardService.update(
+      id,
+      req.user.userId,
+      updateInsuranceCardDto,
+    );
   }
 
   @Delete(':id')
-  async delete(@Request() req, @Param('id') id: string) {
-    await this.insuranceCardService.delete(id, req.user.userId);
-    return { message: 'Insurance card deleted successfully' };
+  remove(@Request() req, @Param('id') id: string) {
+    return this.insuranceCardService.remove(id, req.user.userId);
   }
 
   @Post(':id/verify')
-  async verify(@Request() req, @Param('id') id: string) {
+  verify(@Request() req, @Param('id') id: string) {
     return this.insuranceCardService.verifyInsurance(id, req.user.userId);
   }
 
-  @Post(':id/check-eligibility')
-  async checkEligibility(
-    @Request() req,
-    @Param('id') id: string,
-    @Body('serviceType') serviceType: string,
-  ) {
-    return this.insuranceCardService.checkEligibility(
-      id,
-      req.user.userId,
-      serviceType,
-    );
+  @Get(':id/benefits')
+  getBenefits(@Request() req, @Param('id') id: string) {
+    return this.insuranceCardService.getBenefits(id, req.user.userId);
+  }
+
+  @Post(':id/eligibility-check')
+  checkEligibility(@Request() req, @Param('id') id: string) {
+    return this.insuranceCardService.checkEligibility(id, req.user.userId);
   }
 }

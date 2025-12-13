@@ -33,4 +33,15 @@ export class EmailService {
       `Click here to reset your password: ${resetToken}`
     );
   }
+
+  async sendAppointmentConfirmation(
+    email: string, 
+    appointmentDetails: any
+  ): Promise<boolean> {
+    return this.sendEmail(
+      email,
+      'Appointment Confirmation - MediConnect 360',
+      `Your appointment has been confirmed for ${appointmentDetails.date}`
+    );
+  }
 }

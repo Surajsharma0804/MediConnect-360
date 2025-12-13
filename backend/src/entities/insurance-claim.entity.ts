@@ -1,73 +1,52 @@
 import {
   Entity,
-  Column,
   PrimaryGeneratedColumn,
+  Column,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToOne,
-  JoinColumn,
-  Index,
 } from 'typeorm';
-import { User } from './user.entity';
-import { InsuranceCard } from './insurance-card.entity';
 
 export enum ClaimStatus {
   DRAFT = 'draft',
   SUBMITTED = 'submitted',
-  IN_REVIEW = 'in_review',
+  PROCESSING = 'processing',
   APPROVED = 'approved',
-  PARTIALLY_APPROVED = 'partially_approved',
   DENIED = 'denied',
-  PAID = 'paid',
   APPEALED = 'appealed',
-  CLOSED = 'closed',
-}
-
-export enum ClaimType {
-  MEDICAL = 'medical',
-  DENTAL = 'dental',
-  VISION = 'vision',
-  PRESCRIPTION = 'prescription',
-  MENTAL_HEALTH = 'mental_health',
-  PREVENTIVE = 'preventive',
-  EMERGENCY = 'emergency',
-  HOSPITALIZATION = 'hospitalization',
-  SURGERY = 'surgery',
-  LAB_TEST = 'lab_test',
-  IMAGING = 'imaging',
-  THERAPY = 'therapy',
+  PAID = 'paid',
 }
 
 @Entity('insurance_claims')
-@Index(['userId', 'status'])
-@Index(['insuranceCardId'])
-@Index(['claimNumber'])
 export class InsuranceClaim {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'uuid' })
+  @Column()
   userId: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'userId' })
-  user: User;
-
-  @Column({ type: 'uuid' })
+  @Column()
   insuranceCardId: string;
 
-  @ManyToOne(() => InsuranceCard)
-  @JoinColumn({ name: 'insuranceCardId' })
-  insuranceCard: InsuranceCard;
+  @Column()
+  providerId: string;
 
-  @Column({ length: 100, unique: true })
-  claimNumber: string;
+  @Column()
+  serviceType: string;
 
-  @Column({
-    type: 'enum',
-    enum: ClaimType,
-  })
-  claimType: ClaimType;
+  @Column()
+  serviceDate: Date;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  totalAmount: number;
+
+  @Column({ nullable: true })
+  diagnosis: string;
+
+  @Column('simple-array', { nullable: true })
+  procedureCodes: string[];
+
+  @Column({ nullable: true })
+  notes: string;
 
   @Column({
     type: 'enum',
@@ -76,84 +55,30 @@ export class InsuranceClaim {
   })
   status: ClaimStatus;
 
-  @Column({ type: 'date' })
-  serviceDate: Date;
-
-  @Column({ type: 'date', nullable: true })
-  serviceEndDate: Date;
-
-  @Column({ length: 255 })
-  providerName: string;
-
-  @Column({ length: 100, nullable: true })
-  providerNPI: string; // National Provider Identifier
-
-  @Column({ type: 'text', nullable: true })
-  providerAddress: string;
-
-  @Column({ type: 'text' })
-  diagnosisCode: string; // ICD-10 codes
-
-  @Column({ type: 'text', nullable: true })
-  procedureCode: string; // CPT codes
-
-  @Column({ type: 'text' })
-  serviceDescription: string;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  billedAmount: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  allowedAmount: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  insurancePaid: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  patientResponsibility: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  copay: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  coinsurance: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  deductible: number;
-
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ nullable: true })
   submittedAt: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ nullable: true })
   processedAt: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
-  paidAt: Date;
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  approvedAmount: number;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ nullable: true })
   denialReason: string;
 
-  @Column({ type: 'text', nullable: true })
-  appealNotes: string;
+  @Column({ nullable: true })
+  appealReason: string;
 
-  @Column({ type: 'jsonb', nullable: true })
-  documents: string[]; // URLs to claim documents
+  @Column({ nullable: true })
+  appealedAt: Date;
 
-  @Column({ type: 'text', nullable: true })
-  eobUrl: string; // Explanation of Benefits URL
-
-  @Column({ type: 'text', nullable: true })
-  notes: string;
-
-  @Column({ type: 'jsonb', nullable: true })
-  metadata: Record<string, any>;
+  @Column('json', { nullable: true })
+  documents: any[];
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @Column({ type: 'timestamp', nullable: true })
-  deletedAt: Date;
 }

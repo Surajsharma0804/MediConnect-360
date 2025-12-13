@@ -23,4 +23,18 @@ export class SMSService {
       `Your MediConnect 360 verification code is: ${code}`
     );
   }
+
+  async sendAppointmentReminder(phone: string, appointmentDetails: any): Promise<boolean> {
+    return this.sendSMS(
+      phone,
+      `Reminder: You have an appointment on ${appointmentDetails.date} at ${appointmentDetails.time}`
+    );
+  }
+
+  async sendEmergencyAlert(phone: string, alertDetails: any): Promise<boolean> {
+    return this.sendSMS(
+      phone,
+      `EMERGENCY ALERT: ${alertDetails.message}. Location: ${alertDetails.location}`
+    );
+  }
 }

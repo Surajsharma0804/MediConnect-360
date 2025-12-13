@@ -78,7 +78,11 @@ const oauthProviders = getOAuthProviders();
       isGlobal: true,
     }),
     TypeOrmModule.forRoot(databaseConfig()),
-    TypeOrmModule.forFeature([User, AuditLog]),
+    TypeOrmModule.forFeature([
+      User, 
+      AuditLog,
+      // Add other entities as needed for advanced features
+    ]),
     PassportModule,
     JwtModule.register({
       global: true,

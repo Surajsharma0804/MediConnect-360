@@ -11,6 +11,22 @@ export class NotificationService {
 
   async sendNotification(
     userId: string,
+    notification: {
+      type: string;
+      title: string;
+      message: string;
+      data?: any;
+    }
+  ): Promise<boolean> {
+    this.logger.log(`Notification sent to user ${userId}: ${notification.title}`);
+    
+    // For development, just log the notification
+    this.logger.log(`Type: ${notification.type}, Message: ${notification.message}`);
+    return true;
+  }
+
+  async sendNotificationLegacy(
+    userId: string,
     type: 'email' | 'push' | 'sms',
     title: string,
     message: string,
@@ -50,12 +66,11 @@ export class NotificationService {
   }
 
   async sendAppointmentReminder(userId: string, appointmentDetails: any): Promise<boolean> {
-    return this.sendNotification(
-      userId,
-      'email',
-      'Appointment Reminder',
-      'You have an upcoming appointment',
-      appointmentDetails
-    );
+    return this.sendNotification(userId, {
+      type: 'appointment_reminder',
+      title: 'Appointment Reminder',
+      message: 'You have an upcoming appointment',
+      data: appointmentDetails,
+    });
   }
 }

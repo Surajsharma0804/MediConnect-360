@@ -1,53 +1,29 @@
-import {
-  IsEnum,
-  IsString,
-  IsOptional,
-  IsDateString,
-  IsObject,
-  IsNumber,
-} from 'class-validator';
-import { ImagingModality } from '../../entities/imaging-study.entity';
+import { IsString, IsOptional, IsDateString } from 'class-validator';
 
 export class CreateImagingStudyDto {
-  @IsEnum(ImagingModality)
-  modality: ImagingModality;
+  @IsString()
+  studyType: string;
 
   @IsString()
-  studyDescription: string;
-
-  @IsOptional()
-  @IsString()
-  bodyPart?: string;
+  bodyPart: string;
 
   @IsOptional()
   @IsString()
-  clinicalIndication?: string;
+  indication?: string;
 
   @IsOptional()
   @IsString()
-  orderedByProviderId?: string;
-
-  @IsOptional()
-  @IsString()
-  imagingCenterName?: string;
-
-  @IsOptional()
-  @IsString()
-  imagingCenterAddress?: string;
+  urgency?: string;
 
   @IsOptional()
   @IsDateString()
-  scheduledDate?: string;
-
-  @IsOptional()
-  @IsNumber()
-  cost?: number;
+  requestedDate?: string;
 
   @IsOptional()
   @IsString()
-  currency?: string;
+  orderingPhysician?: string;
 
   @IsOptional()
-  @IsObject()
-  metadata?: Record<string, any>;
+  @IsString()
+  notes?: string;
 }

@@ -123,6 +123,30 @@ export class ImagingStudy {
   @Column({ nullable: true })
   currency: string;
 
+  @Column({ nullable: true })
+  location: string;
+
+  @Column({ type: 'text', nullable: true })
+  instructions: string;
+
+  @Column({ name: 'cancellation_reason', nullable: true })
+  cancellationReason: string;
+
+  @Column({ name: 'completed_at', nullable: true })
+  completedAt: Date;
+
+  @Column({ name: 'share_token', nullable: true })
+  shareToken: string;
+
+  @Column({ name: 'share_expires_at', nullable: true })
+  shareExpiresAt: Date;
+
+  @Column({ type: 'jsonb', nullable: true })
+  results: any;
+
+  @Column({ name: 'radiologist_report', type: 'text', nullable: true })
+  radiologistReport: string;
+
   @Column({ type: 'jsonb', nullable: true })
   metadata: Record<string, any>;
 

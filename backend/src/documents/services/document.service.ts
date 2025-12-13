@@ -21,40 +21,44 @@ export class DocumentService {
   async uploadDocument(
     userId: string,
     file: Express.Multer.File,
-    data: {
+    metadata: {
       title: string;
+      type: string;
       description?: string;
-      documentType: DocumentType;
-      documentDate?: Date;
       tags?: string[];
-      category?: string;
     },
   ): Promise<MedicalDocument> {
     // Upload file to storage
     const fileUrl = await this.storageService.uploadFile(
       file.buffer,
-      `documents/${userId}/${Date.now()}-${file.originalname}`,
+      file.originalname,
       file.mimetype,
+      `documents/${userId}`,
     );
 
     // Create document record
     const document = this.documentRepository.create({
       userId,
-      ...data,
+      title: metadata.title,
+      documentType: metadata.type as DocumentType,
+      description: metadata.description,
+      tags: metadata.tags || [],
       fileUrl,
       fileName: file.originalname,
       fileSize: file.size,
       mimeType: file.mimetype,
       status: DocumentStatus.ACTIVE,
-      isEncrypted: true,
-      documentDate: data.documentDate || new Date(),
+      uploadedAt: new Date(),
     });
 
     const savedDocument = await this.documentRepository.save(document);
 
-    this.notificationService.sendPushNotification(userId, {
+    // Send notification
+    await this.notificationService.sendNotification(userId, {
+      type: 'document_uploaded',
       title: 'Document Uploaded',
-      body: `${data.title} has been uploaded successfully.`,
+      message: `Your document "${metadata.title}" has been uploaded successfully.`,
+      data: { documentId: savedDocument.id },
     });
 
     return savedDocument;
@@ -62,44 +66,59 @@ export class DocumentService {
 
   async findAll(
     userId: string,
-    filters?: {
-      documentType?: DocumentType;
-      category?: string;
-      tags?: string[];
-      status?: DocumentStatus;
+    filters: {
+      type?: string;
+      status?: string;
+      search?: string;
+      page?: number;
+      limit?: number;
     },
-  ): Promise<MedicalDocument[]> {
-    const query = this.documentRepository
+  ): Promise<{
+    documents: MedicalDocument[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
+    const { type, status, search, page = 1, limit = 10 } = filters;
+    const skip = (page - 1) * limit;
+
+    const queryBuilder = this.documentRepository
       .createQueryBuilder('document')
       .where('document.userId = :userId', { userId });
 
-    if (filters?.documentType) {
-      query.andWhere('document.documentType = :documentType', {
-        documentType: filters.documentType,
-      });
+    if (type) {
+      queryBuilder.andWhere('document.documentType = :type', { type });
     }
 
-    if (filters?.category) {
-      query.andWhere('document.category = :category', {
-        category: filters.category,
-      });
+    if (status) {
+      queryBuilder.andWhere('document.status = :status', { status });
     }
 
-    if (filters?.status) {
-      query.andWhere('document.status = :status', { status: filters.status });
+    if (search) {
+      queryBuilder.andWhere(
+        '(document.title ILIKE :search OR document.description ILIKE :search)',
+        { search: `%${search}%` },
+      );
     }
 
-    if (filters?.tags && filters.tags.length > 0) {
-      query.andWhere('document.tags && :tags', { tags: filters.tags });
-    }
+    queryBuilder
+      .orderBy('document.uploadedAt', 'DESC')
+      .skip(skip)
+      .take(limit);
 
-    return query.orderBy('document.createdAt', 'DESC').getMany();
+    const [documents, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      documents,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async findOne(id: string, userId: string): Promise<MedicalDocument> {
     const document = await this.documentRepository.findOne({
       where: { id, userId },
-      relations: ['uploadedByProvider'],
     });
 
     if (!document) {
@@ -112,124 +131,63 @@ export class DocumentService {
   async update(
     id: string,
     userId: string,
-    data: Partial<MedicalDocument>,
+    updateData: Partial<MedicalDocument>,
   ): Promise<MedicalDocument> {
     const document = await this.findOne(id, userId);
 
-    Object.assign(document, data);
+    Object.assign(document, updateData);
+    document.updatedAt = new Date();
 
     return this.documentRepository.save(document);
   }
 
-  async delete(id: string, userId: string): Promise<void> {
+  async remove(id: string, userId: string): Promise<void> {
     const document = await this.findOne(id, userId);
 
+    // Delete file from storage
+    await this.storageService.deleteFile(document.fileUrl);
+
+    // Soft delete document
     document.status = DocumentStatus.DELETED;
+    document.deletedAt = new Date();
 
     await this.documentRepository.save(document);
   }
 
-  async search(userId: string, searchTerm: string): Promise<MedicalDocument[]> {
+  async getDownloadUrl(id: string, userId: string): Promise<string> {
+    const document = await this.findOne(id, userId);
+    return this.storageService.getSignedUrl(document.fileUrl);
+  }
+
+  async generateShareLink(id: string, userId: string): Promise<string> {
+    const document = await this.findOne(id, userId);
+
+    // Generate temporary share token
+    const shareToken = Math.random().toString(36).substring(2, 15);
+    document.shareToken = shareToken;
+    document.shareExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    await this.documentRepository.save(document);
+
+    return `${process.env.API_URL}/documents/shared/${shareToken}`;
+  }
+
+  async revokeShareLink(id: string, userId: string): Promise<void> {
+    const document = await this.findOne(id, userId);
+
+    document.shareToken = undefined;
+    document.shareExpiresAt = undefined;
+
+    await this.documentRepository.save(document);
+  }
+
+  async getVersions(id: string, userId: string): Promise<MedicalDocument[]> {
+    const document = await this.findOne(id, userId);
+
     return this.documentRepository.find({
-      where: [
-        { userId, title: Like(`%${searchTerm}%`) },
-        { userId, description: Like(`%${searchTerm}%`) },
-        { userId, ocrText: Like(`%${searchTerm}%`) },
-      ],
-      order: { createdAt: 'DESC' },
+      where: { parentDocumentId: document.id, userId },
+      order: { version: 'DESC' },
     });
-  }
-
-  async shareDocument(
-    id: string,
-    userId: string,
-    shareWith: {
-      providerId?: string;
-      userId?: string;
-      expiresAt?: Date;
-    },
-  ): Promise<MedicalDocument> {
-    const document = await this.findOne(id, userId);
-
-    const sharedWith = document.sharedWith || [];
-    sharedWith.push({
-      ...shareWith,
-      sharedAt: new Date().toISOString(),
-      expiresAt: shareWith.expiresAt?.toISOString(),
-    });
-
-    document.sharedWith = sharedWith;
-    document.isShared = true;
-
-    return this.documentRepository.save(document);
-  }
-
-  async unshareDocument(
-    id: string,
-    userId: string,
-    shareId: string,
-  ): Promise<MedicalDocument> {
-    const document = await this.findOne(id, userId);
-
-    document.sharedWith = document.sharedWith.filter(
-      (share) => share.providerId !== shareId && share.userId !== shareId,
-    );
-
-    document.isShared = document.sharedWith.length > 0;
-
-    return this.documentRepository.save(document);
-  }
-
-  async getSharedDocuments(userId: string): Promise<MedicalDocument[]> {
-    return this.documentRepository
-      .createQueryBuilder('document')
-      .where('document.isShared = :isShared', { isShared: true })
-      .andWhere(
-        `document.sharedWith @> '[{"userId": "${userId}"}]'::jsonb OR document.sharedWith @> '[{"providerId": "${userId}"}]'::jsonb`,
-      )
-      .getMany();
-  }
-
-  async addTag(
-    id: string,
-    userId: string,
-    tag: string,
-  ): Promise<MedicalDocument> {
-    const document = await this.findOne(id, userId);
-
-    const tags = document.tags || [];
-    if (!tags.includes(tag)) {
-      tags.push(tag);
-    }
-
-    document.tags = tags;
-
-    return this.documentRepository.save(document);
-  }
-
-  async removeTag(
-    id: string,
-    userId: string,
-    tag: string,
-  ): Promise<MedicalDocument> {
-    const document = await this.findOne(id, userId);
-
-    document.tags = (document.tags || []).filter((t) => t !== tag);
-
-    return this.documentRepository.save(document);
-  }
-
-  async getCategories(userId: string): Promise<string[]> {
-    const documents = await this.documentRepository.find({
-      where: { userId },
-      select: ['category'],
-    });
-
-    const categories = new Set(
-      documents.map((d) => d.category).filter((c) => c),
-    );
-
-    return Array.from(categories);
   }
 
   async createVersion(
@@ -242,65 +200,60 @@ export class DocumentService {
     // Upload new version
     const fileUrl = await this.storageService.uploadFile(
       file.buffer,
-      `documents/${userId}/${Date.now()}-${file.originalname}`,
+      file.originalname,
       file.mimetype,
+      `documents/${userId}/versions`,
     );
+
+    // Get next version number
+    const latestVersion = await this.documentRepository.findOne({
+      where: { parentDocumentId: id, userId },
+      order: { version: 'DESC' },
+    });
+
+    const nextVersion = latestVersion ? latestVersion.version + 1 : 2;
 
     // Create new version
     const newVersion = this.documentRepository.create({
-      ...originalDocument,
-      id: undefined,
+      userId: originalDocument.userId,
+      title: originalDocument.title,
+      documentType: originalDocument.documentType,
+      description: originalDocument.description,
+      tags: originalDocument.tags,
+      parentDocumentId: id,
+      version: nextVersion,
       fileUrl,
       fileName: file.originalname,
       fileSize: file.size,
       mimeType: file.mimetype,
-      version: originalDocument.version + 1,
-      parentDocumentId: originalDocument.id,
-      createdAt: undefined,
-      updatedAt: undefined,
+      status: DocumentStatus.ACTIVE,
+      uploadedAt: new Date(),
     });
 
     return this.documentRepository.save(newVersion);
   }
 
-  async getVersions(id: string, userId: string): Promise<MedicalDocument[]> {
+  async extractText(id: string, userId: string): Promise<{ text: string }> {
     const document = await this.findOne(id, userId);
 
-    return this.documentRepository.find({
-      where: [
-        { id: document.id },
-        { parentDocumentId: document.id },
-        { parentDocumentId: document.parentDocumentId },
-      ],
-      order: { version: 'DESC' },
-    });
+    // TODO: Implement OCR service integration
+    // For now, return placeholder
+    return {
+      text: 'OCR text extraction will be implemented with cloud OCR service',
+    };
   }
 
-  async getStatistics(userId: string): Promise<any> {
-    const documents = await this.documentRepository.find({
-      where: { userId, status: DocumentStatus.ACTIVE },
-    });
+  async analyzeWithAI(
+    id: string,
+    userId: string,
+  ): Promise<{ analysis: string; insights: string[] }> {
+    const document = await this.findOne(id, userId);
 
-    const stats = {
-      total: documents.length,
-      byType: {} as Record<string, number>,
-      byCategory: {} as Record<string, number>,
-      totalSize: documents.reduce((sum, d) => sum + d.fileSize, 0),
-      shared: documents.filter((d) => d.isShared).length,
-      recentUploads: documents
-        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-        .slice(0, 5),
+    // TODO: Implement AI analysis
+    // For now, return placeholder
+    return {
+      analysis: 'AI document analysis will be implemented',
+      insights: ['Document type detected', 'Key information extracted'],
     };
-
-    documents.forEach((doc) => {
-      stats.byType[doc.documentType] =
-        (stats.byType[doc.documentType] || 0) + 1;
-      if (doc.category) {
-        stats.byCategory[doc.category] =
-          (stats.byCategory[doc.category] || 0) + 1;
-      }
-    });
-
-    return stats;
   }
 }

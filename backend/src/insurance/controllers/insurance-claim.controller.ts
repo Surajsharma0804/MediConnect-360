@@ -13,54 +13,76 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { InsuranceClaimService } from '../services/insurance-claim.service';
+import { CreateClaimDto } from '../dto/create-claim.dto';
+import { UpdateClaimDto } from '../dto/update-claim.dto';
 
-@Controller('api/insurance/claims')
+@Controller('insurance/claims')
 @UseGuards(JwtAuthGuard)
 export class InsuranceClaimController {
   constructor(private readonly claimService: InsuranceClaimService) {}
 
-  @Post()
-  async create(@Request() req, @Body() claimData: any) {
-    return this.claimService.create(req.user.userId, claimData);
-  }
-
   @Get()
-  async findAll(@Request() req) {
-    return this.claimService.findByUser(req.user.userId);
-  }
-
-  @Get('summary')
-  async getSummary(@Request() req) {
-    return this.claimService.getClaimsSummary(req.user.userId);
+  findAll(@Request() req) {
+    return this.claimService.findAll(req.user.userId);
   }
 
   @Get(':id')
-  async findOne(@Request() req, @Param('id') id: string) {
-    return this.claimService.findById(id, req.user.userId);
+  findOne(@Request() req, @Param('id') id: string) {
+    return this.claimService.findOne(id, req.user.userId);
+  }
+
+  @Post()
+  create(@Request() req, @Body() createClaimDto: CreateClaimDto) {
+    return this.claimService.create(req.user.userId, createClaimDto);
+  }
+
+  @Put(':id')
+  update(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() updateClaimDto: UpdateClaimDto,
+  ) {
+    return this.claimService.update(id, req.user.userId, updateClaimDto);
   }
 
   @Post(':id/submit')
-  async submit(@Request() req, @Param('id') id: string) {
+  submit(@Request() req, @Param('id') id: string) {
     return this.claimService.submit(id, req.user.userId);
   }
 
-  @Put(':id/status')
-  async updateStatus(@Param('id') id: string, @Body() body: any) {
-    return this.claimService.updateStatus(id, body.status, body.notes);
+  @Get(':id/status')
+  getStatus(@Request() req, @Param('id') id: string) {
+    return this.claimService.getStatus(id, req.user.userId);
   }
 
   @Post(':id/documents')
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadDocument(
+  @UseInterceptors(FileInterceptor('document'))
+  uploadDocument(
     @Request() req,
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
+    @Body('documentType') documentType: string,
   ) {
     return this.claimService.uploadDocument(
       id,
       req.user.userId,
-      file.buffer,
-      file.originalname,
+      file,
+      documentType,
     );
+  }
+
+  @Get(':id/documents')
+  getDocuments(@Request() req, @Param('id') id: string) {
+    return this.claimService.getDocuments(id, req.user.userId);
+  }
+
+  @Post(':id/appeal')
+  appeal(@Request() req, @Param('id') id: string, @Body('reason') reason: string) {
+    return this.claimService.appeal(id, req.user.userId, reason);
+  }
+
+  @Get(':id/history')
+  getHistory(@Request() req, @Param('id') id: string) {
+    return this.claimService.getHistory(id, req.user.userId);
   }
 }

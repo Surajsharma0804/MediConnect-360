@@ -1,162 +1,79 @@
 import {
   Entity,
-  Column,
   PrimaryGeneratedColumn,
+  Column,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToOne,
-  JoinColumn,
-  Index,
 } from 'typeorm';
-import { User } from './user.entity';
-
-export enum InsuranceType {
-  HEALTH = 'health',
-  DENTAL = 'dental',
-  VISION = 'vision',
-  PRESCRIPTION = 'prescription',
-  MEDICARE = 'medicare',
-  MEDICAID = 'medicaid',
-}
-
-export enum InsuranceStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  PENDING_VERIFICATION = 'pending_verification',
-  EXPIRED = 'expired',
-  CANCELLED = 'cancelled',
-}
 
 @Entity('insurance_cards')
-@Index(['userId', 'status'])
-@Index(['insuranceProvider'])
 export class InsuranceCard {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'uuid' })
+  @Column()
   userId: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'userId' })
-  user: User;
-
-  @Column({
-    type: 'enum',
-    enum: InsuranceType,
-    default: InsuranceType.HEALTH,
-  })
-  type: InsuranceType;
-
-  @Column({ length: 255 })
+  @Column()
   insuranceProvider: string;
 
-  @Column({ length: 100 })
-  planName: string;
-
-  @Column({ length: 100, unique: true })
-  memberId: string;
-
-  @Column({ length: 100, nullable: true })
-  groupNumber: string;
-
-  @Column({ length: 100, nullable: true })
+  @Column()
   policyNumber: string;
 
-  @Column({ length: 100, nullable: true })
-  rxBin: string; // Prescription BIN
+  @Column()
+  groupNumber: string;
 
-  @Column({ length: 100, nullable: true })
-  rxPcn: string; // Prescription PCN
+  @Column()
+  memberName: string;
 
-  @Column({ length: 100, nullable: true })
-  rxGroup: string; // Prescription Group
+  @Column()
+  memberId: string;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ nullable: true })
   effectiveDate: Date;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ nullable: true })
   expirationDate: Date;
 
-  @Column({
-    type: 'enum',
-    enum: InsuranceStatus,
-    default: InsuranceStatus.PENDING_VERIFICATION,
-  })
-  status: InsuranceStatus;
+  @Column({ nullable: true })
+  planType: string;
 
-  @Column({ type: 'boolean', default: false })
-  isPrimary: boolean;
+  @Column({ nullable: true })
+  copayAmount: string;
 
-  @Column({ type: 'text', nullable: true })
-  policyHolderName: string;
+  @Column({ nullable: true })
+  deductibleAmount: string;
 
-  @Column({ type: 'date', nullable: true })
-  policyHolderDob: Date;
+  @Column({ nullable: true })
+  deductible: string;
 
-  @Column({ length: 50, nullable: true })
-  relationshipToPolicyHolder: string; // Self, Spouse, Child, etc.
+  @Column({ nullable: true })
+  deductibleMet: string;
 
-  @Column({ type: 'text', nullable: true })
-  insuranceAddress: string;
+  @Column({ nullable: true })
+  copayPrimaryCare: string;
 
-  @Column({ length: 20, nullable: true })
-  insurancePhone: string;
+  @Column({ nullable: true })
+  copaySpecialist: string;
 
-  @Column({ length: 20, nullable: true })
-  claimsPhone: string;
+  @Column({ nullable: true })
+  copayEmergency: string;
 
-  @Column({ length: 255, nullable: true })
-  insuranceWebsite: string;
+  @Column({ nullable: true })
+  copayUrgentCare: string;
 
-  @Column({ type: 'text', nullable: true })
-  frontImageUrl: string; // Front of insurance card
+  @Column({ nullable: true })
+  frontImageUrl: string;
 
-  @Column({ type: 'text', nullable: true })
-  backImageUrl: string; // Back of insurance card
+  @Column({ nullable: true })
+  backImageUrl: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  copayPrimaryCare: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  copaySpecialist: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  copayEmergency: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  copayUrgentCare: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  deductible: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  deductibleMet: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  outOfPocketMax: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  outOfPocketMet: number;
-
-  @Column({ type: 'timestamp', nullable: true })
-  lastVerifiedAt: Date;
-
-  @Column({ type: 'text', nullable: true })
-  verificationNotes: string;
-
-  @Column({ type: 'jsonb', nullable: true })
-  coverageDetails: Record<string, any>;
-
-  @Column({ type: 'jsonb', nullable: true })
-  metadata: Record<string, any>;
+  @Column({ default: true })
+  isActive: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @Column({ type: 'timestamp', nullable: true })
-  deletedAt: Date;
 }

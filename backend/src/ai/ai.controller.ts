@@ -26,8 +26,8 @@ export class AIController {
   @Post('chat')
   async chatWithAI(@Body() dto: ChatDto) {
     const response = await this.aiService.chatWithAI(
-      [{ role: 'user', content: dto.message }],
-      dto.language || 'en',
+      dto.message,
+      'anonymous', // Will be replaced with actual user ID from JWT in production
     );
     return { response };
   }

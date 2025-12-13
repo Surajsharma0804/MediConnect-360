@@ -15,17 +15,33 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { DocumentService } from '../services/document.service';
-import {
-  DocumentType,
-  DocumentStatus,
-} from '../../entities/medical-document.entity';
+import { CreateDocumentDto } from '../dto/create-document.dto';
+import { UpdateDocumentDto } from '../dto/update-document.dto';
 
 @Controller('documents')
 @UseGuards(JwtAuthGuard)
 export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
 
-  @Post()
+  @Get()
+  findAll(
+    @Request() req,
+    @Query('type') type?: string,
+    @Query('status') status?: string,
+    @Query('search') search?: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    return this.documentService.findAll(req.user.userId, {
+      type,
+      status,
+      search,
+      page,
+      limit,
+    });
+  }
+
+  @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   uploadDocument(
     @Request() req,
@@ -33,54 +49,12 @@ export class DocumentController {
     @Body()
     body: {
       title: string;
+      type: string;
       description?: string;
-      documentType: DocumentType;
-      documentDate?: string;
-      tags?: string;
-      category?: string;
+      tags?: string[];
     },
   ) {
-    return this.documentService.uploadDocument(req.user.userId, file, {
-      ...body,
-      documentDate: body.documentDate ? new Date(body.documentDate) : undefined,
-      tags: body.tags ? body.tags.split(',') : undefined,
-    });
-  }
-
-  @Get()
-  findAll(
-    @Request() req,
-    @Query('documentType') documentType?: DocumentType,
-    @Query('category') category?: string,
-    @Query('tags') tags?: string,
-    @Query('status') status?: DocumentStatus,
-  ) {
-    return this.documentService.findAll(req.user.userId, {
-      documentType,
-      category,
-      tags: tags ? tags.split(',') : undefined,
-      status,
-    });
-  }
-
-  @Get('search')
-  search(@Request() req, @Query('q') searchTerm: string) {
-    return this.documentService.search(req.user.userId, searchTerm);
-  }
-
-  @Get('shared')
-  getSharedDocuments(@Request() req) {
-    return this.documentService.getSharedDocuments(req.user.userId);
-  }
-
-  @Get('categories')
-  getCategories(@Request() req) {
-    return this.documentService.getCategories(req.user.userId);
-  }
-
-  @Get('statistics')
-  getStatistics(@Request() req) {
-    return this.documentService.getStatistics(req.user.userId);
+    return this.documentService.uploadDocument(req.user.userId, file, body);
   }
 
   @Get(':id')
@@ -89,56 +63,40 @@ export class DocumentController {
   }
 
   @Patch(':id')
-  update(@Request() req, @Param('id') id: string, @Body() body: any) {
-    return this.documentService.update(id, req.user.userId, body);
+  update(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() updateDocumentDto: UpdateDocumentDto,
+  ) {
+    return this.documentService.update(id, req.user.userId, updateDocumentDto);
   }
 
   @Delete(':id')
-  delete(@Request() req, @Param('id') id: string) {
-    return this.documentService.delete(id, req.user.userId);
+  remove(@Request() req, @Param('id') id: string) {
+    return this.documentService.remove(id, req.user.userId);
   }
 
-  @Post(':id/share')
-  shareDocument(
-    @Request() req,
-    @Param('id') id: string,
-    @Body()
-    body: {
-      providerId?: string;
-      userId?: string;
-      expiresAt?: string;
-    },
-  ) {
-    return this.documentService.shareDocument(id, req.user.userId, {
-      ...body,
-      expiresAt: body.expiresAt ? new Date(body.expiresAt) : undefined,
-    });
+  @Get(':id/download')
+  download(@Request() req, @Param('id') id: string) {
+    return this.documentService.getDownloadUrl(id, req.user.userId);
   }
 
-  @Delete(':id/share/:shareId')
-  unshareDocument(
-    @Request() req,
-    @Param('id') id: string,
-    @Param('shareId') shareId: string,
-  ) {
-    return this.documentService.unshareDocument(id, req.user.userId, shareId);
+  @Get(':id/share')
+  share(@Request() req, @Param('id') id: string) {
+    return this.documentService.generateShareLink(id, req.user.userId);
   }
 
-  @Post(':id/tag')
-  addTag(@Request() req, @Param('id') id: string, @Body('tag') tag: string) {
-    return this.documentService.addTag(id, req.user.userId, tag);
+  @Post(':id/share/revoke')
+  revokeShare(@Request() req, @Param('id') id: string) {
+    return this.documentService.revokeShareLink(id, req.user.userId);
   }
 
-  @Delete(':id/tag/:tag')
-  removeTag(
-    @Request() req,
-    @Param('id') id: string,
-    @Param('tag') tag: string,
-  ) {
-    return this.documentService.removeTag(id, req.user.userId, tag);
+  @Get(':id/versions')
+  getVersions(@Request() req, @Param('id') id: string) {
+    return this.documentService.getVersions(id, req.user.userId);
   }
 
-  @Post(':id/version')
+  @Post(':id/versions')
   @UseInterceptors(FileInterceptor('file'))
   createVersion(
     @Request() req,
@@ -148,8 +106,13 @@ export class DocumentController {
     return this.documentService.createVersion(id, req.user.userId, file);
   }
 
-  @Get(':id/versions')
-  getVersions(@Request() req, @Param('id') id: string) {
-    return this.documentService.getVersions(id, req.user.userId);
+  @Post(':id/ocr')
+  extractText(@Request() req, @Param('id') id: string) {
+    return this.documentService.extractText(id, req.user.userId);
+  }
+
+  @Post(':id/analyze')
+  analyzeDocument(@Request() req, @Param('id') id: string) {
+    return this.documentService.analyzeWithAI(id, req.user.userId);
   }
 }

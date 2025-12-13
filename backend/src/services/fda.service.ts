@@ -20,6 +20,34 @@ export class FDAService {
     };
   }
 
+  async searchDrug(drugName: string): Promise<any> {
+    this.logger.log(`Searching drug: ${drugName}`);
+    
+    return {
+      name: drugName,
+      genericName: drugName.toLowerCase(),
+      brandNames: [drugName],
+      description: 'Medication information from FDA database',
+      dosage: 'As prescribed by healthcare provider',
+      sideEffects: ['Consult package insert for complete list'],
+      warnings: ['Use only as directed'],
+    };
+  }
+
+  async getDrugRecalls(drugName: string): Promise<any[]> {
+    this.logger.log(`Getting recalls for: ${drugName}`);
+    
+    // Mock recall data
+    return [
+      {
+        drugName,
+        recallDate: new Date().toISOString(),
+        reason: 'No active recalls found',
+        status: 'clear',
+      }
+    ];
+  }
+
   async checkDrugRecalls(drugName: string): Promise<any[]> {
     this.logger.log(`Checking recalls for: ${drugName}`);
     

@@ -14,31 +14,16 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { ImagingService } from '../services/imaging.service';
 import { CreateImagingStudyDto } from '../dto/create-imaging-study.dto';
-import { ImagingStatus } from '../../entities/imaging-study.entity';
+import { UpdateImagingStudyDto } from '../dto/update-imaging-study.dto';
 
-@Controller('imaging')
+@Controller('lab/imaging')
 @UseGuards(JwtAuthGuard)
 export class ImagingController {
   constructor(private readonly imagingService: ImagingService) {}
 
-  @Post()
-  create(@Request() req, @Body() createDto: CreateImagingStudyDto) {
-    return this.imagingService.create(req.user.userId, createDto);
-  }
-
   @Get()
   findAll(@Request() req) {
     return this.imagingService.findAll(req.user.userId);
-  }
-
-  @Get('statistics')
-  getStatistics(@Request() req) {
-    return this.imagingService.getStatistics(req.user.userId);
-  }
-
-  @Get('modality/:modality')
-  findByModality(@Request() req, @Param('modality') modality: string) {
-    return this.imagingService.findByModality(req.user.userId, modality);
   }
 
   @Get(':id')
@@ -46,13 +31,33 @@ export class ImagingController {
     return this.imagingService.findOne(id, req.user.userId);
   }
 
-  @Patch(':id/status')
-  updateStatus(
+  @Post()
+  create(@Request() req, @Body() createDto: CreateImagingStudyDto) {
+    return this.imagingService.create(req.user.userId, createDto);
+  }
+
+  @Patch(':id')
+  update(
     @Request() req,
     @Param('id') id: string,
-    @Body('status') status: ImagingStatus,
+    @Body() updateDto: UpdateImagingStudyDto,
   ) {
-    return this.imagingService.updateStatus(id, req.user.userId, status);
+    return this.imagingService.update(id, req.user.userId, updateDto);
+  }
+
+  @Post(':id/schedule')
+  schedule(@Request() req, @Param('id') id: string, @Body() scheduleData: any) {
+    return this.imagingService.schedule(id, req.user.userId, scheduleData);
+  }
+
+  @Post(':id/cancel')
+  cancel(@Request() req, @Param('id') id: string, @Body('reason') reason: string) {
+    return this.imagingService.cancel(id, req.user.userId, reason);
+  }
+
+  @Get(':id/results')
+  getResults(@Request() req, @Param('id') id: string) {
+    return this.imagingService.getResults(id, req.user.userId);
   }
 
   @Post(':id/upload-images')
@@ -65,30 +70,22 @@ export class ImagingController {
     return this.imagingService.uploadImages(id, req.user.userId, files);
   }
 
-  @Post(':id/ai-analysis')
-  analyzeWithAI(@Request() req, @Param('id') id: string) {
+  @Post(':id/analyze')
+  analyzeImages(@Request() req, @Param('id') id: string) {
     return this.imagingService.analyzeWithAI(id, req.user.userId);
   }
 
-  @Post(':id/report')
-  addReport(
+  @Get(':id/report')
+  generateReport(@Request() req, @Param('id') id: string) {
+    return this.imagingService.generateReport(id, req.user.userId);
+  }
+
+  @Post(':id/share')
+  shareStudy(
     @Request() req,
     @Param('id') id: string,
-    @Body()
-    reportDto: {
-      findings: string;
-      impression: string;
-      recommendations: string;
-      radiologistName: string;
-    },
+    @Body('recipientEmail') recipientEmail: string,
   ) {
-    return this.imagingService.addReport(
-      id,
-      req.user.userId,
-      reportDto.findings,
-      reportDto.impression,
-      reportDto.recommendations,
-      reportDto.radiologistName,
-    );
+    return this.imagingService.shareStudy(id, req.user.userId, recipientEmail);
   }
 }
