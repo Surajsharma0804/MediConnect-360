@@ -1,140 +1,113 @@
 #!/bin/bash
 
-# MediConnect 360 - Quick Setup Script
-# This script automates the initial setup process
-
+# MediConnect 360 - Complete Setup Script
 set -e
 
-echo "🏥 MediConnect 360 - Quick Setup"
-echo "================================"
-echo ""
+echo "🚀 Setting up MediConnect 360..."
 
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+# Function to print colored output
+print_status() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
 
 # Check if Docker is installed
 if ! command -v docker &> /dev/null; then
-    echo -e "${RED}❌ Docker is not installed${NC}"
-    echo "Please install Docker from: https://docs.docker.com/get-docker/"
+    print_error "Docker is not installed. Please install Docker first."
     exit 1
 fi
 
 # Check if Docker Compose is installed
 if ! command -v docker-compose &> /dev/null; then
-    echo -e "${RED}❌ Docker Compose is not installed${NC}"
-    echo "Please install Docker Compose from: https://docs.docker.com/compose/install/"
+    print_error "Docker Compose is not installed. Please install Docker Compose first."
     exit 1
 fi
 
-# Check if Node.js is installed
-if ! command -v node &> /dev/null; then
-    echo -e "${RED}❌ Node.js is not installed${NC}"
-    echo "Please install Node.js 18+ from: https://nodejs.org/"
-    exit 1
-fi
+# Create necessary directories
+print_status "Creating necessary directories..."
+mkdir -p logs
+mkdir -p backups
+mkdir -p backend/uploads
+mkdir -p ssl
 
-echo -e "${GREEN}✅ Prerequisites check passed${NC}"
-echo ""
-
-# Setup environment files
-echo "📝 Setting up environment files..."
-
+# Copy environment file if it doesn't exist
 if [ ! -f .env ]; then
-    cp .env.example .env
-    echo -e "${GREEN}✅ Created .env file${NC}"
-else
-    echo -e "${YELLOW}⚠️  .env file already exists${NC}"
+    print_status "Creating .env file from template..."
+    cp .env.production .env
+    print_warning "Please edit .env file with your actual values before running the application!"
 fi
 
-if [ ! -f backend/.env ]; then
-    cp backend/.env backend/.env.backup 2>/dev/null || true
-    echo -e "${GREEN}✅ Backed up existing backend/.env${NC}"
-else
-    echo -e "${YELLOW}⚠️  backend/.env file already exists${NC}"
+# Generate secrets if not provided
+print_status "Generating secure secrets..."
+
+# Generate JWT secrets
+if ! grep -q "your-super-secret" .env; then
+    JWT_SECRET=$(openssl rand -base64 32)
+    JWT_REFRESH_SECRET=$(openssl rand -base64 32)
+    ENCRYPTION_KEY=$(openssl rand -hex 16)
+    
+    sed -i "s/your-super-secret-jwt-key-min-32-chars/$JWT_SECRET/g" .env
+    sed -i "s/your-super-secret-refresh-key-min-32-chars/$JWT_REFRESH_SECRET/g" .env
+    sed -i "s/your-32-character-encryption-key!!/$ENCRYPTION_KEY/g" .env
+    
+    print_success "Generated secure JWT and encryption keys"
 fi
 
-echo ""
-
-# Start Docker services
-echo "🐳 Starting Docker services..."
-docker-compose up -d
-
-echo ""
-echo "⏳ Waiting for services to be ready..."
-sleep 10
-
-# Check if services are running
-if docker-compose ps | grep -q "Up"; then
-    echo -e "${GREEN}✅ Docker services are running${NC}"
-else
-    echo -e "${RED}❌ Failed to start Docker services${NC}"
-    exit 1
+# Generate database passwords
+if grep -q "your-secure-postgres-password" .env; then
+    POSTGRES_PASSWORD=$(openssl rand -base64 16)
+    REDIS_PASSWORD=$(openssl rand -base64 16)
+    
+    sed -i "s/your-secure-postgres-password/$POSTGRES_PASSWORD/g" .env
+    sed -i "s/your-secure-redis-password/$REDIS_PASSWORD/g" .env
+    
+    print_success "Generated secure database passwords"
 fi
 
-echo ""
-
-# Install backend dependencies
-echo "📦 Installing backend dependencies..."
-cd backend
+# Install dependencies
+print_status "Installing frontend dependencies..."
 npm install
-cd ..
-echo -e "${GREEN}✅ Backend dependencies installed${NC}"
 
-echo ""
+print_status "Installing backend dependencies..."
+cd backend && npm install && cd ..
 
-# Install frontend dependencies
-echo "📦 Installing frontend dependencies..."
-npm install
-echo -e "${GREEN}✅ Frontend dependencies installed${NC}"
+# Build Docker images
+print_status "Building Docker images..."
+docker-compose build
 
+print_success "Setup complete!"
 echo ""
-
-# Run backend tests
-echo "🧪 Running backend tests..."
-cd backend
-npm run test -- --passWithNoTests
-cd ..
-echo -e "${GREEN}✅ Backend tests passed${NC}"
-
+echo "📋 Next Steps:"
+echo "1. Edit .env file with your API keys:"
+echo "   - VITE_GOOGLE_CLIENT_ID"
+echo "   - GEMINI_API_KEY"
+echo "   - RESEND_API_KEY"
+echo "   - STRIPE keys"
 echo ""
-
-# Display next steps
-echo "================================"
-echo -e "${GREEN}🎉 Setup Complete!${NC}"
-echo "================================"
+echo "2. Start the application:"
+echo "   docker-compose up -d"
 echo ""
-echo "Next steps:"
+echo "3. Access the application:"
+echo "   - Frontend: http://localhost"
+echo "   - Backend: http://localhost:5000"
+echo "   - Database: localhost:5432"
 echo ""
-echo "1. Get your FREE API keys:"
-echo "   - Gemini AI: https://aistudio.google.com/app/apikey"
-echo "   - Resend Email: https://resend.com/api-keys"
-echo ""
-echo "2. Add API keys to backend/.env:"
-echo "   GEMINI_API_KEY=your-key-here"
-echo "   RESEND_API_KEY=your-key-here"
-echo ""
-echo "3. Start the backend:"
-echo "   cd backend && npm run start:dev"
-echo ""
-echo "4. Start the frontend (in a new terminal):"
-echo "   npm run dev"
-echo ""
-echo "5. Open your browser:"
-echo "   Frontend: http://localhost:5173"
-echo "   Backend:  http://localhost:5000"
-echo ""
-echo "📚 Documentation:"
-echo "   - README.md - Project overview"
-echo "   - TESTING_GUIDE.md - Testing guide"
-echo "   - DEPLOYMENT.md - Deployment guide"
-echo "   - IMPROVEMENTS_SUMMARY.md - What's new"
-echo ""
-echo "🐛 Troubleshooting:"
-echo "   - Check Docker: docker-compose ps"
-echo "   - View logs: docker-compose logs -f"
-echo "   - Restart services: docker-compose restart"
-echo ""
-echo -e "${GREEN}Happy coding! 🚀${NC}"
+echo "4. For production deployment, see DEPLOYMENT_GUIDE.md"

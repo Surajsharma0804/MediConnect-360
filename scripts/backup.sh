@@ -1,39 +1,41 @@
 #!/bin/bash
-# MediConnect 360 - Automated Backup Script
 
+# MediConnect 360 - Database Backup Script
 set -e
 
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-BACKUP_DIR="/backups/mediconnect"
-S3_BUCKET="s3://mediconnect-backups"
+# Load environment variables
+if [ -f .env ]; then
+    source .env
+fi
 
-echo "Starting backup at $TIMESTAMP"
+# Default values
+POSTGRES_USER=${POSTGRES_USER:-postgres}
+POSTGRES_DB=${POSTGRES_DB:-mediconnect}
+BACKUP_DIR=${BACKUP_DIR:-./backups}
 
-# Backup PostgreSQL Database
-echo "Backing up database..."
-pg_dump $DATABASE_URL > "$BACKUP_DIR/db_$TIMESTAMP.sql"
-gzip "$BACKUP_DIR/db_$TIMESTAMP.sql"
+# Create backup directory
+mkdir -p $BACKUP_DIR
 
-# Backup uploaded files
-echo "Backing up files..."
-tar -czf "$BACKUP_DIR/files_$TIMESTAMP.tar.gz" /app/uploads
+# Generate timestamp
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 
-# Upload to S3
-echo "Uploading to S3..."
-aws s3 cp "$BACKUP_DIR/db_$TIMESTAMP.sql.gz" "$S3_BUCKET/database/"
-aws s3 cp "$BACKUP_DIR/files_$TIMESTAMP.tar.gz" "$S3_BUCKET/files/"
+# Backup PostgreSQL
+echo "Creating PostgreSQL backup..."
+pg_dump -h postgres -U $POSTGRES_USER -d $POSTGRES_DB > $BACKUP_DIR/postgres_backup_$TIMESTAMP.sql
 
-# Cleanup old backups (keep last 30 days)
-echo "Cleaning up old backups..."
-find $BACKUP_DIR -name "*.gz" -mtime +30 -delete
+# Backup Redis (if running)
+echo "Creating Redis backup..."
+redis-cli -h redis --rdb $BACKUP_DIR/redis_backup_$TIMESTAMP.rdb
 
-# Verify backup
-echo "Verifying backup..."
-aws s3 ls "$S3_BUCKET/database/db_$TIMESTAMP.sql.gz"
+# Compress backups
+echo "Compressing backups..."
+tar -czf $BACKUP_DIR/mediconnect_backup_$TIMESTAMP.tar.gz $BACKUP_DIR/*_backup_$TIMESTAMP.*
 
-echo "Backup completed successfully at $(date)"
+# Clean up individual files
+rm $BACKUP_DIR/postgres_backup_$TIMESTAMP.sql
+rm $BACKUP_DIR/redis_backup_$TIMESTAMP.rdb
 
-# Send notification
-curl -X POST $SLACK_WEBHOOK_URL \
-  -H 'Content-Type: application/json' \
-  -d "{\"text\":\"✅ MediConnect backup completed: $TIMESTAMP\"}"
+# Remove backups older than 7 days
+find $BACKUP_DIR -name "mediconnect_backup_*.tar.gz" -mtime +7 -delete
+
+echo "Backup completed: $BACKUP_DIR/mediconnect_backup_$TIMESTAMP.tar.gz"
