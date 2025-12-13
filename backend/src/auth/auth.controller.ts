@@ -7,16 +7,21 @@ import {
   UseGuards,
   Req,
   Res,
+  Delete,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
+import { TwoFactorService } from './two-factor.service';
 import { AuthGuard } from '@nestjs/passport';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private twoFactorService: TwoFactorService,
+  ) {}
 
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
@@ -86,5 +91,44 @@ export class AuthController {
     // Redirect to frontend with token and user data
     const redirectUrl = `${frontendUrl}/auth/callback?token=${result.accessToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
     return res.redirect(redirectUrl);
+  }
+
+  // Two-Factor Authentication endpoints
+  @Post('2fa/generate')
+  @UseGuards(AuthGuard('jwt'))
+  async generateTwoFactor(@Req() req) {
+    return this.twoFactorService.generateTwoFactorSecret(req.user.id);
+  }
+
+  @Post('2fa/enable')
+  @UseGuards(AuthGuard('jwt'))
+  async enableTwoFactor(@Req() req, @Body() body: { token: string }) {
+    return this.twoFactorService.enableTwoFactor(req.user.id, body.token);
+  }
+
+  @Delete('2fa/disable')
+  @UseGuards(AuthGuard('jwt'))
+  async disableTwoFactor(@Req() req, @Body() body: { token: string }) {
+    await this.twoFactorService.disableTwoFactor(req.user.id, body.token);
+    return { message: '2FA disabled successfully' };
+  }
+
+  @Post('2fa/verify')
+  async verifyTwoFactor(@Body() body: { userId: string; token: string }) {
+    const isValid = await this.twoFactorService.verifyTwoFactorToken(body.userId, body.token);
+    return { valid: isValid };
+  }
+
+  @Post('2fa/backup-codes/regenerate')
+  @UseGuards(AuthGuard('jwt'))
+  async regenerateBackupCodes(@Req() req) {
+    return this.twoFactorService.regenerateBackupCodes(req.user.id);
+  }
+
+  @Get('2fa/status')
+  @UseGuards(AuthGuard('jwt'))
+  async getTwoFactorStatus(@Req() req) {
+    const enabled = await this.twoFactorService.isTwoFactorEnabled(req.user.id);
+    return { enabled };
   }
 }

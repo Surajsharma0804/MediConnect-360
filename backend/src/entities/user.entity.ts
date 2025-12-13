@@ -128,6 +128,18 @@ export class User {
   @Column({ type: 'timestamp', nullable: true })
   deletedAt: Date; // Soft delete for HIPAA compliance
 
+  // Two-Factor Authentication fields
+  @Column({ default: false })
+  twoFactorEnabled: boolean;
+
+  @Column({ nullable: true, select: false })
+  @Exclude()
+  twoFactorSecret: string;
+
+  @Column({ type: 'text', array: true, default: [] })
+  @Exclude()
+  twoFactorBackupCodes: string[];
+
   // Hooks
   @BeforeInsert()
   @BeforeUpdate()

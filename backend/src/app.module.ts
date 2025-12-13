@@ -21,6 +21,7 @@ import { User } from './entities/user.entity';
 // Auth modules
 import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
+import { TwoFactorService } from './auth/two-factor.service';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { GoogleStrategy } from './auth/strategies/google.strategy';
 import { GitHubStrategy } from './auth/strategies/github.strategy';
@@ -171,6 +172,7 @@ const oauthProviders = getOAuthProviders();
   providers: [
     AppService,
     AuthService,
+    TwoFactorService,
     JwtStrategy,
     ...oauthProviders,
     AIService,

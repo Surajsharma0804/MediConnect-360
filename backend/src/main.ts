@@ -19,10 +19,34 @@ async function bootstrap() {
       logger: ['error', 'warn', 'log', 'debug', 'verbose'],
     });
 
-    // Security: Enable Helmet for security headers
-    if (process.env.NODE_ENV === 'production') {
-      app.use(helmet());
-    }
+    // Security: Enhanced Helmet configuration for healthcare compliance
+    app.use(helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+          scriptSrc: ["'self'", "'unsafe-eval'"], // unsafe-eval needed for development
+          fontSrc: ["'self'", "https://fonts.gstatic.com"],
+          imgSrc: ["'self'", "data:", "https:", "blob:"],
+          connectSrc: ["'self'", "https://api.stripe.com", "wss:", "ws:"],
+          frameSrc: ["'self'", "https://js.stripe.com", "https://meet.jit.si"],
+          objectSrc: ["'none'"],
+          baseUri: ["'self'"],
+          formAction: ["'self'"],
+          upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null,
+        },
+      },
+      hsts: {
+        maxAge: 31536000, // 1 year
+        includeSubDomains: true,
+        preload: true
+      },
+      noSniff: true,
+      xssFilter: true,
+      referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+      permittedCrossDomainPolicies: false,
+      crossOriginEmbedderPolicy: false, // Disabled for compatibility
+    }));
 
     // Enable compression
     app.use(compression());
