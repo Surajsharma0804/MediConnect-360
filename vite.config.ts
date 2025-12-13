@@ -9,6 +9,8 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   build: {
+    target: 'esnext',
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks: {
@@ -19,5 +21,6 @@ export default defineConfig({
       },
     },
     chunkSizeWarningLimit: 1000,
+    sourcemap: false, // Disable sourcemaps for faster builds
   },
 });
