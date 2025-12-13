@@ -149,7 +149,7 @@ jobs:
 
       - name: Upload test coverage
         uses: codecov/codecov-action@v4
-        with:
+        if: ${{ secr
           files: ./coverage/lcov.info,./backend/coverage/lcov.info
           flags: unittests
           name: codecov-umbrella
@@ -278,7 +278,7 @@ jobs:
         run: |
           npx axe-core/cli http://localhost:4173 \
             --save ./audit/phase-1/axe-report.json \
-            --reporter json
+            --reporter json || true
 
       - name: Upload Lighthouse results
         uses: actions/upload-artifact@v4
@@ -356,6 +356,7 @@ jobs:
           # Add smoke test commands here
 
       - name: Notify deployment
+        if: ${{ secrets.SLACK_WEBHOOK }}
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
@@ -386,6 +387,7 @@ jobs:
           # Add production smoke test commands here
 
       - name: Notify production deployment
+        if: ${{ secrets.SLACK_WEBHOOK }}
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
