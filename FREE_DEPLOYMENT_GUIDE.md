@@ -137,9 +137,68 @@ CLOUDINARY_API_SECRET=your-api-secret
 
 ---
 
-# 🚀 **STEP 4: Deploy Backend to Render (5 minutes)**
+# � ***STEP 3: CRITICAL - Fix TypeORM Config (REQUIRED)**
 
-## 4.1 Prepare Your Repository
+## 🔧 **MOST IMPORTANT STEP - Don't Skip This!**
+
+**If this step is skipped, database connection will NEVER work.**
+
+Your TypeORM config must use `DATABASE_URL`, not individual host/port settings.
+
+### Check Your Configuration:
+
+**Find this file**: `backend/src/config/database.config.ts`
+
+**❌ WRONG (causes localhost error):**
+```typescript
+export const databaseConfig = (): TypeOrmModuleOptions => ({
+  type: 'postgres',
+  host: process.env.DB_HOST || 'localhost',  // ← This causes the error!
+  port: parseInt(process.env.DB_PORT || '5432'),
+  username: process.env.DB_USERNAME || 'postgres',
+  password: process.env.DB_PASSWORD || 'password',
+  database: process.env.DB_NAME || 'mediconnect',
+  // ...
+});
+```
+
+**✅ CORRECT (uses DATABASE_URL):**
+```typescript
+export const databaseConfig = (): TypeOrmModuleOptions => ({
+  type: 'postgres',
+  url: process.env.DATABASE_URL,  // ← This is the fix!
+  entities: [User, AuditLog],
+  synchronize: process.env.NODE_ENV !== 'production',
+  logging: process.env.NODE_ENV === 'development',
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  autoLoadEntities: true,
+});
+```
+
+### 🛠️ **How to Fix:**
+
+1. **Open**: `backend/src/config/database.config.ts`
+2. **Replace** the entire config with the CORRECT version above
+3. **Key changes**:
+   - Remove `host`, `port`, `username`, `password`, `database`
+   - Add `url: process.env.DATABASE_URL`
+   - Add `autoLoadEntities: true`
+
+### 🚀 **Push the Fix:**
+
+```bash
+git add .
+git commit -m "fix TypeORM to use Neon DATABASE_URL"
+git push origin main
+```
+
+**Render will automatically redeploy with the fix!**
+
+---
+
+<function_calls>
+<invoke name="readFile">
+<parameter name="path">backend/src/config/database.config.ts
 
 1. **Make sure** your code is pushed to GitHub
 2. **Ensure** you have `backend/package.json` with these scripts:
