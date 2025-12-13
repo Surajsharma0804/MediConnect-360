@@ -1,10 +1,10 @@
 {
-  "name": "backend",
-  "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "name": "mediconnect-360-backend",
+  "version": "1.0.0",
+  "description": "Backend API for MediConnect 360 - Advanced healthcare platform with AI diagnostics and telemedicine",
+  "author": "MediConnect Team",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
