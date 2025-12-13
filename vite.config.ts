@@ -1,10 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { pwaConfig } from './vite-pwa.config';
+// import { pwaConfig } from './vite-pwa.config'; // Temporarily disabled for faster builds
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), pwaConfig],
+  plugins: [react()], // PWA temporarily disabled
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
