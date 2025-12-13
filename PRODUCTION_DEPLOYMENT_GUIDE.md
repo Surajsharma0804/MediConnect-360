@@ -367,7 +367,7 @@ Create your production environment file:
 # SERVER CONFIGURATION
 # ======================
 NODE_ENV=production
-PORT=5000
+PORT=10000
 API_URL=https://api.yourdomain.com
 
 # ======================

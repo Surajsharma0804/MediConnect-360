@@ -116,27 +116,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const socialLogin = async (provider: 'google' | 'facebook' | 'apple', response?: unknown) => {
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       
-      let email = 'user@example.com';
-      let name = 'John Doe';
-      
-      if (provider === 'google' && response && typeof response === 'object' && 'credential' in response) {
-        const credential = (response as { credential: string }).credential;
-        const decoded = JSON.parse(atob(credential.split('.')[1])) as { email: string; name: string };
-        email = decoded.email;
-        name = decoded.name;
+      // For Google OAuth, redirect to backend OAuth endpoint
+      if (provider === 'google') {
+        window.location.href = `${apiUrl}/api/auth/google`;
+        return;
       }
       
-      const mockUser: User = {
-        id: Math.random().toString(36).substr(2, 9),
-        name,
-        email,
-        role: 'patient',
-      };
+      // For GitHub OAuth, redirect to backend OAuth endpoint
+      if (provider === 'github') {
+        window.location.href = `${apiUrl}/api/auth/github`;
+        return;
+      }
       
-      setUser(mockUser);
-      localStorage.setItem('mediconnect_user', JSON.stringify(mockUser));
+      // For other providers, implement as needed
+      throw new Error(`${provider} login not implemented yet`);
     } catch (error) {
       console.error('Social login error:', error);
       throw error;

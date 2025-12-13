@@ -227,6 +227,17 @@ git push origin main
    - **Start Command**: `npm run start:prod`
    - **Instance Type**: `Free`
 
+### 🔌 **IMPORTANT: Port Configuration**
+
+**Development vs Production Ports:**
+- **Local Development**: `PORT=5000` (in backend/.env)
+- **Render Production**: `PORT=10000` (in Render environment variables)
+
+**Why Different Ports?**
+- Render requires port 10000 for free tier services
+- Your local development can use any port (5000 is common)
+- Environment variables override .env file values
+
 ## 4.3 Add Environment Variables
 
 In Render dashboard, go to **Environment** and add these **EXACT** values:
@@ -235,28 +246,44 @@ In Render dashboard, go to **Environment** and add these **EXACT** values:
 NODE_ENV=production
 PORT=10000
 DATABASE_URL=postgresql://neondb_owner:YOUR_PASSWORD@ep-xxxx-xxxx.us-east-1.aws.neon.tech/mediconnect?sslmode=require
+REDIS_URL=redis://default:YOUR_PASSWORD@host:6379
 JWT_SECRET=hNrt9KTHbPcSfzZ6Yod8v3BmOe7uJV24X9kL2mP8qR5sT1wY
 JWT_EXPIRES_IN=7d
+JWT_REFRESH_SECRET=hNrt9KTHbPcSfzZ6Yod8v3BmOe7uJV24X9kL2mP8qR5sT1wY
+JWT_REFRESH_EXPIRES_IN=30d
 GEMINI_API_KEY=AIzaSyC-YOUR-ACTUAL-GEMINI-KEY
 RESEND_API_KEY=re_YOUR-ACTUAL-RESEND-KEY
 FROM_EMAIL=noreply@mediconnect360.com
+FROM_NAME=MediConnect 360
 CORS_ORIGIN=https://your-app.vercel.app
 ENCRYPTION_KEY=1LUF6KmSI5An8rhpJNHwsEdeykZBfoDX
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
 ```
 
 ## 🚨 **CRITICAL REPLACEMENTS NEEDED:**
 
-1. **DATABASE_URL**: Copy EXACTLY from Neon dashboard
+1. **PORT**: Must be `10000` for Render (NOT 5000)
+   - ❌ `PORT=5000` (development only)
+   - ✅ `PORT=10000` (Render requirement)
+
+2. **DATABASE_URL**: Copy EXACTLY from Neon dashboard
    - ❌ `localhost:5432` 
    - ✅ `ep-xxxx-xxxx.us-east-1.aws.neon.tech`
 
-2. **GEMINI_API_KEY**: From Google AI Studio (Step 1)
+3. **REDIS_URL**: Copy EXACTLY from Upstash dashboard
+   - ❌ `localhost:6379`
+   - ✅ `redis://default:password@host:6379`
+
+4. **GEMINI_API_KEY**: From Google AI Studio (Step 1)
    - Must start with `AIzaSyC`
 
-3. **RESEND_API_KEY**: From Resend dashboard (Step 1)  
+5. **RESEND_API_KEY**: From Resend dashboard (Step 1)  
    - Must start with `re_`
 
-4. **CORS_ORIGIN**: Your Vercel URL (Step 5)
+6. **CORS_ORIGIN**: Your Vercel URL (Step 5)
    - Will be `https://your-app-name.vercel.app`
 
 **Generate secure secrets:**

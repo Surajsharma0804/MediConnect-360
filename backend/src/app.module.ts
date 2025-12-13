@@ -118,25 +118,55 @@ const oauthProviders = getOAuthProviders();
     }),
     // Background jobs - Enhanced Redis configuration
     BullModule.forRootAsync({
-      useFactory: (configService: ConfigService) => ({
-        redis: {
-          host: configService.get('REDIS_HOST', 'localhost'),
-          port: configService.get('REDIS_PORT', 6379),
-          password: configService.get('REDIS_PASSWORD'),
-          retryDelayOnFailover: 100,
-          enableReadyCheck: false,
-          maxRetriesPerRequest: 3,
-        },
-        defaultJobOptions: {
-          removeOnComplete: 10,
-          removeOnFail: 5,
-          attempts: 3,
-          backoff: {
-            type: 'exponential',
-            delay: 2000,
+      useFactory: (configService: ConfigService) => {
+        // Parse Redis URL if provided (Upstash format)
+        const redisUrl = configService.get('REDIS_URL');
+        let redisConfig;
+
+        if (redisUrl) {
+          try {
+            const url = new URL(redisUrl);
+            redisConfig = {
+              host: url.hostname,
+              port: parseInt(url.port) || 6379,
+              password: url.password || undefined,
+              username: url.username !== 'default' ? url.username : undefined,
+            };
+          } catch (error) {
+            console.error('Failed to parse REDIS_URL for BullMQ:', error);
+            // Fallback to individual variables
+            redisConfig = {
+              host: configService.get('REDIS_HOST', 'localhost'),
+              port: configService.get('REDIS_PORT', 6379),
+              password: configService.get('REDIS_PASSWORD'),
+            };
+          }
+        } else {
+          redisConfig = {
+            host: configService.get('REDIS_HOST', 'localhost'),
+            port: configService.get('REDIS_PORT', 6379),
+            password: configService.get('REDIS_PASSWORD'),
+          };
+        }
+
+        return {
+          redis: {
+            ...redisConfig,
+            retryDelayOnFailover: 100,
+            enableReadyCheck: false,
+            maxRetriesPerRequest: 3,
           },
-        },
-      }),
+          defaultJobOptions: {
+            removeOnComplete: 10,
+            removeOnFail: 5,
+            attempts: 3,
+            backoff: {
+              type: 'exponential',
+              delay: 2000,
+            },
+          },
+        };
+      },
       inject: [ConfigService],
     }),
     
