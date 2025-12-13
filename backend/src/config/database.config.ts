@@ -1,15 +1,17 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
+import { User } from '../entities/user.entity';
+import { AuditLog } from '../common/entities/audit-log.entity';
+
 export const databaseConfig = (): TypeOrmModuleOptions => ({
   type: 'postgres',
-  url: process.env.DATABASE_URL,
-  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  // Enable synchronize to auto-create tables
-  // Can be controlled via DB_SYNCHRONIZE env var (defaults to true for initial setup)
-  synchronize: process.env.DB_SYNCHRONIZE !== 'false',
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT || '5432'),
+  username: process.env.DB_USERNAME || 'postgres',
+  password: process.env.DB_PASSWORD || 'password',
+  database: process.env.DB_NAME || 'mediconnect',
+  entities: [User, AuditLog], // Only load specific entities for now
+  synchronize: process.env.NODE_ENV !== 'production', // Only for development
   logging: process.env.NODE_ENV === 'development',
-  ssl:
-    process.env.NODE_ENV === 'production'
-      ? { rejectUnauthorized: false }
-      : false,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });

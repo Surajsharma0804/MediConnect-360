@@ -17,6 +17,7 @@ import { redisCacheConfig } from './config/cache.config';
 
 // Entity imports
 import { User } from './entities/user.entity';
+import { AuditLog } from './common/entities/audit-log.entity';
 
 // Auth modules
 import { AuthController } from './auth/auth.controller';
@@ -27,21 +28,6 @@ import { GoogleStrategy } from './auth/strategies/google.strategy';
 import { GitHubStrategy } from './auth/strategies/github.strategy';
 
 // Feature modules
-import { AIModule } from './ai/ai.module';
-import { EHRModule } from './ehr/ehr.module';
-import { ProvidersModule } from './providers/providers.module';
-import { AppointmentsModule } from './appointments/appointments.module';
-import { MessagingModule } from './messaging/messaging.module';
-import { FamilyModule } from './family/family.module';
-import { EmergencyModule } from './emergency/emergency.module';
-import { HealthTrackingModule } from './health-tracking/health-tracking.module';
-import { PharmacyModule } from './pharmacy/pharmacy.module';
-import { InsuranceModule } from './insurance/insurance.module';
-import { LabDiagnosticsModule } from './lab-diagnostics/lab-diagnostics.module';
-import { IntegrationsModule } from './integrations/integrations.module';
-import { CareCoordinationModule } from './care-coordination/care-coordination.module';
-import { DocumentsModule } from './documents/documents.module';
-import { RemindersModule } from './reminders/reminders.module';
 import { HealthModule } from './health/health.module';
 
 // Payment module
@@ -58,6 +44,7 @@ import { FDAService } from './services/fda.service';
 import { NotificationService } from './services/notification.service';
 import { AnalyticsService } from './services/analytics.service';
 import { VideoService } from './services/video.service';
+import { AuditLogService } from './common/services/audit-log.service';
 
 // Logger for application startup
 const logger = new Logger('AppModule');
@@ -91,7 +78,7 @@ const oauthProviders = getOAuthProviders();
       isGlobal: true,
     }),
     TypeOrmModule.forRoot(databaseConfig()),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, AuditLog]),
     PassportModule,
     JwtModule.register({
       global: true,
@@ -152,21 +139,6 @@ const oauthProviders = getOAuthProviders();
     // Health checks
     TerminusModule,
     HealthModule,
-    AIModule,
-    EHRModule,
-    ProvidersModule,
-    AppointmentsModule,
-    MessagingModule,
-    FamilyModule,
-    EmergencyModule,
-    HealthTrackingModule,
-    PharmacyModule,
-    InsuranceModule,
-    LabDiagnosticsModule,
-    IntegrationsModule,
-    CareCoordinationModule,
-    DocumentsModule,
-    RemindersModule,
   ],
   controllers: [AppController, AuthController, PaymentController],
   providers: [
@@ -185,6 +157,7 @@ const oauthProviders = getOAuthProviders();
     AnalyticsService,
     VideoService,
     VoiceService,
+    AuditLogService,
   ],
 })
 export class AppModule {}

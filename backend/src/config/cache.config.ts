@@ -1,21 +1,23 @@
 import { CacheModuleOptions } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
 
-export const cacheConfig: CacheModuleOptions = {
-  isGlobal: true,
-  ttl: 300, // 5 minutes default
-  max: 100, // Maximum number of items in cache
-};
-
 export const redisCacheConfig = async (): Promise<CacheModuleOptions> => {
-  if (process.env.REDIS_URL) {
+  try {
     return {
       store: await redisStore({
-        url: process.env.REDIS_URL,
-        ttl: 300,
+        socket: {
+          host: process.env.REDIS_HOST || 'localhost',
+          port: parseInt(process.env.REDIS_PORT || '6379'),
+        },
+        password: process.env.REDIS_PASSWORD,
       }),
-      isGlobal: true,
+      ttl: 300, // 5 minutes default TTL
+    };
+  } catch (error) {
+    // Fallback to memory cache if Redis is not available
+    console.warn('Redis not available, falling back to memory cache');
+    return {
+      ttl: 300,
     };
   }
-  return cacheConfig;
 };

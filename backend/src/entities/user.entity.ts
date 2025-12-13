@@ -132,9 +132,9 @@ export class User {
   @Column({ default: false })
   twoFactorEnabled: boolean;
 
-  @Column({ nullable: true, select: false })
+  @Column({ type: 'text', nullable: true, select: false })
   @Exclude()
-  twoFactorSecret: string;
+  twoFactorSecret: string | null;
 
   @Column({ type: 'text', array: true, default: [] })
   @Exclude()
