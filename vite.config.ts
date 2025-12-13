@@ -7,8 +7,6 @@ import path from 'path';
 export default defineConfig({
   plugins: [
     react({
-      // Enable React Fast Refresh
-      fastRefresh: true,
       // Optimize JSX runtime
       jsxRuntime: 'automatic',
     }),
@@ -76,6 +74,7 @@ export default defineConfig({
         },
         // Optimize asset naming
         assetFileNames: (assetInfo) => {
+          if (!assetInfo.name) return `assets/[name]-[hash][extname]`;
           const info = assetInfo.name.split('.');
           const ext = info[info.length - 1];
           if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {

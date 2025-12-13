@@ -6,7 +6,7 @@ import Navbar from './components/common/Navbar';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import ToastProvider from './components/common/ToastProvider';
-import SkeletonLoader from './components/common/SkeletonLoader';
+import { Skeleton } from './components/common/SkeletonLoader';
 import { useAuth } from './hooks/useAuth';
 
 // Lazy load pages for better performance
@@ -26,7 +26,7 @@ function App() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <SkeletonLoader className="w-32 h-32" />
+        <Skeleton className="w-32 h-32" variant="rectangular" />
       </div>
     );
   }
@@ -42,7 +42,7 @@ function App() {
               {isAuthenticated && <Navbar />}
               <Suspense fallback={
                 <div className="min-h-screen flex items-center justify-center">
-                  <SkeletonLoader className="w-64 h-32" />
+                  <Skeleton className="w-64 h-32" variant="rectangular" />
                 </div>
               }>
                 <Routes>

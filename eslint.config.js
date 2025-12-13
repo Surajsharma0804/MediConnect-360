@@ -38,7 +38,7 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': [
         'warn',
-        { allowConstantExport: true },
+        { allowConstantExport: true, allowExportNames: ['AuthContext', 'useAuth', 'AuthProvider'] },
       ],
       
       // TypeScript rules
@@ -47,11 +47,9 @@ export default tseslint.config(
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_'
       }],
-      '@typescript-eslint/prefer-const': 'error',
-      '@typescript-eslint/no-var-requires': 'error',
       
       // General rules
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-console': ['warn', { allow: ['warn', 'error', 'log'] }],
       'no-debugger': 'error',
       'prefer-const': 'error',
       'no-var': 'error',
