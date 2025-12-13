@@ -1,16 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-// import { pwaConfig } from './vite-pwa.config'; // Temporarily disabled for faster builds
+import { pwaConfig } from './vite-pwa.config';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()], // PWA temporarily disabled
+  plugins: [react(), pwaConfig],
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
   build: {
-    target: 'esnext',
-    minify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks: {
@@ -21,6 +19,5 @@ export default defineConfig({
       },
     },
     chunkSizeWarningLimit: 1000,
-    sourcemap: false, // Disable sourcemaps for faster builds
   },
 });
