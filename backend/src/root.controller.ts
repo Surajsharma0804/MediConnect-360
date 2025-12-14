@@ -1,51 +1,74 @@
-import { Controller, Get, Head, Res } from '@nestjs/common';
-import type { Response } from 'express';
+import { Controller, Get, Head } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 /**
- * Root Controller - Enterprise Best Practice
+ * Root Controller - Industry Standard Implementation
  * 
- * Redirects root path to versioned health endpoint for:
- * - Clean API-only mindset
- * - Professional appearance
- * - Platform-friendly monitoring
- * - Enterprise-level presentation
+ * Handles true root path (/) with NO prefix - exactly like Stripe, AWS, etc.
+ * Provides service metadata and status information at the root level.
+ * 
+ * Architecture:
+ * - / → Service metadata and info
+ * - /api/* → Actual APIs  
+ * - /api/health → Health probes
+ * - Frontend → Separate deployment (Vercel)
  */
-@Controller()
+@Controller() // ⚠️ NO PREFIX - This is the key!
 @ApiTags('Root')
 export class RootController {
   
   /**
-   * Root GET endpoint - Redirects to versioned health check
-   * This provides a clean, professional response when someone visits the root URL
+   * Root GET endpoint - Service metadata and information
+   * Industry standard: Provides service info, not redirects
    */
   @Get()
   @ApiOperation({ 
-    summary: 'Root endpoint redirect',
-    description: 'Redirects to the versioned health check endpoint for monitoring and status verification'
+    summary: 'Service information',
+    description: 'Returns service metadata and available endpoints - industry standard root response'
   })
   @ApiResponse({ 
-    status: 302, 
-    description: 'Redirects to /api/v1/health' 
+    status: 200, 
+    description: 'Service information and metadata',
+    schema: {
+      type: 'object',
+      properties: {
+        service: { type: 'string' },
+        status: { type: 'string' },
+        version: { type: 'string' },
+        api: { type: 'string' },
+        health: { type: 'string' },
+        documentation: { type: 'string' }
+      }
+    }
   })
-  redirect(@Res() res: Response) {
-    return res.redirect(302, '/api/v1/health');
+  root() {
+    return {
+      service: 'MediConnect 360 Backend',
+      status: 'running',
+      version: '1.0.0',
+      api: '/api',
+      health: '/api/health',
+      documentation: '/api/docs',
+      environment: process.env.NODE_ENV || 'development',
+      timestamp: new Date().toISOString(),
+    };
   }
 
   /**
-   * Root HEAD endpoint - Quick health check for monitoring systems
-   * Many monitoring tools use HEAD requests for lightweight health checks
+   * Root HEAD endpoint - Lightweight monitoring probe
+   * Used by monitoring systems for quick health checks
    */
   @Head()
   @ApiOperation({ 
-    summary: 'Root HEAD check',
-    description: 'Lightweight health check endpoint for monitoring systems'
+    summary: 'Root HEAD probe',
+    description: 'Lightweight health probe for monitoring systems - returns 200 OK if service is alive'
   })
   @ApiResponse({ 
     status: 200, 
     description: 'Service is alive and responding' 
   })
-  head(@Res() res: Response) {
-    return res.status(200).end();
+  head() {
+    // Return nothing - just 200 OK status
+    return;
   }
 }
