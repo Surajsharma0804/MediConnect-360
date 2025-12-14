@@ -169,9 +169,13 @@ export class AuthService {
   }
 
   async handleOAuthLogin(oauthUser: any, provider: string): Promise<AuthResult> {
+    this.logger.log(`🔍 handleOAuthLogin called with provider: ${provider}`);
+    this.logger.log(`🔍 OAuth user data:`, JSON.stringify(oauthUser, null, 2));
+    
     const { email, name, picture, id: providerId } = oauthUser;
 
     if (!email) {
+      this.logger.error('❌ No email provided by OAuth provider');
       throw new BadRequestException('Email is required from OAuth provider');
     }
 
@@ -182,6 +186,7 @@ export class AuthService {
 
     if (!user) {
       // Create new user from OAuth
+      this.logger.log(`🆕 Creating new user for: ${email}`);
       user = this.userRepository.create({
         email,
         name: name || email.split('@')[0],
@@ -195,7 +200,7 @@ export class AuthService {
       });
 
       user = await this.userRepository.save(user);
-      this.logger.log(`New user created via ${provider} OAuth: ${email}`);
+      this.logger.log(`✅ New user created via ${provider} OAuth: ${email}`);
     } else {
       // Update existing user with OAuth info if not set
       if (!user.oauthProvider) {
@@ -207,11 +212,13 @@ export class AuthService {
         }
         await this.userRepository.save(user);
       }
-      this.logger.log(`Existing user logged in via ${provider} OAuth: ${email}`);
+      this.logger.log(`✅ Existing user logged in via ${provider} OAuth: ${email}`);
     }
 
     // Generate tokens
+    this.logger.log(`🔑 Generating tokens for user: ${user.id}`);
     const tokens = await this.generateTokens(user);
+    this.logger.log(`🔑 Tokens generated successfully`);
 
     return {
       user: this.sanitizeUser(user),
@@ -277,6 +284,10 @@ export class AuthService {
       path: '/',
     };
 
+    this.logger.log(`🍪 Setting cookies with options:`, JSON.stringify(cookieOptions, null, 2));
+    this.logger.log(`🍪 Access token length: ${tokens.accessToken.length}`);
+    this.logger.log(`🍪 Refresh token length: ${tokens.refreshToken.length}`);
+
     // Set access token cookie (15 minutes)
     response.cookie('accessToken', tokens.accessToken, {
       ...cookieOptions,
@@ -289,7 +300,7 @@ export class AuthService {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    this.logger.debug('Auth cookies set successfully with cross-origin settings');
+    this.logger.log('🍪 Auth cookies set successfully with cross-origin settings');
   }
 
   clearAuthCookies(response: Response): void {

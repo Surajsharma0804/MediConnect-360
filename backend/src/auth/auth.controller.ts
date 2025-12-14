@@ -173,19 +173,22 @@ export class AuthController {
   ) {
     try {
       const user = request.user as any;
-      this.logger.log(`Google OAuth callback: ${user.email}`);
+      this.logger.log(`🔍 Google OAuth callback started for: ${user?.email || 'unknown'}`);
+      this.logger.log(`🔍 User object:`, JSON.stringify(user, null, 2));
       
       const result = await this.authService.handleOAuthLogin(user, 'google');
+      this.logger.log(`🔍 Auth service returned tokens: ${!!result.tokens.accessToken}`);
       
       // Set HttpOnly cookies
       this.authService.setAuthCookies(response, result.tokens);
+      this.logger.log(`🔍 Cookies set successfully`);
       
       // Redirect to frontend success page
       const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
-      this.logger.log(`Google OAuth: Redirecting to ${frontendUrl}/auth/callback?success=true`);
+      this.logger.log(`🔍 Redirecting to: ${frontendUrl}/auth/callback?success=true`);
       return response.redirect(`${frontendUrl}/auth/callback?success=true`);
     } catch (error) {
-      this.logger.error('Google OAuth callback error:', error);
+      this.logger.error('❌ Google OAuth callback error:', error);
       const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
       return response.redirect(`${frontendUrl}/auth/callback?error=oauth_failed`);
     }
