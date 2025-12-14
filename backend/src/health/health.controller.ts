@@ -29,31 +29,18 @@ export class HealthController {
    * Always returns 200 OK unless the core application is completely down
    */
   @Get()
-  @HealthCheck()
   @ApiOperation({ summary: 'Basic health check for load balancers' })
   @ApiResponse({ status: 200, description: 'Service is healthy' })
   async check() {
-    try {
-      return await this.health.check([
-        () => this.basicAppCheck(),
-        () => this.redis.isHealthy('redis'),
-      ]);
-    } catch (error) {
-      this.logger.warn(`Health check warning: ${error.message}`);
-      // Return healthy status even if some services are degraded
-      return {
-        status: 'ok',
-        info: {
-          app: { status: 'up' },
-          redis: { status: 'degraded', message: 'Using memory cache fallback' },
-        },
-        error: {},
-        details: {
-          app: { status: 'up' },
-          redis: { status: 'degraded' },
-        },
-      };
-    }
+    this.logger.log('Health check endpoint called');
+    return {
+      status: 'ok',
+      service: 'MediConnect-360',
+      timestamp: new Date().toISOString(),
+      version: '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+      uptime: process.uptime(),
+    };
   }
 
   /**
@@ -134,7 +121,8 @@ export class HealthController {
   @Get('live')
   @ApiOperation({ summary: 'Liveness probe for container orchestration' })
   @ApiResponse({ status: 200, description: 'Service is alive' })
-  async liveness() {
+  liveness() {
+    this.logger.log('Liveness check endpoint called');
     return {
       status: 'alive',
       timestamp: new Date().toISOString(),
