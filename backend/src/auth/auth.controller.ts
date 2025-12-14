@@ -23,6 +23,15 @@ export class AuthController {
     private twoFactorService: TwoFactorService,
   ) {}
 
+  @Get('test')
+  async test() {
+    return {
+      message: 'Auth controller is working!',
+      timestamp: new Date().toISOString(),
+      routes: ['register', 'login', 'google', 'github']
+    };
+  }
+
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
     return this.authService.register(
