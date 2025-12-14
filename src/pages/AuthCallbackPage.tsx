@@ -9,6 +9,34 @@ const AuthCallbackPage: React.FC = () => {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('Processing authentication...');
 
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://mediconnect-backend-orkv.onrender.com';
+
+  const checkAuthStatus = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
+        method: 'GET',
+        credentials: 'include', // Include cookies
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Auth check successful:', data.user);
+        // Trigger auth context refresh
+        await refreshAuth();
+        return true;
+      } else {
+        console.error('Auth check failed:', response.status);
+        return false;
+      }
+    } catch (error) {
+      console.error('Auth check error:', error);
+      return false;
+    }
+  };
+
   useEffect(() => {
     const handleCallback = async () => {
       try {
@@ -23,11 +51,17 @@ const AuthCallbackPage: React.FC = () => {
         }
 
         if (success === 'true') {
-          // OAuth was successful, refresh auth to get user data
-          await refreshAuth();
-          setStatus('success');
-          setMessage('Authentication successful! Redirecting...');
-          setTimeout(() => navigate('/dashboard'), 2000);
+          // OAuth was successful, check auth status to get user data
+          const authSuccess = await checkAuthStatus();
+          if (authSuccess) {
+            setStatus('success');
+            setMessage('Authentication successful! Redirecting...');
+            setTimeout(() => navigate('/dashboard'), 2000);
+          } else {
+            setStatus('error');
+            setMessage('Authentication verification failed. Please try again.');
+            setTimeout(() => navigate('/login'), 3000);
+          }
         } else {
           setStatus('error');
           setMessage('Authentication failed. Please try again.');
@@ -42,7 +76,7 @@ const AuthCallbackPage: React.FC = () => {
     };
 
     handleCallback();
-  }, [searchParams, navigate, refreshAuth]);
+  }, [searchParams, navigate]);
 
   const getErrorMessage = (error: string): string => {
     switch (error) {

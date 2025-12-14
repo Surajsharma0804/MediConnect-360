@@ -272,8 +272,8 @@ export class AuthService {
     
     const cookieOptions = {
       httpOnly: true,
-      secure: isProduction, // HTTPS only in production
-      sameSite: 'lax' as const,
+      secure: true, // Always secure for cross-origin
+      sameSite: 'none' as const, // Required for cross-origin cookies
       path: '/',
     };
 
@@ -289,14 +289,14 @@ export class AuthService {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    this.logger.debug('Auth cookies set successfully');
+    this.logger.debug('Auth cookies set successfully with cross-origin settings');
   }
 
   clearAuthCookies(response: Response): void {
     const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
+      secure: true, // Always secure for cross-origin
+      sameSite: 'none' as const, // Required for cross-origin cookies
       path: '/',
     };
 
