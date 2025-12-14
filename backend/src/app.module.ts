@@ -117,13 +117,13 @@ const oauthProviders = getOAuthProviders();
       useFactory: redisCacheConfig,
     }),
     // Background jobs - Enhanced Redis configuration
-    BullModule.forRootAsync({
-      useFactory: (configService: ConfigService) => {
-        // Parse Redis URL if provided (Upstash format)
-        const redisUrl = configService.get('REDIS_URL');
-        let redisConfig;
+    // BullModule disabled if no Redis URL configured
+    ...(process.env.REDIS_URL && process.env.REDIS_URL !== 'redis://localhost:6379' ? [
+      BullModule.forRootAsync({
+        useFactory: (configService: ConfigService) => {
+          const redisUrl = configService.get('REDIS_URL');
+          let redisConfig;
 
-        if (redisUrl) {
           try {
             const url = new URL(redisUrl);
             redisConfig = {
@@ -134,40 +134,32 @@ const oauthProviders = getOAuthProviders();
             };
           } catch (error) {
             console.error('Failed to parse REDIS_URL for BullMQ:', error);
-            // Fallback to individual variables
-            redisConfig = {
-              host: configService.get('REDIS_HOST', 'localhost'),
-              port: configService.get('REDIS_PORT', 6379),
-              password: configService.get('REDIS_PASSWORD'),
-            };
+            return null;
           }
-        } else {
-          redisConfig = {
-            host: configService.get('REDIS_HOST', 'localhost'),
-            port: configService.get('REDIS_PORT', 6379),
-            password: configService.get('REDIS_PASSWORD'),
-          };
-        }
 
-        return {
-          redis: {
-            ...redisConfig,
-            retryDelayOnFailover: 100,
-            enableReadyCheck: false,
-            maxRetriesPerRequest: 3,
-          },
-          defaultJobOptions: {
-            removeOnComplete: 10,
-            removeOnFail: 5,
-            attempts: 3,
-            backoff: {
-              type: 'exponential',
-              delay: 2000,
+          return {
+            redis: {
+              ...redisConfig,
+              retryDelayOnFailover: 100,
+              enableReadyCheck: false,
+              maxRetriesPerRequest: 3,
+              connectTimeout: 10000,
+              lazyConnect: true,
             },
-          },
-        };
-      },
-      inject: [ConfigService],
+            defaultJobOptions: {
+              removeOnComplete: 10,
+              removeOnFail: 5,
+              attempts: 3,
+              backoff: {
+                type: 'exponential',
+                delay: 2000,
+              },
+            },
+          };
+        },
+        inject: [ConfigService],
+      })
+    ] : []),
     }),
     
     // Health checks
