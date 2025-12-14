@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, Logger, VersioningType } from '@nestjs/common';
+import { ValidationPipe, Logger, VersioningType, RequestMethod } from '@nestjs/common';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -115,8 +115,8 @@ async function bootstrap() {
     // Global API prefix (excludes root controller routes)
     app.setGlobalPrefix('api', {
       exclude: [
-        '/', // Root endpoint
-        '/health', // Root health check
+        { path: '/', method: RequestMethod.ALL },
+        { path: '/health', method: RequestMethod.ALL },
       ],
     });
 
