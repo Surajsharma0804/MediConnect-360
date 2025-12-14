@@ -13,96 +13,109 @@ export class RedisHealthIndicator extends HealthIndicator {
 
   constructor(private configService: ConfigService) {
     super();
-    this.initializeRedisClient();
+    // Don't initialize Redis client in constructor to avoid connection issues
+    this.logger.log('Redis health check initialized - will check on demand');
   }
 
-  private async initializeRedisClient(): Promise<void> {
+  private async createTemporaryRedisClient(): Promise<any | null> {
     try {
       const redisUrl = this.configService.get('REDIS_URL');
       
       if (!redisUrl || redisUrl === 'redis://localhost:6379') {
-        this.logger.log('Redis not configured for health checks');
-        return;
+        return null;
       }
 
-      // Use URL directly - this handles TLS automatically for Upstash
-      this.redisClient = createClient({
-        url: redisUrl,
+      // Create a temporary client for health check - same pattern as BullMQ
+      const client = createClient({
+        url: redisUrl, // Use URL directly like BullMQ does
         socket: {
-          connectTimeout: 5000,
-          reconnectStrategy: (retries: number) => {
-            if (retries > 3) {
-              this.logger.warn('Redis health check reconnection attempts exceeded, giving up');
-              return false;
-            }
-            const delay = Math.min(retries * 500, 2000);
-            this.logger.log(`Redis health check reconnecting in ${delay}ms (attempt ${retries})`);
-            return delay;
-          },
+          connectTimeout: 3000, // Shorter timeout for health checks
+          // NO reconnect strategy - we don't want persistent connections for health checks
         },
-        // Reduced queue size for health checks
-        commandsQueueMaxLength: 10,
+        // Minimal configuration for health checks
+        commandsQueueMaxLength: 1,
       });
 
-      this.redisClient.on('error', (err) => {
-        this.logger.warn(`Redis health check client error: ${err.message}`);
-        // Don't crash on Redis errors
+      // Set up error handler that doesn't throw
+      client.on('error', (err) => {
+        this.logger.warn(`Redis health check error: ${err.message}`);
+        // Swallow errors - don't let them become uncaught exceptions
       });
 
-      this.redisClient.on('connect', () => {
-        this.logger.log('Redis health check client connected');
-      });
+      // Connect with timeout
+      await Promise.race([
+        client.connect(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Connection timeout')), 3000)
+        )
+      ]);
 
-      await this.redisClient.connect();
+      return client;
     } catch (error) {
-      this.logger.warn(`Failed to initialize Redis health check client: ${error.message}`);
-      this.redisClient = null;
-      // Don't throw - just set client to null
+      this.logger.warn(`Redis health check connection failed: ${error.message}`);
+      return null;
     }
   }
 
   async isHealthy(key: string): Promise<HealthIndicatorResult> {
-    // Use cached result if within interval
+    // Use cached result if within interval to avoid frequent connection attempts
     const now = Date.now();
     if (this.cachedResult && (now - this.lastHealthCheck) < this.healthCheckInterval) {
       return this.cachedResult;
     }
 
+    const redisUrl = this.configService.get('REDIS_URL');
+    
+    if (!redisUrl || redisUrl === 'redis://localhost:6379') {
+      // Redis not configured - this is acceptable
+      const result = this.getStatus(key, true, {
+        status: 'not_configured',
+        message: 'Redis not configured, using memory cache',
+      });
+      this.cachedResult = result;
+      this.lastHealthCheck = now;
+      return result;
+    }
+
+    let tempClient: any | null = null;
+    
     try {
-      if (!this.redisClient) {
-        // Redis not configured - this is acceptable
+      // Create temporary client for this health check only
+      tempClient = await this.createTemporaryRedisClient();
+      
+      if (!tempClient) {
+        // Connection failed, but that's OK - return healthy with fallback message
         const result = this.getStatus(key, true, {
-          status: 'not_configured',
-          message: 'Redis not configured, using memory cache',
+          status: 'unavailable',
+          message: 'Redis connection failed, using memory cache fallback',
         });
         this.cachedResult = result;
         this.lastHealthCheck = now;
         return result;
       }
 
-      // Perform health check - DO NOT THROW
+      // Perform quick health check
       const startTime = Date.now();
-      await this.redisClient.ping();
+      await tempClient.ping();
       const responseTime = Date.now() - startTime;
 
-      // Get Redis info
-      const info = await this.redisClient.info('server');
-      const memoryInfo = await this.redisClient.info('memory');
-      
-      // Parse Redis version
-      const versionMatch = info.match(/redis_version:([^\r\n]+)/);
-      const version = versionMatch ? versionMatch[1] : 'unknown';
-      
-      // Parse memory usage
-      const memoryMatch = memoryInfo.match(/used_memory_human:([^\r\n]+)/);
-      const memoryUsage = memoryMatch ? memoryMatch[1] : 'unknown';
+      // Get basic Redis info (don't get too much to avoid timeouts)
+      let version = 'unknown';
+      try {
+        const info = await tempClient.info('server');
+        const versionMatch = info.match(/redis_version:([^\r\n]+)/);
+        version = versionMatch ? versionMatch[1] : 'unknown';
+      } catch (infoError) {
+        // Info command failed, but ping worked - that's still healthy
+        this.logger.warn(`Redis info command failed: ${infoError.message}`);
+      }
 
       const result = this.getStatus(key, true, {
         status: 'connected',
         version,
-        memory_usage: memoryUsage,
         response_time_ms: responseTime,
-        connection_type: 'external',
+        connection_type: 'temporary',
+        message: 'Redis connection successful',
       });
 
       this.cachedResult = result;
@@ -112,38 +125,38 @@ export class RedisHealthIndicator extends HealthIndicator {
     } catch (error) {
       this.logger.warn(`Redis health check failed: ${error.message}`);
       
-      // Try to reconnect silently
-      if (this.redisClient) {
-        try {
-          await this.redisClient.disconnect();
-          this.redisClient = null;
-          // Don't immediately reconnect - let it happen on next health check
-        } catch (reconnectError) {
-          this.logger.warn(`Redis disconnect failed: ${reconnectError.message}`);
-        }
-      }
-
-      // Return DOWN status but DO NOT THROW - this prevents app crashes
-      const result = this.getStatus(key, true, { // Set to true so health check passes
+      // CRITICAL: Return healthy status even if Redis fails
+      // This prevents the health check from failing and potentially crashing the app
+      const result = this.getStatus(key, true, { // Always return true for health
         status: 'down',
         error: error.message,
-        message: 'Redis unavailable, using memory cache fallback',
+        message: 'Redis unavailable, using memory cache fallback - this is OK',
       });
 
-      // Don't cache failed results for as long
-      this.lastHealthCheck = now - (this.healthCheckInterval * 0.8);
+      // Cache failed result for shorter time
+      this.cachedResult = result;
+      this.lastHealthCheck = now - (this.healthCheckInterval * 0.5);
       return result;
+
+    } finally {
+      // ALWAYS clean up the temporary client to prevent socket leaks
+      if (tempClient) {
+        try {
+          await tempClient.quit(); // Graceful disconnect
+        } catch (quitError) {
+          // If quit fails, force disconnect
+          try {
+            await tempClient.disconnect();
+          } catch (disconnectError) {
+            this.logger.warn(`Failed to disconnect Redis health check client: ${disconnectError.message}`);
+          }
+        }
+      }
     }
   }
 
   async onApplicationShutdown(): Promise<void> {
-    if (this.redisClient) {
-      try {
-        await this.redisClient.disconnect();
-        this.logger.log('Redis health check client disconnected');
-      } catch (error) {
-        this.logger.error(`Error disconnecting Redis health check client: ${error.message}`);
-      }
-    }
+    // No persistent client to disconnect - we use temporary clients only
+    this.logger.log('Redis health check shutdown - no persistent connections to close');
   }
 }
