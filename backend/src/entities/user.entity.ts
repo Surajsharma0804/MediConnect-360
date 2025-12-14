@@ -36,9 +36,9 @@ export enum BloodType {
 }
 
 @Entity('users')
-@Index(['email']) // Index for faster email lookups
-@Index(['role']) // Index for role-based queries
-@Index(['isActive', 'isVerified']) // Composite index for active verified users
+@Index('IDX_USER_EMAIL', ['email']) // Index for faster email lookups
+@Index('IDX_USER_ROLE', ['role']) // Index for role-based queries
+@Index('IDX_USER_ACTIVE_VERIFIED', ['isActive', 'isEmailVerified']) // Composite index for active verified users
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
