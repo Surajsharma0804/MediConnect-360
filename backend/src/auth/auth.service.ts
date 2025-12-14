@@ -226,14 +226,29 @@ export class AuthService {
     };
   }
 
-  async loginOAuth(oauthUser: any): Promise<{ accessToken: string; refreshToken: string }> {
+  loginOAuth(oauthUser: any): { accessToken: string; refreshToken: string } {
     this.logger.log(`🔍 loginOAuth called for user: ${oauthUser?.email}`);
     
-    // Use existing handleOAuthLogin logic but return just tokens
-    const result = await this.handleOAuthLogin(oauthUser, oauthUser.provider || 'google');
-    
-    this.logger.log(`🔑 loginOAuth returning tokens for: ${result.user.email}`);
-    return result.tokens;
+    // Generate tokens directly for OAuth user
+    const payload = {
+      sub: oauthUser.providerId || oauthUser.id,
+      email: oauthUser.email,
+      role: 'patient',
+      iat: Math.floor(Date.now() / 1000),
+    };
+
+    const accessToken = this.jwtService.sign(payload, {
+      secret: process.env.JWT_SECRET || 'super-secret-key',
+      expiresIn: '15m',
+    });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: process.env.JWT_REFRESH_SECRET || 'refresh-secret-key',
+      expiresIn: '7d',
+    });
+
+    this.logger.log(`🔑 loginOAuth returning tokens for: ${oauthUser.email}`);
+    return { accessToken, refreshToken };
   }
 
   async refreshTokens(refreshToken: string): Promise<AuthResult> {
