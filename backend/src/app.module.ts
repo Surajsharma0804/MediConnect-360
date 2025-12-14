@@ -12,6 +12,7 @@ import { TerminusModule } from '@nestjs/terminus';
 // Core modules
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { RootController } from './root.controller';
 import { databaseConfig } from './config/database.config';
 import { redisCacheConfig } from './config/cache.config';
 import appConfig from './config/app.config';
@@ -197,7 +198,7 @@ const oauthProviders = getOAuthProviders();
     ProvidersModule,
     RemindersModule,
   ],
-  controllers: [AppController, AuthController, PaymentController],
+  controllers: [RootController, AppController, AuthController, PaymentController],
   providers: [
     AppService,
     AuthService,
