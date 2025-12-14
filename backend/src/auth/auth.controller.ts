@@ -168,12 +168,27 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Handle Google OAuth callback' })
   @ApiResponse({ status: 302, description: 'Redirects to frontend with auth result' })
-  async googleCallback(
-    @Req() req: Request,
-    @Res({ passthrough: false }) res: Response,
-  ) {
+  googleCallback(@Req() req: Request, @Res() res: Response): void {
+    this.logger.log(`🔍 CONTROLLER METHOD CALLED - Google OAuth callback started`);
+    this.logger.log(`🔍 User from request:`, JSON.stringify(req.user, null, 2));
+    
+    // Handle the OAuth callback synchronously
+    this.handleGoogleCallback(req, res).catch(error => {
+      this.logger.error('❌ Google OAuth callback error:', error);
+      const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
+      res.redirect(`${frontendUrl}/auth/callback?error=oauth_failed`);
+    });
+  }
+
+  private async handleGoogleCallback(req: Request, res: Response): Promise<void> {
     try {
-      this.logger.log(`🔍 CONTROLLER METHOD CALLED - Google OAuth callback started`);
+      this.logger.log(`🔍 Processing Google OAuth callback`);
+      
+      if (!req.user) {
+        this.logger.error('❌ No user object in request');
+        const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
+        return res.redirect(`${frontendUrl}/auth/callback?error=no_user`);
+      }
       
       const result = await this.authService.handleOAuthLogin(req.user, 'google');
       const { accessToken, refreshToken } = result.tokens;
@@ -200,11 +215,11 @@ export class AuthController {
       
       // Redirect to frontend success page
       const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
-      return res.redirect(`${frontendUrl}/auth/success`);
+      res.redirect(`${frontendUrl}/auth/success`);
     } catch (error) {
-      this.logger.error('❌ Google OAuth callback error:', error);
+      this.logger.error('❌ Error in handleGoogleCallback:', error);
       const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
-      return res.redirect(`${frontendUrl}/auth/callback?error=oauth_failed`);
+      res.redirect(`${frontendUrl}/auth/callback?error=oauth_failed`);
     }
   }
 
