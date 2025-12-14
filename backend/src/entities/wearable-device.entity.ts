@@ -62,10 +62,10 @@ export class WearableDevice {
   })
   status: ConnectionStatus;
 
-  @Column({ name: 'access_token', nullable: true })
+  @Column({ name: 'access_token', type: 'text', nullable: true })
   accessToken: string | null;
 
-  @Column({ name: 'refresh_token', nullable: true })
+  @Column({ name: 'refresh_token', type: 'text', nullable: true })
   refreshToken: string | null;
 
   @Column({ name: 'token_expires_at', type: 'timestamp', nullable: true })

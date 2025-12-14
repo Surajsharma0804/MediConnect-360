@@ -68,7 +68,7 @@ export class Appointment {
   @Column({ type: 'text', nullable: true })
   notes: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   videoRoomUrl: string;
 
   @Column({ type: 'jsonb', nullable: true })
@@ -83,6 +83,6 @@ export class Appointment {
   @Column({ type: 'timestamp', nullable: true })
   cancelledAt: Date;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   cancellationReason: string;
 }

@@ -60,7 +60,7 @@ export class ImagingStudy {
   @Column({ type: 'varchar', length: 500 })
   studyDescription: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   bodyPart: string;
 
   @Column({ type: 'text', nullable: true })
@@ -120,10 +120,10 @@ export class ImagingStudy {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   cost: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 10, nullable: true })
   currency: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   location: string;
 
   @Column({ type: 'text', nullable: true })

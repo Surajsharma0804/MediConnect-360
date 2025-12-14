@@ -18,13 +18,13 @@ export class AuditLog {
   @Column({ length: 100 })
   action: string; // AuditAction enum value
 
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   userId: string; // User who performed the action
 
   @Column({ nullable: true, length: 100 })
   resourceType: string; // Type of resource affected (User, Patient, Appointment, etc.)
 
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   resourceId: string; // ID of the affected resource
 
   @Column({ type: 'jsonb', nullable: true })

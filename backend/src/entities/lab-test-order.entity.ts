@@ -127,7 +127,7 @@ export class LabTestOrder {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   estimatedCost: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 10, nullable: true })
   currency: string;
 
   @Column({ name: 'insurance_covered', default: false })

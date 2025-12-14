@@ -87,7 +87,7 @@ export class MedicalDocument {
   @Column({ type: 'simple-array', nullable: true })
   tags: string[];
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   category: string;
 
   @Column({ name: 'is_shared', default: false })

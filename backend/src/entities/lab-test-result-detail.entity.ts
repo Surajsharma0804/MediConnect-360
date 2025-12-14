@@ -42,10 +42,10 @@ export class LabTestResultDetail {
   @Column({ type: 'varchar', length: 255 })
   componentName: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   value: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   unit: string;
 
   @Column({ name: 'reference_range', nullable: true })
