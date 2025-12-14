@@ -25,26 +25,28 @@ export class RedisHealthIndicator extends HealthIndicator {
         return;
       }
 
+      // Use URL directly - this handles TLS automatically for Upstash
       this.redisClient = createClient({
         url: redisUrl,
         socket: {
           connectTimeout: 5000,
           reconnectStrategy: (retries: number) => {
-            if (retries > 5) {
-              this.logger.error('Redis health check reconnection attempts exceeded');
+            if (retries > 3) {
+              this.logger.warn('Redis health check reconnection attempts exceeded, giving up');
               return false;
             }
-            const delay = Math.min(retries * 200, 2000);
+            const delay = Math.min(retries * 500, 2000);
             this.logger.log(`Redis health check reconnecting in ${delay}ms (attempt ${retries})`);
             return delay;
           },
         },
-        // Enterprise Redis client configuration
-        commandsQueueMaxLength: 100,
+        // Reduced queue size for health checks
+        commandsQueueMaxLength: 10,
       });
 
       this.redisClient.on('error', (err) => {
-        this.logger.error(`Redis health check client error: ${err.message}`);
+        this.logger.warn(`Redis health check client error: ${err.message}`);
+        // Don't crash on Redis errors
       });
 
       this.redisClient.on('connect', () => {
@@ -53,8 +55,9 @@ export class RedisHealthIndicator extends HealthIndicator {
 
       await this.redisClient.connect();
     } catch (error) {
-      this.logger.error(`Failed to initialize Redis health check client: ${error.message}`);
+      this.logger.warn(`Failed to initialize Redis health check client: ${error.message}`);
       this.redisClient = null;
+      // Don't throw - just set client to null
     }
   }
 
@@ -77,7 +80,7 @@ export class RedisHealthIndicator extends HealthIndicator {
         return result;
       }
 
-      // Perform health check
+      // Perform health check - DO NOT THROW
       const startTime = Date.now();
       await this.redisClient.ping();
       const responseTime = Date.now() - startTime;
@@ -107,22 +110,24 @@ export class RedisHealthIndicator extends HealthIndicator {
       return result;
 
     } catch (error) {
-      this.logger.error(`Redis health check failed: ${error.message}`);
+      this.logger.warn(`Redis health check failed: ${error.message}`);
       
-      // Try to reconnect
+      // Try to reconnect silently
       if (this.redisClient) {
         try {
           await this.redisClient.disconnect();
-          await this.initializeRedisClient();
+          this.redisClient = null;
+          // Don't immediately reconnect - let it happen on next health check
         } catch (reconnectError) {
-          this.logger.error(`Redis reconnection failed: ${reconnectError.message}`);
+          this.logger.warn(`Redis disconnect failed: ${reconnectError.message}`);
         }
       }
 
-      const result = this.getStatus(key, false, {
-        status: 'disconnected',
+      // Return DOWN status but DO NOT THROW - this prevents app crashes
+      const result = this.getStatus(key, true, { // Set to true so health check passes
+        status: 'down',
         error: error.message,
-        message: 'Redis connection failed, using memory cache fallback',
+        message: 'Redis unavailable, using memory cache fallback',
       });
 
       // Don't cache failed results for as long

@@ -14,6 +14,7 @@ const LoginPage = lazy(() => import('./pages/LoginPage'));
 const HomePage = lazy(() => import('./pages/HomePage'));
 const SymptomCheckerPage = lazy(() => import('./pages/SymptomCheckerPage'));
 const VirtualConsultPage = lazy(() => import('./pages/VirtualConsultPage'));
+const CameraTestPage = lazy(() => import('./pages/CameraTestPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const PricingPage = lazy(() => import('./pages/PricingPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
@@ -72,6 +73,14 @@ function App() {
                     element={
                       <ProtectedRoute>
                         <VirtualConsultPage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/camera-test" 
+                    element={
+                      <ProtectedRoute>
+                        <CameraTestPage />
                       </ProtectedRoute>
                     } 
                   />

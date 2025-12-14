@@ -29,6 +29,21 @@ import { GitHubStrategy } from './auth/strategies/github.strategy';
 
 // Feature modules
 import { HealthModule } from './health/health.module';
+import { AIModule } from './ai/ai.module';
+import { AppointmentsModule } from './appointments/appointments.module';
+import { CareCoordinationModule } from './care-coordination/care-coordination.module';
+import { DocumentsModule } from './documents/documents.module';
+import { EHRModule } from './ehr/ehr.module';
+import { EmergencyModule } from './emergency/emergency.module';
+import { FamilyModule } from './family/family.module';
+import { HealthTrackingModule } from './health-tracking/health-tracking.module';
+import { InsuranceModule } from './insurance/insurance.module';
+import { IntegrationsModule } from './integrations/integrations.module';
+import { LabDiagnosticsModule } from './lab-diagnostics/lab-diagnostics.module';
+import { MessagingModule } from './messaging/messaging.module';
+import { PharmacyModule } from './pharmacy/pharmacy.module';
+import { ProvidersModule } from './providers/providers.module';
+import { RemindersModule } from './reminders/reminders.module';
 
 // Payment module
 import { PaymentController } from './payment/payment.controller';
@@ -81,7 +96,7 @@ const oauthProviders = getOAuthProviders();
     TypeOrmModule.forFeature([
       User, 
       AuditLog,
-      // Add other entities as needed for advanced features
+      // All entities enabled for full functionality
     ]),
     PassportModule,
     JwtModule.register({
@@ -121,59 +136,19 @@ const oauthProviders = getOAuthProviders();
       useFactory: async (configService: ConfigService) => {
         const logger = new Logger('BullMQConfig');
         
-        // Parse Redis URL if provided (Upstash/Redis Cloud format)
+        // Use Redis URL directly - this is the ONLY correct way for Upstash
         const redisUrl = configService.get('REDIS_URL');
-        let redisConfig;
 
-        if (redisUrl && redisUrl !== 'redis://localhost:6379') {
-          try {
-            const url = new URL(redisUrl);
-            redisConfig = {
-              host: url.hostname,
-              port: parseInt(url.port) || 6379,
-              password: url.password || undefined,
-              username: url.username !== 'default' ? url.username : undefined,
-            };
-            logger.log(`🔄 BullMQ connecting to Redis: ${url.hostname}:${url.port || 6379}`);
-          } catch (error) {
-            logger.error(`Failed to parse REDIS_URL for BullMQ: ${error.message}`);
-            redisConfig = {
-              host: configService.get('REDIS_HOST', 'localhost'),
-              port: configService.get('REDIS_PORT', 6379),
-              password: configService.get('REDIS_PASSWORD'),
-            };
-          }
-        } else {
-          // Use individual environment variables or localhost fallback
-          redisConfig = {
-            host: configService.get('REDIS_HOST', 'localhost'),
-            port: configService.get('REDIS_PORT', 6379),
-            password: configService.get('REDIS_PASSWORD'),
-          };
+        if (!redisUrl || redisUrl === 'redis://localhost:6379') {
+          logger.warn('BullMQ disabled - no Redis URL configured');
+          return {}; // Return empty config to disable BullMQ
         }
 
-        return {
-          redis: {
-            ...redisConfig,
-            // Enterprise BullMQ Redis configuration
-            connectTimeout: 10000,
-            maxRetriesPerRequest: 3,
-            // BullMQ specific Redis options
-            retryDelayOnFailover: 100,
-            enableReadyCheck: false,
-            retryDelayOnClusterDown: 300,
-            enableOfflineQueue: false,
-            // Connection event handlers for monitoring
-            onConnect: () => {
-              logger.log('✅ BullMQ Redis connection established');
-            },
-            onError: (err: Error) => {
-              logger.error(`❌ BullMQ Redis connection error: ${err.message}`);
-            },
-            onReconnecting: () => {
-              logger.log('🔄 BullMQ Redis reconnecting...');
-            },
-          },
+        try {
+          logger.log(`🔄 BullMQ connecting to Redis using URL`);
+          
+          return {
+            redis: redisUrl, // Use URL directly - BullMQ supports this and handles TLS automatically
           // Enterprise job configuration
           defaultJobOptions: {
             removeOnComplete: 50, // Keep more completed jobs for monitoring
@@ -197,6 +172,11 @@ const oauthProviders = getOAuthProviders();
             maxStalledCount: 3, // Maximum number of times a job can be stalled
           },
         };
+        } catch (error) {
+          logger.error(`BullMQ configuration failed: ${error.message}`);
+          logger.warn('BullMQ disabled due to configuration error');
+          return {}; // Return empty config to disable BullMQ
+        }
       },
       inject: [ConfigService],
     }),
@@ -204,6 +184,23 @@ const oauthProviders = getOAuthProviders();
     // Health checks
     TerminusModule,
     HealthModule,
+    
+    // Feature modules - All enabled
+    AIModule,
+    AppointmentsModule,
+    CareCoordinationModule,
+    DocumentsModule,
+    EHRModule,
+    EmergencyModule,
+    FamilyModule,
+    HealthTrackingModule,
+    InsuranceModule,
+    IntegrationsModule,
+    LabDiagnosticsModule,
+    MessagingModule,
+    PharmacyModule,
+    ProvidersModule,
+    RemindersModule,
   ],
   controllers: [AppController, AuthController, PaymentController],
   providers: [

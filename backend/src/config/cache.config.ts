@@ -4,12 +4,7 @@ import { Logger } from '@nestjs/common';
 
 const logger = new Logger('RedisConfig');
 
-interface RedisConnectionOptions {
-  host: string;
-  port: number;
-  password?: string;
-  username?: string;
-}
+// Redis connection now uses URL directly - no need for separate options interface
 
 class RedisConnectionManager {
   private static instance: RedisConnectionManager;
@@ -45,7 +40,7 @@ class RedisConnectionManager {
     logger.warn(`Redis circuit breaker opened after ${this.connectionAttempts} failed attempts`);
   }
 
-  async createRedisStore(options: RedisConnectionOptions): Promise<any> {
+  async createRedisStore(redisUrl: string): Promise<any> {
     if (this.isCircuitBreakerOpen()) {
       logger.warn('Redis circuit breaker is open, using memory cache');
       return null;
@@ -53,13 +48,12 @@ class RedisConnectionManager {
 
     try {
       this.connectionAttempts++;
-      logger.log(`Redis connection attempt ${this.connectionAttempts}/${this.maxRetries} to ${options.host}:${options.port}`);
+      logger.log(`Redis connection attempt ${this.connectionAttempts}/${this.maxRetries} using URL`);
 
-      // Create Redis client configuration with proper types
+      // Use URL-based connection ONLY - this handles TLS automatically for Upstash
       const redisClientConfig = {
+        url: redisUrl,
         socket: {
-          host: options.host,
-          port: options.port,
           connectTimeout: 10000,
           reconnectStrategy: (retries: number) => {
             if (retries > 10) {
@@ -71,8 +65,6 @@ class RedisConnectionManager {
             return delay;
           },
         },
-        password: options.password,
-        username: options.username,
         // Enterprise Redis client configuration
         commandsQueueMaxLength: 1000,
       };
@@ -102,7 +94,7 @@ class RedisConnectionManager {
       // Reset connection attempts on successful connection
       this.connectionAttempts = 0;
       this.circuitBreakerOpen = false;
-      logger.log(`✅ Redis connection established successfully to ${options.host}:${options.port}`);
+      logger.log(`✅ Redis connection established successfully`);
       
       return store;
     } catch (error) {
@@ -126,21 +118,15 @@ class RedisConnectionManager {
 export const redisCacheConfig = async (): Promise<CacheModuleOptions> => {
   const connectionManager = RedisConnectionManager.getInstance();
   
-  // Parse Redis URL if provided (Upstash/Redis Cloud format)
+  // Use Redis URL directly - this is the ONLY correct way for Upstash
   const redisUrl = process.env.REDIS_URL;
   
   if (redisUrl && redisUrl !== 'redis://localhost:6379') {
     try {
-      const url = new URL(redisUrl);
-      const options: RedisConnectionOptions = {
-        host: url.hostname,
-        port: parseInt(url.port) || 6379,
-        password: url.password || undefined,
-        username: url.username !== 'default' ? url.username : undefined,
-      };
-
-      const store = await connectionManager.createRedisStore(options);
+      // Use URL directly - NO parsing, NO host/port extraction
+      const store = await connectionManager.createRedisStore(redisUrl);
       if (store) {
+        logger.log('✅ Redis cache store created successfully');
         return {
           store,
           ttl: 300000, // 5 minutes in milliseconds
@@ -148,28 +134,7 @@ export const redisCacheConfig = async (): Promise<CacheModuleOptions> => {
         };
       }
     } catch (error) {
-      logger.error(`Failed to parse REDIS_URL: ${error.message}`);
-    }
-  }
-
-  // Fallback to individual Redis environment variables
-  const redisHost = process.env.REDIS_HOST;
-  const redisPort = process.env.REDIS_PORT;
-  
-  if (redisHost && redisHost !== 'localhost') {
-    const options: RedisConnectionOptions = {
-      host: redisHost,
-      port: parseInt(redisPort || '6379'),
-      password: process.env.REDIS_PASSWORD,
-    };
-
-    const store = await connectionManager.createRedisStore(options);
-    if (store) {
-      return {
-        store,
-        ttl: 300000, // 5 minutes in milliseconds
-        max: 1000, // Maximum number of items in cache
-      };
+      logger.error(`Failed to create Redis store: ${error.message}`);
     }
   }
 
