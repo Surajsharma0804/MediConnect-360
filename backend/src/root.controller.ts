@@ -71,4 +71,35 @@ export class RootController {
     // Return nothing - just 200 OK status
     return;
   }
+
+  /**
+   * Basic health endpoint at root level
+   * Provides quick health status for monitoring
+   */
+  @Get('health')
+  @ApiOperation({ 
+    summary: 'Basic health check',
+    description: 'Quick health status check at root level'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Service health status',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'string' },
+        timestamp: { type: 'string' },
+        service: { type: 'string' },
+        version: { type: 'string' }
+      }
+    }
+  })
+  getHealth() {
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      service: 'MediConnect 360 Backend',
+      version: '1.0.0',
+    };
+  }
 }
