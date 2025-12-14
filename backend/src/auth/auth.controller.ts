@@ -160,6 +160,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Initiate Google OAuth login' })
   @ApiResponse({ status: 302, description: 'Redirects to Google OAuth' })
   googleAuth() {
+    this.logger.log('🔍 Google OAuth initiation called');
     // Passport handles the redirect - no logic needed here
   }
 
@@ -169,12 +170,20 @@ export class AuthController {
   @ApiResponse({ status: 302, description: 'Redirects to frontend with auth result' })
   async googleCallback(
     @Req() request: Request,
-    @Res() response: Response,
+    @Res({ passthrough: false }) response: Response,
   ) {
+    this.logger.log(`🔍 CONTROLLER METHOD CALLED - Google OAuth callback started`);
+    
     try {
       const user = request.user as any;
       this.logger.log(`🔍 Google OAuth callback started for: ${user?.email || 'unknown'}`);
       this.logger.log(`🔍 User object:`, JSON.stringify(user, null, 2));
+      
+      if (!user) {
+        this.logger.error('❌ No user object in request after OAuth validation');
+        const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
+        return response.redirect(`${frontendUrl}/auth/callback?error=no_user`);
+      }
       
       const result = await this.authService.handleOAuthLogin(user, 'google');
       this.logger.log(`🔍 Auth service returned tokens: ${!!result.tokens.accessToken}`);
@@ -186,11 +195,12 @@ export class AuthController {
       // Redirect to frontend success page
       const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
       this.logger.log(`🔍 Redirecting to: ${frontendUrl}/auth/callback?success=true`);
-      return response.redirect(`${frontendUrl}/auth/callback?success=true`);
+      
+      response.redirect(`${frontendUrl}/auth/callback?success=true`);
     } catch (error) {
       this.logger.error('❌ Google OAuth callback error:', error);
       const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
-      return response.redirect(`${frontendUrl}/auth/callback?error=oauth_failed`);
+      response.redirect(`${frontendUrl}/auth/callback?error=oauth_failed`);
     }
   }
 
