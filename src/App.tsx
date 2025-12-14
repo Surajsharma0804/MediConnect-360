@@ -18,7 +18,6 @@ const CameraTestPage = lazy(() => import('./pages/CameraTestPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const PricingPage = lazy(() => import('./pages/PricingPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
-const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
 const AuthSuccessPage = lazy(() => import('./pages/AuthSuccessPage'));
 
 function App() {
@@ -57,7 +56,7 @@ function App() {
                       isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />
                     } 
                   />
-                  <Route path="/auth/callback" element={<AuthCallbackPage />} />
+                  <Route path="/auth/callback" element={<AuthSuccessPage />} />
                   <Route path="/auth/success" element={<AuthSuccessPage />} />
                   <Route 
                     path="/" 

@@ -168,63 +168,7 @@ export class AuthService {
     };
   }
 
-  async handleOAuthLogin(oauthUser: any, provider: string): Promise<AuthResult> {
-    this.logger.log(`🔍 handleOAuthLogin called with provider: ${provider}`);
-    this.logger.log(`🔍 OAuth user data:`, JSON.stringify(oauthUser, null, 2));
-    
-    const { email, name, picture, id: providerId } = oauthUser;
 
-    if (!email) {
-      this.logger.error('❌ No email provided by OAuth provider');
-      throw new BadRequestException('Email is required from OAuth provider');
-    }
-
-    // Find or create user
-    let user = await this.userRepository.findOne({
-      where: { email },
-    });
-
-    if (!user) {
-      // Create new user from OAuth
-      this.logger.log(`🆕 Creating new user for: ${email}`);
-      user = this.userRepository.create({
-        email,
-        name: name || email.split('@')[0],
-        role: UserRole.PATIENT,
-        isActive: true,
-        isEmailVerified: true, // OAuth emails are pre-verified
-        isTwoFactorEnabled: false,
-        oauthProvider: provider,
-        oauthProviderId: providerId,
-        profilePicture: picture,
-      });
-
-      user = await this.userRepository.save(user);
-      this.logger.log(`✅ New user created via ${provider} OAuth: ${email}`);
-    } else {
-      // Update existing user with OAuth info if not set
-      if (!user.oauthProvider) {
-        user.oauthProvider = provider;
-        user.oauthProviderId = providerId;
-        user.isEmailVerified = true;
-        if (picture && !user.profilePicture) {
-          user.profilePicture = picture;
-        }
-        await this.userRepository.save(user);
-      }
-      this.logger.log(`✅ Existing user logged in via ${provider} OAuth: ${email}`);
-    }
-
-    // Generate tokens
-    this.logger.log(`🔑 Generating tokens for user: ${user.id}`);
-    const tokens = await this.generateTokens(user);
-    this.logger.log(`🔑 Tokens generated successfully`);
-
-    return {
-      user: this.sanitizeUser(user),
-      tokens,
-    };
-  }
 
   loginOAuth(oauthUser: any): { accessToken: string; refreshToken: string } {
     this.logger.log(`🔍 loginOAuth called for user: ${oauthUser?.email}`);
@@ -299,48 +243,7 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  setAuthCookies(response: Response, tokens: AuthTokens): void {
-    const isProduction = process.env.NODE_ENV === 'production';
-    
-    const cookieOptions = {
-      httpOnly: true,
-      secure: true, // Always secure for cross-origin
-      sameSite: 'none' as const, // Required for cross-origin cookies
-      path: '/',
-    };
 
-    this.logger.log(`🍪 Setting cookies with options:`, JSON.stringify(cookieOptions, null, 2));
-    this.logger.log(`🍪 Access token length: ${tokens.accessToken.length}`);
-    this.logger.log(`🍪 Refresh token length: ${tokens.refreshToken.length}`);
-
-    // Set access token cookie (15 minutes)
-    response.cookie('accessToken', tokens.accessToken, {
-      ...cookieOptions,
-      maxAge: 15 * 60 * 1000, // 15 minutes
-    });
-
-    // Set refresh token cookie (7 days)
-    response.cookie('refreshToken', tokens.refreshToken, {
-      ...cookieOptions,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
-
-    this.logger.log('🍪 Auth cookies set successfully with cross-origin settings');
-  }
-
-  clearAuthCookies(response: Response): void {
-    const cookieOptions = {
-      httpOnly: true,
-      secure: true, // Always secure for cross-origin
-      sameSite: 'none' as const, // Required for cross-origin cookies
-      path: '/',
-    };
-
-    response.clearCookie('accessToken', cookieOptions);
-    response.clearCookie('refreshToken', cookieOptions);
-
-    this.logger.debug('Auth cookies cleared');
-  }
 
   private sanitizeUser(user: User): Partial<User> {
     const { password, ...sanitizedUser } = user;
