@@ -1,30 +1,32 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from '../../entities/user.entity';
+import { Request } from 'express';
+import { AuthService } from '../auth.service';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-  ) {
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
+  constructor(private readonly authService: AuthService) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        // Extract from cookies first (preferred)
+        (request: Request) => {
+          return request?.cookies?.accessToken;
+        },
+        // Fallback to Authorization header
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ]),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'super-secret-dev-key-change-in-production-123',
+      secretOrKey: process.env.JWT_SECRET || 'super-secret-key',
+      passReqToCallback: false,
     });
   }
 
   async validate(payload: any) {
-    const user = await this.userRepository.findOne({
-      where: { id: payload.sub },
-    });
+    const user = await this.authService.validateUser(payload.sub);
 
-    if (!user || !user.isActive) {
-      throw new UnauthorizedException();
+    if (!user) {
+      throw new UnauthorizedException('User not found or inactive');
     }
 
     return user;

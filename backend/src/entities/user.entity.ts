@@ -90,13 +90,22 @@ export class User {
   isActive: boolean;
 
   @Column({ default: false })
-  isVerified: boolean;
+  isEmailVerified: boolean;
 
   @Column({ nullable: true, unique: true, length: 255 })
   googleId: string;
 
   @Column({ nullable: true, unique: true, length: 255 })
   githubId: string;
+
+  @Column({ nullable: true, length: 50 })
+  oauthProvider: string;
+
+  @Column({ nullable: true, length: 255 })
+  oauthProviderId: string;
+
+  @Column({ nullable: true, length: 500 })
+  profilePicture: string;
 
   @Column({ nullable: true, length: 500 })
   bio: string;
@@ -130,7 +139,7 @@ export class User {
 
   // Two-Factor Authentication fields
   @Column({ default: false })
-  twoFactorEnabled: boolean;
+  isTwoFactorEnabled: boolean;
 
   @Column({ type: 'text', nullable: true, select: false })
   @Exclude()

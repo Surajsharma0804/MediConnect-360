@@ -7,12 +7,24 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   private readonly logger = new Logger(GoogleStrategy.name);
 
   constructor() {
+    const clientID = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const callbackURL = process.env.GOOGLE_CALLBACK_URL || 
+      'https://mediconnect-backend-orkv.onrender.com/api/v1/auth/google/callback';
+
+    if (!clientID || !clientSecret) {
+      throw new Error('Google OAuth credentials not configured');
+    }
+
     super({
-      clientID: process.env.GOOGLE_CLIENT_ID || 'mock-client-id',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'mock-client-secret',
-      callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/api/auth/google/callback',
+      clientID,
+      clientSecret,
+      callbackURL,
       scope: ['email', 'profile'],
     });
+
+    this.logger.log('Google OAuth strategy initialized');
+    this.logger.log(`Callback URL: ${callbackURL}`);
   }
 
   async validate(
@@ -21,16 +33,25 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: any,
     done: VerifyCallback,
   ): Promise<any> {
-    this.logger.log(`Google OAuth validation for: ${profile.emails[0].value}`);
-    
-    const user = {
-      id: profile.id,
-      email: profile.emails[0].value,
-      name: profile.displayName,
-      picture: profile.photos[0].value,
-      accessToken,
-    };
+    try {
+      const { id, name, emails, photos } = profile;
+      
+      const user = {
+        id,
+        email: emails[0].value,
+        name: name.givenName + ' ' + name.familyName,
+        firstName: name.givenName,
+        lastName: name.familyName,
+        picture: photos[0].value,
+        accessToken,
+        refreshToken,
+      };
 
-    done(null, user);
+      this.logger.log(`Google OAuth validation successful: ${user.email}`);
+      done(null, user);
+    } catch (error) {
+      this.logger.error('Google OAuth validation failed:', error);
+      done(error, null);
+    }
   }
 }

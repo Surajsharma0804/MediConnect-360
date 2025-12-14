@@ -1,212 +1,235 @@
 import {
   Controller,
   Post,
-  Body,
   Get,
-  Query,
-  UseGuards,
+  Body,
   Req,
   Res,
-  Delete,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  UseInterceptors,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
-import type { Response } from 'express';
-import { AuthService } from './auth.service';
-import { TwoFactorService } from './two-factor.service';
+import type { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
-import { RegisterDto } from './dto/register.dto';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { CurrentUser } from './decorators/current-user.decorator';
+import { AuditLogInterceptor } from '../common/interceptors/audit-log.interceptor';
+import { SanitizeInterceptor } from '../common/interceptors/sanitize.interceptor';
+import type { User } from '../entities/user.entity';
 
-@Controller('auth')
+@ApiTags('Authentication')
+@Controller('api/v1/auth')
+@UseGuards(ThrottlerGuard)
+@UseInterceptors(AuditLogInterceptor, SanitizeInterceptor)
 export class AuthController {
-  constructor(
-    private authService: AuthService,
-    private twoFactorService: TwoFactorService,
-  ) {}
+  private readonly logger = new Logger(AuthController.name);
 
-  @Get('test')
-  async test() {
+  constructor(private readonly authService: AuthService) {}
+
+  @Get('health')
+  async healthCheck() {
+    const isProduction = process.env.NODE_ENV === 'production';
+    
     return {
-      message: 'Auth controller is working!',
+      status: 'healthy',
       timestamp: new Date().toISOString(),
-      routes: ['register', 'login', 'google', 'github'],
-      environment: {
-        nodeEnv: process.env.NODE_ENV,
-        corsOrigin: process.env.CORS_ORIGIN,
-        googleConfigured: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
-        githubConfigured: !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET),
-      }
+      version: 'v1',
+      environment: process.env.NODE_ENV || 'development',
+      oauth: {
+        google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
+        github: !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET),
+      },
+      security: {
+        httpsOnly: isProduction,
+        cookiesEnabled: true,
+        jwtConfigured: !!process.env.JWT_SECRET,
+        refreshTokenConfigured: !!process.env.JWT_REFRESH_SECRET,
+      },
+      routes: [
+        'POST /api/v1/auth/register',
+        'POST /api/v1/auth/login',
+        'POST /api/v1/auth/logout',
+        'GET /api/v1/auth/me',
+        'GET /api/v1/auth/google',
+        'GET /api/v1/auth/google/callback',
+        'GET /api/v1/auth/github',
+        'GET /api/v1/auth/github/callback',
+        'POST /api/v1/auth/refresh',
+      ],
     };
   }
 
   @Post('register')
-  async register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(
-      registerDto.email,
-      registerDto.password,
-      registerDto.name,
-      registerDto.role,
-    );
+  @HttpCode(HttpStatus.CREATED)
+  @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 attempts per minute
+  @ApiOperation({ summary: 'Register new user account' })
+  @ApiBody({ type: RegisterDto })
+  @ApiResponse({ status: 201, description: 'User registered successfully' })
+  @ApiResponse({ status: 409, description: 'User already exists' })
+  @ApiResponse({ status: 429, description: 'Too many registration attempts' })
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  async register(
+    @Body() registerDto: RegisterDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    this.logger.log(`Registration attempt: ${registerDto.email}`);
+    const result = await this.authService.register(registerDto);
+    
+    // Set HttpOnly cookies
+    this.authService.setAuthCookies(response, result.tokens);
+    
+    return {
+      user: result.user,
+      message: 'Registration successful',
+    };
   }
 
   @Post('login')
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto.email, loginDto.password);
-  }
-
-  @Get('google')
-  async googleAuth(@Res() res: Response) {
-    // Check if Google OAuth is configured
-    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-      return res.status(503).json({
-        error: 'Google OAuth not configured',
-        message: 'Google OAuth credentials are missing from environment variables'
-      });
-    }
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 attempts per minute
+  @ApiOperation({ summary: 'Authenticate user login' })
+  @ApiBody({ type: LoginDto })
+  @ApiResponse({ status: 200, description: 'Login successful' })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @ApiResponse({ status: 423, description: 'Account locked due to failed attempts' })
+  @ApiResponse({ status: 429, description: 'Too many login attempts' })
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  async login(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    this.logger.log(`Login attempt: ${loginDto.email}`);
+    const result = await this.authService.login(loginDto);
     
-    // If configured, redirect to Google OAuth
-    try {
-      // Manual redirect to Google OAuth
-      const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${process.env.GOOGLE_CLIENT_ID}&` +
-        `redirect_uri=${encodeURIComponent(process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/api/auth/google/callback')}&` +
-        `response_type=code&` +
-        `scope=email profile`;
-      
-      return res.redirect(googleAuthUrl);
-    } catch (error) {
-      return res.status(500).json({
-        error: 'OAuth initialization failed',
-        message: error.message
-      });
-    }
+    // Set HttpOnly cookies
+    this.authService.setAuthCookies(response, result.tokens);
+    
+    return {
+      user: result.user,
+      message: 'Login successful',
+    };
   }
 
-  @Get('google/callback')
-  async googleAuthCallback(@Query('code') code: string, @Res() res: Response) {
-    if (!code) {
-      const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5173';
-      return res.redirect(`${frontendUrl}/login?error=oauth_cancelled`);
-    }
-
-    try {
-      // Handle Google OAuth callback manually
-      const result = await this.authService.handleGoogleCallback(code);
-      const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5173';
-
-      // Redirect to frontend with token and user data
-      const redirectUrl = `${frontendUrl}/auth/callback?token=${result.accessToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
-      return res.redirect(redirectUrl);
-    } catch (error) {
-      const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5173';
-      return res.redirect(`${frontendUrl}/login?error=oauth_failed`);
-    }
-  }
-
-  @Get('verify-email')
-  async verifyEmail(@Query('token') token: string) {
-    return this.authService.verifyEmail(token);
-  }
-
-  @Post('forgot-password')
-  async forgotPassword(@Body() body: { email: string }) {
-    return this.authService.requestPasswordReset(body.email);
-  }
-
-  @Post('reset-password')
-  async resetPassword(@Body() body: { token: string; password: string }) {
-    return this.authService.resetPassword(body.token, body.password);
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  async logout(
+    @CurrentUser() user: User,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    this.logger.log(`Logout: ${user.email}`);
+    
+    // Clear cookies
+    this.authService.clearAuthCookies(response);
+    
+    return { message: 'Logout successful' };
   }
 
   @Get('me')
-  @UseGuards(AuthGuard('jwt'))
-  getProfile(@Req() req) {
-    return req.user;
+  @UseGuards(JwtAuthGuard)
+  async getProfile(@CurrentUser() user: User) {
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        isEmailVerified: user.isEmailVerified,
+        isTwoFactorEnabled: user.isTwoFactorEnabled,
+      },
+    };
   }
 
-  @Get('github')
-  async githubAuth(@Res() res: Response) {
-    // Check if GitHub OAuth is configured
-    if (!process.env.GITHUB_CLIENT_ID || !process.env.GITHUB_CLIENT_SECRET) {
-      return res.status(503).json({
-        error: 'GitHub OAuth not configured',
-        message: 'GitHub OAuth credentials are missing from environment variables'
-      });
-    }
+  // Google OAuth Routes
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth() {
+    // Passport handles the redirect
+  }
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleCallback(
+    @Req() request: Request,
+    @Res() response: Response,
+  ) {
+    const user = request.user as any;
+    this.logger.log(`Google OAuth callback: ${user.email}`);
     
-    // If configured, redirect to GitHub OAuth
-    try {
-      // Manual redirect to GitHub OAuth
-      const githubAuthUrl = `https://github.com/login/oauth/authorize?` +
-        `client_id=${process.env.GITHUB_CLIENT_ID}&` +
-        `redirect_uri=${encodeURIComponent(process.env.GITHUB_CALLBACK_URL || 'http://localhost:5000/api/auth/github/callback')}&` +
-        `scope=user:email`;
-      
-      return res.redirect(githubAuthUrl);
-    } catch (error) {
-      return res.status(500).json({
-        error: 'OAuth initialization failed',
-        message: error.message
-      });
-    }
+    const result = await this.authService.handleOAuthLogin(user, 'google');
+    
+    // Set HttpOnly cookies
+    this.authService.setAuthCookies(response, result.tokens);
+    
+    // Redirect to frontend success page
+    const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
+    return response.redirect(`${frontendUrl}/auth/callback?success=true`);
+  }
+
+  // GitHub OAuth Routes
+  @Get('github')
+  @UseGuards(AuthGuard('github'))
+  async githubAuth() {
+    // Passport handles the redirect
   }
 
   @Get('github/callback')
-  async githubAuthCallback(@Query('code') code: string, @Res() res: Response) {
-    if (!code) {
-      const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5173';
-      return res.redirect(`${frontendUrl}/login?error=oauth_cancelled`);
+  @UseGuards(AuthGuard('github'))
+  async githubCallback(
+    @Req() request: Request,
+    @Res() response: Response,
+  ) {
+    const user = request.user as any;
+    this.logger.log(`GitHub OAuth callback: ${user.email}`);
+    
+    const result = await this.authService.handleOAuthLogin(user, 'github');
+    
+    // Set HttpOnly cookies
+    this.authService.setAuthCookies(response, result.tokens);
+    
+    // Redirect to frontend success page
+    const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
+    return response.redirect(`${frontendUrl}/auth/callback?success=true`);
+  }
+
+  // Token refresh endpoint
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refreshToken(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const refreshToken = request.cookies?.refreshToken;
+    
+    if (!refreshToken) {
+      this.logger.warn('Refresh token missing from cookies');
+      this.authService.clearAuthCookies(response);
+      return { message: 'Refresh token required' };
     }
 
     try {
-      // Handle GitHub OAuth callback manually
-      const result = await this.authService.handleGithubCallback(code);
-      const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5173';
-
-      // Redirect to frontend with token and user data
-      const redirectUrl = `${frontendUrl}/auth/callback?token=${result.accessToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
-      return res.redirect(redirectUrl);
+      const result = await this.authService.refreshTokens(refreshToken);
+      
+      // Set new HttpOnly cookies
+      this.authService.setAuthCookies(response, result.tokens);
+      
+      return {
+        user: result.user,
+        message: 'Tokens refreshed successfully',
+      };
     } catch (error) {
-      const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5173';
-      return res.redirect(`${frontendUrl}/login?error=oauth_failed`);
+      this.logger.error('Token refresh failed:', error.message);
+      this.authService.clearAuthCookies(response);
+      return { message: 'Token refresh failed' };
     }
-  }
-
-  // Two-Factor Authentication endpoints
-  @Post('2fa/generate')
-  @UseGuards(AuthGuard('jwt'))
-  async generateTwoFactor(@Req() req) {
-    return this.twoFactorService.generateTwoFactorSecret(req.user.id);
-  }
-
-  @Post('2fa/enable')
-  @UseGuards(AuthGuard('jwt'))
-  async enableTwoFactor(@Req() req, @Body() body: { token: string }) {
-    return this.twoFactorService.enableTwoFactor(req.user.id, body.token);
-  }
-
-  @Delete('2fa/disable')
-  @UseGuards(AuthGuard('jwt'))
-  async disableTwoFactor(@Req() req, @Body() body: { token: string }) {
-    await this.twoFactorService.disableTwoFactor(req.user.id, body.token);
-    return { message: '2FA disabled successfully' };
-  }
-
-  @Post('2fa/verify')
-  async verifyTwoFactor(@Body() body: { userId: string; token: string }) {
-    const isValid = await this.twoFactorService.verifyTwoFactorToken(body.userId, body.token);
-    return { valid: isValid };
-  }
-
-  @Post('2fa/backup-codes/regenerate')
-  @UseGuards(AuthGuard('jwt'))
-  async regenerateBackupCodes(@Req() req) {
-    return this.twoFactorService.regenerateBackupCodes(req.user.id);
-  }
-
-  @Get('2fa/status')
-  @UseGuards(AuthGuard('jwt'))
-  async getTwoFactorStatus(@Req() req) {
-    const enabled = await this.twoFactorService.isTwoFactorEnabled(req.user.id);
-    return { enabled };
   }
 }

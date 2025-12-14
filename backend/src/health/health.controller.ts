@@ -183,6 +183,14 @@ export class HealthController {
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development',
       version: '1.0.0',
+      auth: {
+        oauth: {
+          google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
+          github: !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET),
+        },
+        jwt: !!process.env.JWT_SECRET,
+        refreshToken: !!process.env.JWT_REFRESH_SECRET,
+      },
     });
   }
 

@@ -21,13 +21,8 @@ import appConfig from './config/app.config';
 import { User } from './entities/user.entity';
 import { AuditLog } from './common/entities/audit-log.entity';
 
-// Auth modules
-import { AuthController } from './auth/auth.controller';
-import { AuthService } from './auth/auth.service';
-import { TwoFactorService } from './auth/two-factor.service';
-import { JwtStrategy } from './auth/strategies/jwt.strategy';
-import { GoogleStrategy } from './auth/strategies/google.strategy';
-import { GitHubStrategy } from './auth/strategies/github.strategy';
+// Auth module
+import { AuthModule } from './auth/auth.module';
 
 // Feature modules
 import { HealthModule } from './health/health.module';
@@ -66,39 +61,7 @@ import { AuditLogService } from './common/services/audit-log.service';
 // Logger for application startup
 const logger = new Logger('AppModule');
 
-// Conditionally add OAuth strategies only if credentials are configured
-const getOAuthProviders = (): any[] => {
-  const providers: any[] = [];
-  
-  // Debug environment variables
-  logger.log(`Environment check - NODE_ENV: ${process.env.NODE_ENV}`);
-  logger.log(`Google Client ID exists: ${!!process.env.GOOGLE_CLIENT_ID}`);
-  logger.log(`GitHub Client ID exists: ${!!process.env.GITHUB_CLIENT_ID}`);
-  
-  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    providers.push(GoogleStrategy);
-    logger.log('✅ Google OAuth strategy enabled');
-  } else {
-    logger.warn('❌ Google OAuth credentials not configured');
-    logger.warn(`GOOGLE_CLIENT_ID: ${process.env.GOOGLE_CLIENT_ID ? 'SET' : 'MISSING'}`);
-    logger.warn(`GOOGLE_CLIENT_SECRET: ${process.env.GOOGLE_CLIENT_SECRET ? 'SET' : 'MISSING'}`);
-  }
-  
-  if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
-    providers.push(GitHubStrategy);
-    logger.log('✅ GitHub OAuth strategy enabled');
-  } else {
-    logger.warn('❌ GitHub OAuth credentials not configured');
-    logger.warn(`GITHUB_CLIENT_ID: ${process.env.GITHUB_CLIENT_ID ? 'SET' : 'MISSING'}`);
-    logger.warn(`GITHUB_CLIENT_SECRET: ${process.env.GITHUB_CLIENT_SECRET ? 'SET' : 'MISSING'}`);
-  }
-  
-  logger.log(`Total OAuth providers loaded: ${providers.length}`);
-  return providers;
-};
 
-// Get OAuth providers but don't fail if none available
-const oauthProviders = getOAuthProviders();
 
 @Module({
   imports: [
@@ -192,6 +155,9 @@ const oauthProviders = getOAuthProviders();
     TerminusModule,
     HealthModule,
     
+    // Authentication
+    AuthModule,
+    
     // Feature modules - All enabled
     AIModule,
     AppointmentsModule,
@@ -209,13 +175,9 @@ const oauthProviders = getOAuthProviders();
     ProvidersModule,
     RemindersModule,
   ],
-  controllers: [RootController, AppController, AuthController, PaymentController],
+  controllers: [RootController, AppController, PaymentController],
   providers: [
     AppService,
-    AuthService,
-    TwoFactorService,
-    JwtStrategy,
-    ...oauthProviders,
     AIService,
     StorageService,
     EmailService,

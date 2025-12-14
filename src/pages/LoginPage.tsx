@@ -16,7 +16,7 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { login, signup, socialLogin } = useAuth();
+  const { login, register, loginWithGoogle, loginWithGitHub } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
@@ -51,23 +51,26 @@ const LoginPage: React.FC = () => {
       if (isLogin) {
         await login(formData.email, formData.password);
       } else {
-        await signup(formData.name, formData.email, formData.password, formData.role);
+        await register(formData.name, formData.email, formData.password, formData.role);
       }
       navigate(from, { replace: true });
-    } catch {
-      setError('Authentication failed. Please check your credentials and try again.');
+    } catch (error: any) {
+      setError(error.message || 'Authentication failed. Please check your credentials and try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSocialLogin = async (provider: 'google' | 'facebook' | 'apple', response?: unknown) => {
+  const handleSocialLogin = (provider: 'google' | 'github') => {
     try {
       setError('');
-      await socialLogin(provider, response);
-      navigate(from, { replace: true });
-    } catch {
-      setError('Social login failed. Please try again.');
+      if (provider === 'google') {
+        loginWithGoogle();
+      } else if (provider === 'github') {
+        loginWithGitHub();
+      }
+    } catch (error: any) {
+      setError(error.message || 'Social login failed. Please try again.');
     }
   };
   
@@ -108,6 +111,7 @@ const LoginPage: React.FC = () => {
         {/* Social Login Buttons */}
         <div className="space-y-3 mb-6">
           <button
+            type="button"
             onClick={() => handleSocialLogin('google')}
             className="w-full py-2 px-4 bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 rounded-lg flex items-center justify-center gap-2 transition-colors"
           >
@@ -121,6 +125,7 @@ const LoginPage: React.FC = () => {
           </button>
           
           <button
+            type="button"
             onClick={() => handleSocialLogin('github')}
             className="w-full py-2 px-4 bg-[#24292e] hover:bg-[#1b1f23] text-white rounded-lg flex items-center justify-center gap-2 transition-colors"
           >
