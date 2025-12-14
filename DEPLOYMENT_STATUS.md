@@ -116,16 +116,17 @@ Status: 🟢 OPERATIONAL
 
 ## 🔧 **EXPECTED BEHAVIORS (NOT ERRORS)**
 
-### ❌ **"Cannot GET /" - This is NORMAL**
+### ✅ **Root Route Fixed**
 ```
 URL: https://mediconnect-backend-orkv.onrender.com/
-Response: 404 Not Found
-Reason: Backend is API-only, no root route exists
+Response: Service information and metadata
+Status: Fixed - Now returns proper service info
 ```
 
 **✅ CORRECT URLs to test:**
+- Root: `/` → Returns service information and metadata
 - Health: `/api/health` → Returns `{"status":"ok"}`
-- API Root: `/api` → Returns API information
+- API Root: `/api` → Returns Swagger API documentation
 - OAuth: `/api/auth/google` → Redirects to Google login
 
 ### ⚠️ **Redis Warnings - Optional**

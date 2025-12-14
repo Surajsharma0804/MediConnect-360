@@ -112,9 +112,12 @@ async function bootstrap() {
       }),
     );
 
-    // Global API prefix (excludes root controller)
+    // Global API prefix (excludes root controller routes)
     app.setGlobalPrefix('api', {
-      exclude: ['/'],
+      exclude: [
+        '/', // Root endpoint
+        '/health', // Root health check
+      ],
     });
 
     // Setup Swagger documentation - enabled in all environments
