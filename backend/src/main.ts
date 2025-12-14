@@ -136,7 +136,7 @@ async function bootstrap() {
     // Graceful shutdown
     app.enableShutdownHooks();
 
-    const port = parseInt(process.env.PORT || '1000', 10);
+    const port = parseInt(process.env.PORT || '10000', 10);
     await app.listen(port, '0.0.0.0');
 
     logger.log('\n' + '='.repeat(60));

@@ -27,7 +27,10 @@ import { SanitizeInterceptor } from '../common/interceptors/sanitize.interceptor
 import type { User } from '../entities/user.entity';
 
 @ApiTags('Authentication')
-@Controller('api/v1/auth')
+@Controller({
+  path: 'auth',
+  version: '1',
+})
 @UseGuards(ThrottlerGuard)
 @UseInterceptors(AuditLogInterceptor, SanitizeInterceptor)
 export class AuthController {
