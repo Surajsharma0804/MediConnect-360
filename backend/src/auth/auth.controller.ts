@@ -166,61 +166,34 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  @ApiOperation({ summary: 'Handle Google OAuth callback' })
-  @ApiResponse({ status: 302, description: 'Redirects to frontend with auth result' })
-  googleCallback(@Req() req: Request, @Res() res: Response): void {
-    this.logger.log(`🔍 CONTROLLER METHOD CALLED - Google OAuth callback started`);
-    this.logger.log(`🔍 User from request:`, JSON.stringify(req.user, null, 2));
+  async googleCallback(
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    this.logger.log(`🔍 GOOGLE CALLBACK STARTED`);
     
-    // Handle the OAuth callback synchronously
-    this.handleGoogleCallback(req, res).catch(error => {
-      this.logger.error('❌ Google OAuth callback error:', error);
-      const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
-      res.redirect(`${frontendUrl}/auth/callback?error=oauth_failed`);
+    const { accessToken, refreshToken } = await this.authService.loginOAuth(req.user);
+    
+    this.logger.log(`🔍 Setting cookies for Google OAuth`);
+    
+    res.cookie('access_token', accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 15 * 60 * 1000,
     });
-  }
-
-  private async handleGoogleCallback(req: Request, res: Response): Promise<void> {
-    try {
-      this.logger.log(`🔍 Processing Google OAuth callback`);
-      
-      if (!req.user) {
-        this.logger.error('❌ No user object in request');
-        const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
-        return res.redirect(`${frontendUrl}/auth/callback?error=no_user`);
-      }
-      
-      const result = await this.authService.handleOAuthLogin(req.user, 'google');
-      const { accessToken, refreshToken } = result.tokens;
-      
-      this.logger.log(`🔍 Setting cross-origin cookies for: ${result.user.email}`);
-      
-      // Set access token cookie
-      res.cookie('access_token', accessToken, {
-        httpOnly: true,
-        secure: true,          // REQUIRED on HTTPS (Render + Vercel)
-        sameSite: 'none',      // REQUIRED for cross-site cookies
-        maxAge: 15 * 60 * 1000, // 15 minutes
-      });
-      
-      // Set refresh token cookie
-      res.cookie('refresh_token', refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
-      
-      this.logger.log(`🔍 Cookies set, redirecting to frontend`);
-      
-      // Redirect to frontend success page
-      const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
-      res.redirect(`${frontendUrl}/auth/success`);
-    } catch (error) {
-      this.logger.error('❌ Error in handleGoogleCallback:', error);
-      const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
-      res.redirect(`${frontendUrl}/auth/callback?error=oauth_failed`);
-    }
+    
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    
+    this.logger.log(`🔍 Redirecting to frontend success page`);
+    
+    const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
+    return res.redirect(`${frontendUrl}/auth/success`);
   }
 
   // GitHub OAuth Routes
@@ -234,30 +207,34 @@ export class AuthController {
 
   @Get('github/callback')
   @UseGuards(AuthGuard('github'))
-  @ApiOperation({ summary: 'Handle GitHub OAuth callback' })
-  @ApiResponse({ status: 302, description: 'Redirects to frontend with auth result' })
   async githubCallback(
-    @Req() request: Request,
-    @Res() response: Response,
+    @Req() req: Request,
+    @Res() res: Response,
   ) {
-    try {
-      const user = request.user as any;
-      this.logger.log(`GitHub OAuth callback: ${user.email}`);
-      
-      const result = await this.authService.handleOAuthLogin(user, 'github');
-      
-      // Set HttpOnly cookies
-      this.authService.setAuthCookies(response, result.tokens);
-      
-      // Redirect to frontend success page
-      const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
-      this.logger.log(`GitHub OAuth: Redirecting to ${frontendUrl}/auth/callback?success=true`);
-      return response.redirect(`${frontendUrl}/auth/callback?success=true`);
-    } catch (error) {
-      this.logger.error('GitHub OAuth callback error:', error);
-      const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
-      return response.redirect(`${frontendUrl}/auth/callback?error=oauth_failed`);
-    }
+    this.logger.log(`🔍 GITHUB CALLBACK STARTED`);
+    
+    const { accessToken, refreshToken } = await this.authService.loginOAuth(req.user);
+    
+    this.logger.log(`🔍 Setting cookies for GitHub OAuth`);
+    
+    res.cookie('access_token', accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 15 * 60 * 1000,
+    });
+    
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    
+    this.logger.log(`🔍 Redirecting to frontend success page`);
+    
+    const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
+    return res.redirect(`${frontendUrl}/auth/success`);
   }
 
   // Token refresh endpoint

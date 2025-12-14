@@ -226,6 +226,16 @@ export class AuthService {
     };
   }
 
+  async loginOAuth(oauthUser: any): Promise<{ accessToken: string; refreshToken: string }> {
+    this.logger.log(`🔍 loginOAuth called for user: ${oauthUser?.email}`);
+    
+    // Use existing handleOAuthLogin logic but return just tokens
+    const result = await this.handleOAuthLogin(oauthUser, oauthUser.provider || 'google');
+    
+    this.logger.log(`🔑 loginOAuth returning tokens for: ${result.user.email}`);
+    return result.tokens;
+  }
+
   async refreshTokens(refreshToken: string): Promise<AuthResult> {
     try {
       const payload = this.jwtService.verify(refreshToken, {
