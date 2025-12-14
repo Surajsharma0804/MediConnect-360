@@ -169,38 +169,42 @@ export class AuthController {
   @ApiOperation({ summary: 'Handle Google OAuth callback' })
   @ApiResponse({ status: 302, description: 'Redirects to frontend with auth result' })
   async googleCallback(
-    @Req() request: Request,
-    @Res({ passthrough: false }) response: Response,
+    @Req() req: Request,
+    @Res({ passthrough: false }) res: Response,
   ) {
-    this.logger.log(`🔍 CONTROLLER METHOD CALLED - Google OAuth callback started`);
-    
     try {
-      const user = request.user as any;
-      this.logger.log(`🔍 Google OAuth callback started for: ${user?.email || 'unknown'}`);
-      this.logger.log(`🔍 User object:`, JSON.stringify(user, null, 2));
+      this.logger.log(`🔍 CONTROLLER METHOD CALLED - Google OAuth callback started`);
       
-      if (!user) {
-        this.logger.error('❌ No user object in request after OAuth validation');
-        const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
-        return response.redirect(`${frontendUrl}/auth/callback?error=no_user`);
-      }
+      const result = await this.authService.handleOAuthLogin(req.user, 'google');
+      const { accessToken, refreshToken } = result.tokens;
       
-      const result = await this.authService.handleOAuthLogin(user, 'google');
-      this.logger.log(`🔍 Auth service returned tokens: ${!!result.tokens.accessToken}`);
+      this.logger.log(`🔍 Setting cross-origin cookies for: ${result.user.email}`);
       
-      // Set HttpOnly cookies
-      this.authService.setAuthCookies(response, result.tokens);
-      this.logger.log(`🔍 Cookies set successfully`);
+      // Set access token cookie
+      res.cookie('access_token', accessToken, {
+        httpOnly: true,
+        secure: true,          // REQUIRED on HTTPS (Render + Vercel)
+        sameSite: 'none',      // REQUIRED for cross-site cookies
+        maxAge: 15 * 60 * 1000, // 15 minutes
+      });
+      
+      // Set refresh token cookie
+      res.cookie('refresh_token', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+      
+      this.logger.log(`🔍 Cookies set, redirecting to frontend`);
       
       // Redirect to frontend success page
       const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
-      this.logger.log(`🔍 Redirecting to: ${frontendUrl}/auth/callback?success=true`);
-      
-      response.redirect(`${frontendUrl}/auth/callback?success=true`);
+      return res.redirect(`${frontendUrl}/auth/success`);
     } catch (error) {
       this.logger.error('❌ Google OAuth callback error:', error);
       const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
-      response.redirect(`${frontendUrl}/auth/callback?error=oauth_failed`);
+      return res.redirect(`${frontendUrl}/auth/callback?error=oauth_failed`);
     }
   }
 
@@ -248,7 +252,7 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const refreshToken = request.cookies?.refreshToken;
+    const refreshToken = request.cookies?.refresh_token;
     
     if (!refreshToken) {
       this.logger.warn('Refresh token missing from cookies');

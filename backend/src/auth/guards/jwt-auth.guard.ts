@@ -30,7 +30,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return result as boolean;
     } catch (error) {
       // If access token is expired, try to refresh using refresh token
-      const refreshToken = request.cookies?.refreshToken;
+      const refreshToken = request.cookies?.refresh_token; // Updated to match cookie name
       
       if (!refreshToken) {
         this.logger.warn('No refresh token available for token refresh');

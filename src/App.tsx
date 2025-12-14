@@ -19,6 +19,7 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const PricingPage = lazy(() => import('./pages/PricingPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
+const AuthSuccessPage = lazy(() => import('./pages/AuthSuccessPage'));
 
 function App() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -57,6 +58,7 @@ function App() {
                     } 
                   />
                   <Route path="/auth/callback" element={<AuthCallbackPage />} />
+                  <Route path="/auth/success" element={<AuthSuccessPage />} />
                   <Route 
                     path="/" 
                     element={
