@@ -168,7 +168,7 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleCallback(
     @Req() req: Request,
-    @Res() res: Response,
+    @Res({ passthrough: true }) res: Response,
   ) {
     this.logger.log(`🔍 GOOGLE CALLBACK STARTED`);
     
@@ -190,10 +190,10 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     
-    this.logger.log(`🔍 Redirecting to frontend success page`);
+    this.logger.log(`🔍 Cookies set, performing redirect`);
     
     const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
-    return res.redirect(`${frontendUrl}/auth/success`);
+    res.redirect(`${frontendUrl}/auth/success`);
   }
 
   // GitHub OAuth Routes
@@ -209,7 +209,7 @@ export class AuthController {
   @UseGuards(AuthGuard('github'))
   async githubCallback(
     @Req() req: Request,
-    @Res() res: Response,
+    @Res({ passthrough: true }) res: Response,
   ) {
     this.logger.log(`🔍 GITHUB CALLBACK STARTED`);
     
@@ -231,10 +231,10 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     
-    this.logger.log(`🔍 Redirecting to frontend success page`);
+    this.logger.log(`🔍 Cookies set, performing redirect`);
     
     const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
-    return res.redirect(`${frontendUrl}/auth/success`);
+    res.redirect(`${frontendUrl}/auth/success`);
   }
 
   // Token refresh endpoint
