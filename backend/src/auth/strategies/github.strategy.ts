@@ -36,26 +36,21 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
     try {
       const { id, username, displayName, emails, photos } = profile;
       
-      // GitHub might not provide email in profile, use the first available
-      const email = emails && emails.length > 0 
-        ? emails[0].value 
-        : `${username}@github.local`;
-
+      // Return normalized user object only - no DB calls here
       const user = {
-        id,
-        email,
-        name: displayName || username,
+        provider: 'github',
+        providerId: id,
+        email: emails?.[0]?.value,
+        name: displayName || username || 'GitHub User',
         username,
-        picture: photos && photos.length > 0 ? photos[0].value : null,
-        accessToken,
-        refreshToken,
+        picture: photos?.[0]?.value,
       };
 
       this.logger.log(`GitHub OAuth validation successful: ${user.email}`);
       done(null, user);
     } catch (error) {
       this.logger.error('GitHub OAuth validation failed:', error);
-      done(error, null);
+      done(error, false);
     }
   }
 }

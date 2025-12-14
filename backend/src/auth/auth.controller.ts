@@ -39,6 +39,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Get('health')
+  @ApiOperation({ summary: 'Auth service health check' })
+  @ApiResponse({ status: 200, description: 'Auth service is healthy' })
   async healthCheck() {
     const isProduction = process.env.NODE_ENV === 'production';
     
@@ -155,12 +157,16 @@ export class AuthController {
   // Google OAuth Routes
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  async googleAuth() {
-    // Passport handles the redirect
+  @ApiOperation({ summary: 'Initiate Google OAuth login' })
+  @ApiResponse({ status: 302, description: 'Redirects to Google OAuth' })
+  googleAuth() {
+    // Passport handles the redirect - no logic needed here
   }
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Handle Google OAuth callback' })
+  @ApiResponse({ status: 302, description: 'Redirects to frontend with auth result' })
   async googleCallback(
     @Req() request: Request,
     @Res() response: Response,
@@ -181,12 +187,16 @@ export class AuthController {
   // GitHub OAuth Routes
   @Get('github')
   @UseGuards(AuthGuard('github'))
-  async githubAuth() {
-    // Passport handles the redirect
+  @ApiOperation({ summary: 'Initiate GitHub OAuth login' })
+  @ApiResponse({ status: 302, description: 'Redirects to GitHub OAuth' })
+  githubAuth() {
+    // Passport handles the redirect - no logic needed here
   }
 
   @Get('github/callback')
   @UseGuards(AuthGuard('github'))
+  @ApiOperation({ summary: 'Handle GitHub OAuth callback' })
+  @ApiResponse({ status: 302, description: 'Redirects to frontend with auth result' })
   async githubCallback(
     @Req() request: Request,
     @Res() response: Response,

@@ -36,15 +36,15 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     try {
       const { id, name, emails, photos } = profile;
       
+      // Return normalized user object only - no DB calls here
       const user = {
-        id,
-        email: emails[0].value,
-        name: name.givenName + ' ' + name.familyName,
-        firstName: name.givenName,
-        lastName: name.familyName,
-        picture: photos[0].value,
-        accessToken,
-        refreshToken,
+        provider: 'google',
+        providerId: id,
+        email: emails?.[0]?.value,
+        name: name ? `${name.givenName} ${name.familyName}` : 'Google User',
+        firstName: name?.givenName,
+        lastName: name?.familyName,
+        picture: photos?.[0]?.value,
       };
 
       this.logger.log(`Google OAuth validation successful: ${user.email}`);

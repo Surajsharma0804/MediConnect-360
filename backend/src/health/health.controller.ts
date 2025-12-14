@@ -1,5 +1,6 @@
 import { Controller, Get, Logger } from '@nestjs/common';
 import { HealthCheck, HealthCheckService, TypeOrmHealthIndicator } from '@nestjs/terminus';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { RedisHealthIndicator } from './redis.health';
 
 /**
@@ -13,6 +14,7 @@ import { RedisHealthIndicator } from './redis.health';
   path: 'health',
   version: '1',
 })
+@ApiTags('Health')
 export class HealthController {
   private readonly logger = new Logger(HealthController.name);
 
@@ -28,6 +30,8 @@ export class HealthController {
    */
   @Get()
   @HealthCheck()
+  @ApiOperation({ summary: 'Basic health check for load balancers' })
+  @ApiResponse({ status: 200, description: 'Service is healthy' })
   async check() {
     try {
       return await this.health.check([
@@ -90,6 +94,8 @@ export class HealthController {
    * Indicates if the service is ready to receive traffic
    */
   @Get('ready')
+  @ApiOperation({ summary: 'Readiness probe for container orchestration' })
+  @ApiResponse({ status: 200, description: 'Service is ready to receive traffic' })
   async readiness() {
     const startTime = Date.now();
     
@@ -126,6 +132,8 @@ export class HealthController {
    * Indicates if the service is alive (should restart if this fails)
    */
   @Get('live')
+  @ApiOperation({ summary: 'Liveness probe for container orchestration' })
+  @ApiResponse({ status: 200, description: 'Service is alive' })
   async liveness() {
     return {
       status: 'alive',
