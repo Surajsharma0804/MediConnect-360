@@ -29,12 +29,18 @@ export class RedisHealthIndicator extends HealthIndicator {
         url: redisUrl,
         socket: {
           connectTimeout: 5000,
+          reconnectStrategy: (retries: number) => {
+            if (retries > 5) {
+              this.logger.error('Redis health check reconnection attempts exceeded');
+              return false;
+            }
+            const delay = Math.min(retries * 200, 2000);
+            this.logger.log(`Redis health check reconnecting in ${delay}ms (attempt ${retries})`);
+            return delay;
+          },
         },
-        // Proper Redis client reconnection options
-        reconnectOnError: (err) => {
-          this.logger.warn(`Redis health check reconnection: ${err.message}`);
-          return err.message.includes('READONLY');
-        },
+        // Enterprise Redis client configuration
+        commandsQueueMaxLength: 100,
       });
 
       this.redisClient.on('error', (err) => {

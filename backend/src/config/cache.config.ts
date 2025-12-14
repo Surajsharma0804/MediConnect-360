@@ -55,27 +55,49 @@ class RedisConnectionManager {
       this.connectionAttempts++;
       logger.log(`Redis connection attempt ${this.connectionAttempts}/${this.maxRetries} to ${options.host}:${options.port}`);
 
-      const store = await redisStore({
+      // Create Redis client configuration with proper types
+      const redisClientConfig = {
         socket: {
           host: options.host,
           port: options.port,
           connectTimeout: 10000,
+          reconnectStrategy: (retries: number) => {
+            if (retries > 10) {
+              logger.error('Redis reconnection attempts exceeded, giving up');
+              return false;
+            }
+            const delay = Math.min(retries * 100, 3000);
+            logger.log(`Redis reconnecting in ${delay}ms (attempt ${retries})`);
+            return delay;
+          },
         },
         password: options.password,
         username: options.username,
-        // Redis client options (not socket options)
-        retryDelayOnFailover: 100,
-        enableReadyCheck: false,
-        maxRetriesPerRequest: 3,
-        retryDelayOnClusterDown: 300,
-        enableOfflineQueue: false,
-        lazyConnect: true,
-        // Proper reconnection strategy
-        reconnectOnError: (err: Error) => {
-          logger.warn(`Redis reconnection triggered: ${err.message}`);
-          return err.message.includes('READONLY') || err.message.includes('ECONNRESET');
-        },
-      });
+        // Enterprise Redis client configuration
+        commandsQueueMaxLength: 1000,
+      };
+
+      // Add reconnection error handler
+      const store = await redisStore(redisClientConfig);
+      
+      // Add connection event handlers for monitoring
+      if (store && typeof store.client?.on === 'function') {
+        store.client.on('connect', () => {
+          logger.log('✅ Redis cache client connected');
+        });
+        
+        store.client.on('error', (err: Error) => {
+          logger.error(`❌ Redis cache client error: ${err.message}`);
+        });
+        
+        store.client.on('reconnecting', () => {
+          logger.log('🔄 Redis cache client reconnecting...');
+        });
+        
+        store.client.on('ready', () => {
+          logger.log('✅ Redis cache client ready');
+        });
+      }
 
       // Reset connection attempts on successful connection
       this.connectionAttempts = 0;

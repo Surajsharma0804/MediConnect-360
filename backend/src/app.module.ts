@@ -155,21 +155,23 @@ const oauthProviders = getOAuthProviders();
         return {
           redis: {
             ...redisConfig,
-            // Production-grade Redis configuration
+            // Enterprise BullMQ Redis configuration
+            connectTimeout: 10000,
+            maxRetriesPerRequest: 3,
+            // BullMQ specific Redis options
             retryDelayOnFailover: 100,
             enableReadyCheck: false,
-            maxRetriesPerRequest: 3,
-            connectTimeout: 10000,
-            lazyConnect: true,
             retryDelayOnClusterDown: 300,
             enableOfflineQueue: false,
-            // Enterprise reconnection strategy
-            reconnectOnError: (err: Error) => {
-              logger.warn(`BullMQ Redis reconnection triggered: ${err.message}`);
-              const targetError = err.message;
-              return targetError.includes('READONLY') || 
-                     targetError.includes('ECONNRESET') ||
-                     targetError.includes('ETIMEDOUT');
+            // Connection event handlers for monitoring
+            onConnect: () => {
+              logger.log('✅ BullMQ Redis connection established');
+            },
+            onError: (err: Error) => {
+              logger.error(`❌ BullMQ Redis connection error: ${err.message}`);
+            },
+            onReconnecting: () => {
+              logger.log('🔄 BullMQ Redis reconnecting...');
             },
           },
           // Enterprise job configuration
