@@ -73,7 +73,7 @@ export class LabTestOrder {
   })
   testType: LabTestType;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   testName: string;
 
   @Column({ type: 'text', nullable: true })

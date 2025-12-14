@@ -49,10 +49,10 @@ export class WearableDevice {
   })
   deviceType: WearableType;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   deviceName: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   deviceModel: string;
 
   @Column({

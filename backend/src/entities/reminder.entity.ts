@@ -52,7 +52,7 @@ export class Reminder {
   @Column({ name: 'user_id' })
   userId: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   title: string;
 
   @Column({ type: 'text', nullable: true })

@@ -11,61 +11,61 @@ export class InsuranceCard {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'uuid' })
   userId: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   insuranceProvider: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   policyNumber: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   groupNumber: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   memberName: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   memberId: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'date', nullable: true })
   effectiveDate: Date;
 
-  @Column({ nullable: true })
+  @Column({ type: 'date', nullable: true })
   expirationDate: Date;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   planType: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   copayAmount: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   deductibleAmount: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   deductible: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   deductibleMet: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   copayPrimaryCare: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   copaySpecialist: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   copayEmergency: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   copayUrgentCare: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   frontImageUrl: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   backImageUrl: string;
 
   @Column({ default: true })

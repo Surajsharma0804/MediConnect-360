@@ -45,7 +45,7 @@ export class HealthRecord {
   })
   type: RecordType;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   title: string;
 
   @Column({ type: 'text' })

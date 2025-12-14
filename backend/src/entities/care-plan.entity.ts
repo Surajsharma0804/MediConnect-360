@@ -43,7 +43,7 @@ export class CarePlan {
   @Column({ name: 'created_by_provider_id', nullable: true })
   createdByProviderId: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   title: string;
 
   @Column({ type: 'text' })

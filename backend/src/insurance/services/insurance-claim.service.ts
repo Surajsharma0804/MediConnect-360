@@ -110,10 +110,11 @@ export class InsuranceClaimService {
     // Add document to claim
     const documents = claim.documents || [];
     documents.push({
-      type: documentType,
+      id: `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      name: file.originalname,
       url: documentUrl,
-      fileName: file.originalname,
-      uploadedAt: new Date(),
+      type: documentType,
+      uploadedAt: new Date().toISOString(),
     });
 
     claim.documents = documents;

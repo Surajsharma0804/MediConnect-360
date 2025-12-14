@@ -50,7 +50,7 @@ export class MedicalDocument {
   @Column({ name: 'uploaded_by_provider_id', nullable: true })
   uploadedByProviderId: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   title: string;
 
   @Column({ type: 'text', nullable: true })

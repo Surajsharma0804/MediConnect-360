@@ -57,7 +57,7 @@ export class ImagingStudy {
   })
   modality: ImagingModality;
 
-  @Column()
+  @Column({ type: 'varchar', length: 500 })
   studyDescription: string;
 
   @Column({ nullable: true })

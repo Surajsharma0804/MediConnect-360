@@ -36,10 +36,10 @@ export class LabTestResultDetail {
   @Column({ name: 'lab_test_order_id', nullable: true })
   labTestOrderId: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   testName: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   componentName: string;
 
   @Column({ nullable: true })

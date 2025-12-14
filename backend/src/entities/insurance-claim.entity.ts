@@ -21,31 +21,31 @@ export class InsuranceClaim {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'uuid' })
   userId: string;
 
-  @Column()
+  @Column({ type: 'uuid' })
   insuranceCardId: string;
 
-  @Column()
+  @Column({ type: 'uuid' })
   providerId: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   serviceType: string;
 
-  @Column()
+  @Column({ type: 'date' })
   serviceDate: Date;
 
   @Column('decimal', { precision: 10, scale: 2 })
   totalAmount: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   diagnosis: string;
 
-  @Column('simple-array', { nullable: true })
+  @Column({ type: 'simple-array', nullable: true })
   procedureCodes: string[];
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   notes: string;
 
   @Column({
@@ -55,26 +55,32 @@ export class InsuranceClaim {
   })
   status: ClaimStatus;
 
-  @Column({ nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   submittedAt: Date;
 
-  @Column({ nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   processedAt: Date;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
   approvedAmount: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   denialReason: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   appealReason: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   appealedAt: Date;
 
-  @Column('json', { nullable: true })
-  documents: any[];
+  @Column({ type: 'jsonb', nullable: true })
+  documents: Array<{
+    id: string;
+    name: string;
+    url: string;
+    type: string;
+    uploadedAt: string;
+  }>;
 
   @CreateDateColumn()
   createdAt: Date;
