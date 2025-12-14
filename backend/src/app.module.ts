@@ -10,6 +10,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { TerminusModule } from '@nestjs/terminus';
 
 // Core modules
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { RootController } from './root.controller';
 import { databaseConfig } from './config/database.config';
 import { redisCacheConfig } from './config/cache.config';
@@ -196,8 +198,9 @@ const oauthProviders = getOAuthProviders();
     ProvidersModule,
     RemindersModule,
   ],
-  controllers: [RootController, AuthController, PaymentController],
+  controllers: [RootController, AppController, AuthController, PaymentController],
   providers: [
+    AppService,
     AuthService,
     TwoFactorService,
     JwtStrategy,

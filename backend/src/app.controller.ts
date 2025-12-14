@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 
-@Controller()
+@Controller('app') // Add 'app' prefix to avoid conflict with RootController
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
