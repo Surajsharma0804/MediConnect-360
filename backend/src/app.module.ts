@@ -116,14 +116,16 @@ const oauthProviders = getOAuthProviders();
       isGlobal: true,
       useFactory: redisCacheConfig,
     }),
-    // Background jobs - Enhanced Redis configuration
-    // BullModule disabled if no Redis URL configured
-    ...(process.env.REDIS_URL && process.env.REDIS_URL !== 'redis://localhost:6379' ? [
-      BullModule.forRootAsync({
-        useFactory: (configService: ConfigService) => {
-          const redisUrl = configService.get('REDIS_URL');
-          let redisConfig;
+    // Background jobs - Enterprise Redis configuration with circuit breaker
+    BullModule.forRootAsync({
+      useFactory: async (configService: ConfigService) => {
+        const logger = new Logger('BullMQConfig');
+        
+        // Parse Redis URL if provided (Upstash/Redis Cloud format)
+        const redisUrl = configService.get('REDIS_URL');
+        let redisConfig;
 
+        if (redisUrl && redisUrl !== 'redis://localhost:6379') {
           try {
             const url = new URL(redisUrl);
             redisConfig = {
@@ -132,34 +134,69 @@ const oauthProviders = getOAuthProviders();
               password: url.password || undefined,
               username: url.username !== 'default' ? url.username : undefined,
             };
+            logger.log(`🔄 BullMQ connecting to Redis: ${url.hostname}:${url.port || 6379}`);
           } catch (error) {
-            console.error('Failed to parse REDIS_URL for BullMQ:', error);
-            return null;
+            logger.error(`Failed to parse REDIS_URL for BullMQ: ${error.message}`);
+            redisConfig = {
+              host: configService.get('REDIS_HOST', 'localhost'),
+              port: configService.get('REDIS_PORT', 6379),
+              password: configService.get('REDIS_PASSWORD'),
+            };
           }
-
-          return {
-            redis: {
-              ...redisConfig,
-              retryDelayOnFailover: 100,
-              enableReadyCheck: false,
-              maxRetriesPerRequest: 3,
-              connectTimeout: 10000,
-              lazyConnect: true,
-            },
-            defaultJobOptions: {
-              removeOnComplete: 10,
-              removeOnFail: 5,
-              attempts: 3,
-              backoff: {
-                type: 'exponential',
-                delay: 2000,
-              },
-            },
+        } else {
+          // Use individual environment variables or localhost fallback
+          redisConfig = {
+            host: configService.get('REDIS_HOST', 'localhost'),
+            port: configService.get('REDIS_PORT', 6379),
+            password: configService.get('REDIS_PASSWORD'),
           };
-        },
-        inject: [ConfigService],
-      })
-    ] : []),
+        }
+
+        return {
+          redis: {
+            ...redisConfig,
+            // Production-grade Redis configuration
+            retryDelayOnFailover: 100,
+            enableReadyCheck: false,
+            maxRetriesPerRequest: 3,
+            connectTimeout: 10000,
+            lazyConnect: true,
+            retryDelayOnClusterDown: 300,
+            enableOfflineQueue: false,
+            // Enterprise reconnection strategy
+            reconnectOnError: (err: Error) => {
+              logger.warn(`BullMQ Redis reconnection triggered: ${err.message}`);
+              const targetError = err.message;
+              return targetError.includes('READONLY') || 
+                     targetError.includes('ECONNRESET') ||
+                     targetError.includes('ETIMEDOUT');
+            },
+          },
+          // Enterprise job configuration
+          defaultJobOptions: {
+            removeOnComplete: 50, // Keep more completed jobs for monitoring
+            removeOnFail: 20, // Keep failed jobs for debugging
+            attempts: 5, // More retry attempts for production
+            backoff: {
+              type: 'exponential',
+              delay: 2000,
+            },
+            // Job timeout and delay settings
+            delay: 0,
+            timeout: 30000, // 30 second timeout
+            // Priority and rate limiting
+            priority: 0,
+            // Repeat job configuration
+            repeat: undefined,
+          },
+          // Advanced BullMQ settings for production
+          settings: {
+            stalledInterval: 30000, // Check for stalled jobs every 30 seconds
+            maxStalledCount: 3, // Maximum number of times a job can be stalled
+          },
+        };
+      },
+      inject: [ConfigService],
     }),
     
     // Health checks

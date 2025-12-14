@@ -1,35 +1,163 @@
 import { CacheModuleOptions } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
+import { Logger } from '@nestjs/common';
+
+const logger = new Logger('RedisConfig');
+
+interface RedisConnectionOptions {
+  host: string;
+  port: number;
+  password?: string;
+  username?: string;
+}
+
+class RedisConnectionManager {
+  private static instance: RedisConnectionManager;
+  private connectionAttempts = 0;
+  private maxRetries = 5;
+  private retryDelay = 2000;
+  private circuitBreakerOpen = false;
+  private lastFailureTime = 0;
+  private circuitBreakerTimeout = 60000; // 1 minute
+
+  static getInstance(): RedisConnectionManager {
+    if (!RedisConnectionManager.instance) {
+      RedisConnectionManager.instance = new RedisConnectionManager();
+    }
+    return RedisConnectionManager.instance;
+  }
+
+  private isCircuitBreakerOpen(): boolean {
+    if (this.circuitBreakerOpen) {
+      const timeSinceLastFailure = Date.now() - this.lastFailureTime;
+      if (timeSinceLastFailure > this.circuitBreakerTimeout) {
+        logger.log('Circuit breaker timeout expired, attempting to reconnect');
+        this.circuitBreakerOpen = false;
+        this.connectionAttempts = 0;
+      }
+    }
+    return this.circuitBreakerOpen;
+  }
+
+  private openCircuitBreaker(): void {
+    this.circuitBreakerOpen = true;
+    this.lastFailureTime = Date.now();
+    logger.warn(`Redis circuit breaker opened after ${this.connectionAttempts} failed attempts`);
+  }
+
+  async createRedisStore(options: RedisConnectionOptions): Promise<any> {
+    if (this.isCircuitBreakerOpen()) {
+      logger.warn('Redis circuit breaker is open, using memory cache');
+      return null;
+    }
+
+    try {
+      this.connectionAttempts++;
+      logger.log(`Redis connection attempt ${this.connectionAttempts}/${this.maxRetries} to ${options.host}:${options.port}`);
+
+      const store = await redisStore({
+        socket: {
+          host: options.host,
+          port: options.port,
+          connectTimeout: 10000,
+        },
+        password: options.password,
+        username: options.username,
+        // Redis client options (not socket options)
+        retryDelayOnFailover: 100,
+        enableReadyCheck: false,
+        maxRetriesPerRequest: 3,
+        retryDelayOnClusterDown: 300,
+        enableOfflineQueue: false,
+        lazyConnect: true,
+        // Proper reconnection strategy
+        reconnectOnError: (err: Error) => {
+          logger.warn(`Redis reconnection triggered: ${err.message}`);
+          return err.message.includes('READONLY') || err.message.includes('ECONNRESET');
+        },
+      });
+
+      // Reset connection attempts on successful connection
+      this.connectionAttempts = 0;
+      this.circuitBreakerOpen = false;
+      logger.log(`✅ Redis connection established successfully to ${options.host}:${options.port}`);
+      
+      return store;
+    } catch (error) {
+      logger.error(`❌ Redis connection failed (attempt ${this.connectionAttempts}/${this.maxRetries}): ${error.message}`);
+      
+      if (this.connectionAttempts >= this.maxRetries) {
+        this.openCircuitBreaker();
+      }
+      
+      // Wait before next retry
+      if (this.connectionAttempts < this.maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, this.retryDelay));
+        this.retryDelay = Math.min(this.retryDelay * 1.5, 10000); // Exponential backoff
+      }
+      
+      return null;
+    }
+  }
+}
 
 export const redisCacheConfig = async (): Promise<CacheModuleOptions> => {
-  // Parse Redis URL if provided (Upstash format: redis://default:password@host:port)
+  const connectionManager = RedisConnectionManager.getInstance();
+  
+  // Parse Redis URL if provided (Upstash/Redis Cloud format)
   const redisUrl = process.env.REDIS_URL;
   
   if (redisUrl && redisUrl !== 'redis://localhost:6379') {
     try {
       const url = new URL(redisUrl);
-      console.log('Connecting to Redis:', url.hostname + ':' + (url.port || 6379));
-      return {
-        store: await redisStore({
-          socket: {
-            host: url.hostname,
-            port: parseInt(url.port) || 6379,
-            connectTimeout: 10000,
-            lazyConnect: true,
-          },
-          password: url.password || undefined,
-          username: url.username !== 'default' ? url.username : undefined,
-        }),
-        ttl: 300, // 5 minutes default TTL
+      const options: RedisConnectionOptions = {
+        host: url.hostname,
+        port: parseInt(url.port) || 6379,
+        password: url.password || undefined,
+        username: url.username !== 'default' ? url.username : undefined,
       };
+
+      const store = await connectionManager.createRedisStore(options);
+      if (store) {
+        return {
+          store,
+          ttl: 300000, // 5 minutes in milliseconds
+          max: 1000, // Maximum number of items in cache
+        };
+      }
     } catch (error) {
-      console.error('Failed to connect to Redis, falling back to memory cache:', error.message);
+      logger.error(`Failed to parse REDIS_URL: ${error.message}`);
     }
   }
 
-  // If no Redis URL or localhost, use memory cache
-  console.warn('Redis not configured or localhost detected, using memory cache');
+  // Fallback to individual Redis environment variables
+  const redisHost = process.env.REDIS_HOST;
+  const redisPort = process.env.REDIS_PORT;
+  
+  if (redisHost && redisHost !== 'localhost') {
+    const options: RedisConnectionOptions = {
+      host: redisHost,
+      port: parseInt(redisPort || '6379'),
+      password: process.env.REDIS_PASSWORD,
+    };
+
+    const store = await connectionManager.createRedisStore(options);
+    if (store) {
+      return {
+        store,
+        ttl: 300000, // 5 minutes in milliseconds
+        max: 1000, // Maximum number of items in cache
+      };
+    }
+  }
+
+  // Production-grade memory cache fallback
+  logger.warn('🔄 Using memory cache - Redis not available or configured');
   return {
-    ttl: 300, // 5 minutes default TTL
+    ttl: 300000, // 5 minutes in milliseconds
+    max: 1000, // Maximum number of items in cache
+    // Memory cache options for production
+    updateAgeOnGet: false,
+    updateAgeOnHas: false,
   };
 };

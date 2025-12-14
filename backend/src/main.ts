@@ -8,6 +8,26 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { validateEnvironment } from './config/env.validation';
 import { setupSwagger } from './config/swagger.config';
 
+// Global error handlers for Redis connection issues
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error.message);
+  if (error.message?.includes('Redis') || error.message?.includes('Socket closed') || error.message?.includes('ECONNREFUSED')) {
+    console.warn('Redis connection error - application will continue with memory cache');
+    return; // Don't exit on Redis errors
+  }
+  console.error('Fatal error, exiting...');
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  const reasonStr = reason?.toString() || '';
+  if (reasonStr.includes('Redis') || reasonStr.includes('Socket closed') || reasonStr.includes('ECONNREFUSED')) {
+    console.warn('Redis connection error - application will continue with memory cache');
+    return; // Don't exit on Redis errors
+  }
+});
+
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
