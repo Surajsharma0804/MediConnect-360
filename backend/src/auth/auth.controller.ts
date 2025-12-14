@@ -28,7 +28,13 @@ export class AuthController {
     return {
       message: 'Auth controller is working!',
       timestamp: new Date().toISOString(),
-      routes: ['register', 'login', 'google', 'github']
+      routes: ['register', 'login', 'google', 'github'],
+      environment: {
+        nodeEnv: process.env.NODE_ENV,
+        corsOrigin: process.env.CORS_ORIGIN,
+        googleConfigured: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
+        githubConfigured: !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET),
+      }
     };
   }
 
@@ -51,6 +57,7 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleAuth() {
     // Initiates Google OAuth flow
+    // This route will only work if GoogleStrategy is properly loaded
   }
 
   @Get('google/callback')
@@ -89,6 +96,7 @@ export class AuthController {
   @UseGuards(AuthGuard('github'))
   async githubAuth() {
     // Initiates GitHub OAuth flow
+    // This route will only work if GitHubStrategy is properly loaded
   }
 
   @Get('github/callback')

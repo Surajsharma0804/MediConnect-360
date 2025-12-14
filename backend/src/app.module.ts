@@ -70,20 +70,30 @@ const logger = new Logger('AppModule');
 const getOAuthProviders = (): any[] => {
   const providers: any[] = [];
   
+  // Debug environment variables
+  logger.log(`Environment check - NODE_ENV: ${process.env.NODE_ENV}`);
+  logger.log(`Google Client ID exists: ${!!process.env.GOOGLE_CLIENT_ID}`);
+  logger.log(`GitHub Client ID exists: ${!!process.env.GITHUB_CLIENT_ID}`);
+  
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     providers.push(GoogleStrategy);
-    logger.log('Google OAuth strategy enabled');
+    logger.log('✅ Google OAuth strategy enabled');
   } else {
-    logger.warn('Google OAuth credentials not configured');
+    logger.warn('❌ Google OAuth credentials not configured');
+    logger.warn(`GOOGLE_CLIENT_ID: ${process.env.GOOGLE_CLIENT_ID ? 'SET' : 'MISSING'}`);
+    logger.warn(`GOOGLE_CLIENT_SECRET: ${process.env.GOOGLE_CLIENT_SECRET ? 'SET' : 'MISSING'}`);
   }
   
   if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
     providers.push(GitHubStrategy);
-    logger.log('GitHub OAuth strategy enabled');
+    logger.log('✅ GitHub OAuth strategy enabled');
   } else {
-    logger.warn('GitHub OAuth credentials not configured');
+    logger.warn('❌ GitHub OAuth credentials not configured');
+    logger.warn(`GITHUB_CLIENT_ID: ${process.env.GITHUB_CLIENT_ID ? 'SET' : 'MISSING'}`);
+    logger.warn(`GITHUB_CLIENT_SECRET: ${process.env.GITHUB_CLIENT_SECRET ? 'SET' : 'MISSING'}`);
   }
   
+  logger.log(`Total OAuth providers loaded: ${providers.length}`);
   return providers;
 };
 

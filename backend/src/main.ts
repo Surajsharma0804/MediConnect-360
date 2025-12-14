@@ -42,6 +42,16 @@ async function bootstrap() {
   try {
     // Validate environment variables before starting
     validateEnvironment();
+    
+    // Log critical OAuth environment variables for debugging
+    logger.log('🔍 OAuth Environment Check:');
+    logger.log(`GOOGLE_CLIENT_ID: ${process.env.GOOGLE_CLIENT_ID ? 'SET' : 'MISSING'}`);
+    logger.log(`GOOGLE_CLIENT_SECRET: ${process.env.GOOGLE_CLIENT_SECRET ? 'SET' : 'MISSING'}`);
+    logger.log(`GOOGLE_CALLBACK_URL: ${process.env.GOOGLE_CALLBACK_URL || 'USING DEFAULT'}`);
+    logger.log(`GITHUB_CLIENT_ID: ${process.env.GITHUB_CLIENT_ID ? 'SET' : 'MISSING'}`);
+    logger.log(`GITHUB_CLIENT_SECRET: ${process.env.GITHUB_CLIENT_SECRET ? 'SET' : 'MISSING'}`);
+    logger.log(`GITHUB_CALLBACK_URL: ${process.env.GITHUB_CALLBACK_URL || 'USING DEFAULT'}`);
+    logger.log(`CORS_ORIGIN: ${process.env.CORS_ORIGIN || 'USING DEFAULT'}`);
 
     const app = await NestFactory.create(AppModule, {
       logger: ['error', 'warn', 'log', 'debug', 'verbose'],
