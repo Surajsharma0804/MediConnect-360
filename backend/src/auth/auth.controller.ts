@@ -200,6 +200,7 @@ export class AuthController {
       });
       
       this.logger.log(`🔍 Cookies set, performing redirect`);
+      this.logger.log(`🔍 Response headers:`, JSON.stringify(res.getHeaders(), null, 2));
       
       const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
       res.redirect(`${frontendUrl}/auth/success`);
@@ -263,6 +264,31 @@ export class AuthController {
       const frontendUrl = process.env.CORS_ORIGIN || 'https://medi-connect-360.vercel.app';
       res.redirect(`${frontendUrl}/auth/callback?error=oauth_failed`);
     }
+  }
+
+  // Cookie test endpoint
+  @Get('test-cookies')
+  @ApiOperation({ summary: 'Test cookie functionality' })
+  testCookies(@Req() request: Request, @Res({ passthrough: true }) response: Response) {
+    this.logger.log('🧪 Testing cookies...');
+    
+    // Set a test cookie
+    response.cookie('test_cookie', 'test_value', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 60000, // 1 minute
+    });
+    
+    // Check existing cookies
+    const cookies = request.cookies || {};
+    this.logger.log('🧪 Received cookies:', JSON.stringify(cookies, null, 2));
+    
+    return {
+      message: 'Cookie test completed',
+      receivedCookies: Object.keys(cookies),
+      testCookieSet: true,
+    };
   }
 
   // Token refresh endpoint
