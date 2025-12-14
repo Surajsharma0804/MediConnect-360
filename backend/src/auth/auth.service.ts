@@ -109,9 +109,17 @@ export class AuthService {
   async handleGoogleCallback(code: string) {
     // Manual Google OAuth token exchange
     const tokenUrl = 'https://oauth2.googleapis.com/token';
+    
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    
+    if (!clientId || !clientSecret) {
+      throw new Error('Google OAuth credentials not configured');
+    }
+    
     const tokenData = {
-      client_id: process.env.GOOGLE_CLIENT_ID,
-      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      client_id: clientId,
+      client_secret: clientSecret,
       code,
       grant_type: 'authorization_code',
       redirect_uri: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/api/auth/google/callback',
@@ -149,9 +157,17 @@ export class AuthService {
   async handleGithubCallback(code: string) {
     // Manual GitHub OAuth token exchange
     const tokenUrl = 'https://github.com/login/oauth/access_token';
+    
+    const clientId = process.env.GITHUB_CLIENT_ID;
+    const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+    
+    if (!clientId || !clientSecret) {
+      throw new Error('GitHub OAuth credentials not configured');
+    }
+    
     const tokenData = {
-      client_id: process.env.GITHUB_CLIENT_ID,
-      client_secret: process.env.GITHUB_CLIENT_SECRET,
+      client_id: clientId,
+      client_secret: clientSecret,
       code,
     };
 
