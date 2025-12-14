@@ -63,9 +63,9 @@ export class AuthService {
       isEmailVerified: false, // Require email verification
       isTwoFactorEnabled: false,
       loginAttempts: 0,
-      lockedUntil: null,
+      lockedUntil: undefined,
       createdAt: new Date(),
-      lastLogin: null,
+      lastLogin: undefined,
     });
 
     const savedUser = await this.userRepository.save(user);

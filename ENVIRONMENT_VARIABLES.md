@@ -9,7 +9,7 @@ Create these environment variables in your Render backend service:
 JWT_SECRET=your-super-secure-jwt-secret-key-min-32-chars
 JWT_REFRESH_SECRET=your-super-secure-refresh-secret-key-min-32-chars
 NODE_ENV=production
-PORT=5000
+PORT=10000
 ```
 
 ### Database

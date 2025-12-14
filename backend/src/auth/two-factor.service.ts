@@ -71,7 +71,7 @@ export class TwoFactorService {
     const backupCodes = this.generateBackupCodes();
 
     // Enable 2FA
-    user.twoFactorEnabled = true;
+    user.isTwoFactorEnabled = true;
     user.twoFactorBackupCodes = backupCodes.map(code => this.hashBackupCode(code));
     await this.userRepository.save(user);
 
@@ -87,7 +87,7 @@ export class TwoFactorService {
       throw new BadRequestException('User not found');
     }
 
-    if (!user.twoFactorEnabled) {
+    if (!user.isTwoFactorEnabled) {
       throw new BadRequestException('2FA is not enabled');
     }
 
@@ -106,7 +106,7 @@ export class TwoFactorService {
     }
 
     // Disable 2FA
-    user.twoFactorEnabled = false;
+    user.isTwoFactorEnabled = false;
     user.twoFactorSecret = null;
     user.twoFactorBackupCodes = [];
     await this.userRepository.save(user);
@@ -117,7 +117,7 @@ export class TwoFactorService {
    */
   async verifyTwoFactorToken(userId: string, token: string): Promise<boolean> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user || !user.twoFactorEnabled || !user.twoFactorSecret) {
+    if (!user || !user.isTwoFactorEnabled || !user.twoFactorSecret) {
       return false;
     }
 
@@ -146,7 +146,7 @@ export class TwoFactorService {
    */
   async regenerateBackupCodes(userId: string): Promise<{ backupCodes: string[] }> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user || !user.twoFactorEnabled) {
+    if (!user || !user.isTwoFactorEnabled) {
       throw new BadRequestException('2FA is not enabled');
     }
 
@@ -196,8 +196,8 @@ export class TwoFactorService {
   async isTwoFactorEnabled(userId: string): Promise<boolean> {
     const user = await this.userRepository.findOne({ 
       where: { id: userId },
-      select: ['twoFactorEnabled']
+      select: ['isTwoFactorEnabled']
     });
-    return user?.twoFactorEnabled || false;
+    return user?.isTwoFactorEnabled || false;
   }
 }

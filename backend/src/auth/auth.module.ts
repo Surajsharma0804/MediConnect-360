@@ -6,11 +6,19 @@ import { ConfigService } from '@nestjs/config';
 
 // Entities
 import { User } from '../entities/user.entity';
+import { AuditLog } from '../common/entities/audit-log.entity';
 
 // Controllers & Services
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { TwoFactorService } from './two-factor.service';
+
+// Common Services
+import { AuditLogService } from '../common/services/audit-log.service';
+
+// Interceptors
+import { AuditLogInterceptor } from '../common/interceptors/audit-log.interceptor';
+import { SanitizeInterceptor } from '../common/interceptors/sanitize.interceptor';
 
 // Strategies
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -23,7 +31,7 @@ import { RolesGuard } from './guards/roles.guard';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, AuditLog]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       useFactory: (configService: ConfigService) => ({
@@ -39,6 +47,9 @@ import { RolesGuard } from './guards/roles.guard';
   providers: [
     AuthService,
     TwoFactorService,
+    AuditLogService,
+    AuditLogInterceptor,
+    SanitizeInterceptor,
     JwtStrategy,
     JwtAuthGuard,
     RolesGuard,
@@ -50,6 +61,9 @@ import { RolesGuard } from './guards/roles.guard';
     JwtAuthGuard,
     RolesGuard,
     PassportModule,
+    AuditLogService,
+    AuditLogInterceptor,
+    SanitizeInterceptor,
   ],
 })
 export class AuthModule {}

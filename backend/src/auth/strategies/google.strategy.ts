@@ -51,7 +51,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       done(null, user);
     } catch (error) {
       this.logger.error('Google OAuth validation failed:', error);
-      done(error, null);
+      done(error, false);
     }
   }
 }
