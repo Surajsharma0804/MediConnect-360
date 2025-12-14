@@ -42,7 +42,7 @@ export class VoiceController {
       );
 
       // Process symptoms with AI
-      const analysis = await this.aiService.analyzeSymptoms(transcript);
+      const analysis = await this.aiService.analyzeSymptoms(transcript.text);
 
       return {
         transcript,
@@ -77,18 +77,18 @@ export class VoiceController {
       );
 
       // Process with AI chat
-      const response = await this.aiService.chatWithAI(transcript, userId);
+      const response = await this.aiService.chatWithAI(transcript.text, userId);
 
       // Convert response back to speech
       const audioResponse = await this.voiceService.textToSpeech(
         response.message,
-        language,
+        { language }
       );
 
       return {
         transcript,
         response: response.message,
-        audioResponse: audioResponse.toString('base64'),
+        audioResponse: audioResponse.audioBuffer.toString('base64'),
         timestamp: new Date().toISOString(),
       };
     } catch (error) {

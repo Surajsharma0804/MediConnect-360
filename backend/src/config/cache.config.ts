@@ -4,16 +4,22 @@ import { Logger } from '@nestjs/common';
 
 const logger = new Logger('RedisConfig');
 
-// Redis connection now uses URL directly - no need for separate options interface
+/**
+ * Enterprise Redis Configuration
+ * - Single connection strategy using URL only
+ * - Circuit breaker pattern for fault tolerance
+ * - Graceful fallback to memory cache
+ * - Production-ready error handling
+ */
 
 class RedisConnectionManager {
   private static instance: RedisConnectionManager;
   private connectionAttempts = 0;
-  private maxRetries = 5;
-  private retryDelay = 2000;
+  private readonly maxRetries = 3; // Reduced for faster fallback
+  private retryDelay = 1000; // Start with 1 second
   private circuitBreakerOpen = false;
   private lastFailureTime = 0;
-  private circuitBreakerTimeout = 60000; // 1 minute
+  private readonly circuitBreakerTimeout = 30000; // 30 seconds
 
   static getInstance(): RedisConnectionManager {
     if (!RedisConnectionManager.instance) {
@@ -26,9 +32,10 @@ class RedisConnectionManager {
     if (this.circuitBreakerOpen) {
       const timeSinceLastFailure = Date.now() - this.lastFailureTime;
       if (timeSinceLastFailure > this.circuitBreakerTimeout) {
-        logger.log('Circuit breaker timeout expired, attempting to reconnect');
+        logger.log('Redis circuit breaker timeout expired, attempting reconnect');
         this.circuitBreakerOpen = false;
         this.connectionAttempts = 0;
+        this.retryDelay = 1000; // Reset delay
       }
     }
     return this.circuitBreakerOpen;
@@ -37,77 +44,48 @@ class RedisConnectionManager {
   private openCircuitBreaker(): void {
     this.circuitBreakerOpen = true;
     this.lastFailureTime = Date.now();
-    logger.warn(`Redis circuit breaker opened after ${this.connectionAttempts} failed attempts`);
+    logger.warn(`Redis circuit breaker opened after ${this.connectionAttempts} attempts`);
   }
 
   async createRedisStore(redisUrl: string): Promise<any> {
     if (this.isCircuitBreakerOpen()) {
-      logger.warn('Redis circuit breaker is open, using memory cache');
       return null;
     }
 
     try {
       this.connectionAttempts++;
-      logger.log(`Redis connection attempt ${this.connectionAttempts}/${this.maxRetries} using URL`);
+      logger.log(`Redis connection attempt ${this.connectionAttempts}/${this.maxRetries}`);
 
-      // Use URL-based connection ONLY - this handles TLS automatically for Upstash
-      const redisClientConfig = {
+      const store = await redisStore({
         url: redisUrl,
         socket: {
-          connectTimeout: 10000,
+          connectTimeout: 5000, // 5 second timeout
           reconnectStrategy: (retries: number) => {
-            if (retries > 10) {
-              logger.error('Redis reconnection attempts exceeded, giving up');
-              return false;
-            }
-            const delay = Math.min(retries * 100, 3000);
-            logger.log(`Redis reconnecting in ${delay}ms (attempt ${retries})`);
-            return delay;
+            if (retries > 5) return false;
+            return Math.min(retries * 500, 2000);
           },
         },
-        // Enterprise Redis client configuration
-        commandsQueueMaxLength: 1000,
-      };
+        commandsQueueMaxLength: 100, // Reduced for better performance
+      });
 
-      // Add reconnection error handler
-      const store = await redisStore(redisClientConfig);
-      
-      // Add connection event handlers for monitoring
-      if (store && typeof store.client?.on === 'function') {
-        store.client.on('connect', () => {
-          logger.log('✅ Redis cache client connected');
-        });
-        
+      // Add minimal event handlers
+      if (store?.client?.on) {
         store.client.on('error', (err: Error) => {
-          logger.error(`❌ Redis cache client error: ${err.message}`);
-        });
-        
-        store.client.on('reconnecting', () => {
-          logger.log('🔄 Redis cache client reconnecting...');
-        });
-        
-        store.client.on('ready', () => {
-          logger.log('✅ Redis cache client ready');
+          logger.warn(`Redis cache error: ${err.message}`);
         });
       }
 
-      // Reset connection attempts on successful connection
+      // Reset on success
       this.connectionAttempts = 0;
       this.circuitBreakerOpen = false;
-      logger.log(`✅ Redis connection established successfully`);
+      logger.log('✅ Redis cache store connected');
       
       return store;
     } catch (error) {
-      logger.error(`❌ Redis connection failed (attempt ${this.connectionAttempts}/${this.maxRetries}): ${error.message}`);
+      logger.warn(`Redis connection failed (${this.connectionAttempts}/${this.maxRetries}): ${error.message}`);
       
       if (this.connectionAttempts >= this.maxRetries) {
         this.openCircuitBreaker();
-      }
-      
-      // Wait before next retry
-      if (this.connectionAttempts < this.maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, this.retryDelay));
-        this.retryDelay = Math.min(this.retryDelay * 1.5, 10000); // Exponential backoff
       }
       
       return null;
@@ -116,35 +94,39 @@ class RedisConnectionManager {
 }
 
 export const redisCacheConfig = async (): Promise<CacheModuleOptions> => {
-  const connectionManager = RedisConnectionManager.getInstance();
-  
-  // Use Redis URL directly - this is the ONLY correct way for Upstash
   const redisUrl = process.env.REDIS_URL;
   
-  if (redisUrl && redisUrl !== 'redis://localhost:6379') {
-    try {
-      // Use URL directly - NO parsing, NO host/port extraction
-      const store = await connectionManager.createRedisStore(redisUrl);
-      if (store) {
-        logger.log('✅ Redis cache store created successfully');
-        return {
-          store,
-          ttl: 300000, // 5 minutes in milliseconds
-          max: 1000, // Maximum number of items in cache
-        };
-      }
-    } catch (error) {
-      logger.error(`Failed to create Redis store: ${error.message}`);
-    }
+  // Skip Redis if not configured or using default local URL
+  if (!redisUrl || redisUrl === 'redis://localhost:6379') {
+    logger.log('Using memory cache - Redis not configured');
+    return createMemoryCacheConfig();
   }
 
-  // Production-grade memory cache fallback
-  logger.warn('🔄 Using memory cache - Redis not available or configured');
+  try {
+    const connectionManager = RedisConnectionManager.getInstance();
+    const store = await connectionManager.createRedisStore(redisUrl);
+    
+    if (store) {
+      return {
+        store,
+        ttl: 300000, // 5 minutes
+        max: 1000,
+      };
+    }
+  } catch (error) {
+    logger.warn(`Redis store creation failed: ${error.message}`);
+  }
+
+  // Always fallback to memory cache
+  logger.log('Falling back to memory cache');
+  return createMemoryCacheConfig();
+};
+
+function createMemoryCacheConfig(): CacheModuleOptions {
   return {
-    ttl: 300000, // 5 minutes in milliseconds
-    max: 1000, // Maximum number of items in cache
-    // Memory cache options for production
+    ttl: 300000, // 5 minutes
+    max: 500, // Smaller for memory efficiency
     updateAgeOnGet: false,
     updateAgeOnHas: false,
   };
-};
+}

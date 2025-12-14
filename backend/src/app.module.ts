@@ -14,6 +14,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { databaseConfig } from './config/database.config';
 import { redisCacheConfig } from './config/cache.config';
+import appConfig from './config/app.config';
 
 // Entity imports
 import { User } from './entities/user.entity';
@@ -91,6 +92,9 @@ const oauthProviders = getOAuthProviders();
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      load: [appConfig],
+      cache: true,
+      expandVariables: true,
     }),
     TypeOrmModule.forRoot(databaseConfig()),
     TypeOrmModule.forFeature([
@@ -131,51 +135,42 @@ const oauthProviders = getOAuthProviders();
       isGlobal: true,
       useFactory: redisCacheConfig,
     }),
-    // Background jobs - Enterprise Redis configuration with circuit breaker
+    // Background jobs - Enterprise configuration with graceful fallback
     BullModule.forRootAsync({
       useFactory: async (configService: ConfigService) => {
         const logger = new Logger('BullMQConfig');
-        
-        // Use Redis URL directly - this is the ONLY correct way for Upstash
         const redisUrl = configService.get('REDIS_URL');
 
+        // Skip BullMQ if Redis not properly configured
         if (!redisUrl || redisUrl === 'redis://localhost:6379') {
-          logger.warn('BullMQ disabled - no Redis URL configured');
-          return {}; // Return empty config to disable BullMQ
+          logger.log('BullMQ disabled - Redis not configured (using in-memory processing)');
+          return {}; // Empty config disables BullMQ
         }
 
         try {
-          logger.log(`🔄 BullMQ connecting to Redis using URL`);
+          logger.log('Configuring BullMQ with Redis URL');
           
           return {
-            redis: redisUrl, // Use URL directly - BullMQ supports this and handles TLS automatically
-          // Enterprise job configuration
-          defaultJobOptions: {
-            removeOnComplete: 50, // Keep more completed jobs for monitoring
-            removeOnFail: 20, // Keep failed jobs for debugging
-            attempts: 5, // More retry attempts for production
-            backoff: {
-              type: 'exponential',
-              delay: 2000,
+            redis: redisUrl,
+            defaultJobOptions: {
+              removeOnComplete: 10, // Keep fewer jobs for memory efficiency
+              removeOnFail: 5,
+              attempts: 3, // Reasonable retry count
+              backoff: {
+                type: 'exponential',
+                delay: 1000,
+              },
+              timeout: 30000,
             },
-            // Job timeout and delay settings
-            delay: 0,
-            timeout: 30000, // 30 second timeout
-            // Priority and rate limiting
-            priority: 0,
-            // Repeat job configuration
-            repeat: undefined,
-          },
-          // Advanced BullMQ settings for production
-          settings: {
-            stalledInterval: 30000, // Check for stalled jobs every 30 seconds
-            maxStalledCount: 3, // Maximum number of times a job can be stalled
-          },
-        };
+            settings: {
+              stalledInterval: 30000,
+              maxStalledCount: 2,
+            },
+          };
         } catch (error) {
-          logger.error(`BullMQ configuration failed: ${error.message}`);
-          logger.warn('BullMQ disabled due to configuration error');
-          return {}; // Return empty config to disable BullMQ
+          logger.warn(`BullMQ configuration failed: ${error.message}`);
+          logger.log('BullMQ disabled - falling back to synchronous processing');
+          return {};
         }
       },
       inject: [ConfigService],
