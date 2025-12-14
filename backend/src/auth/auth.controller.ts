@@ -54,21 +54,52 @@ export class AuthController {
   }
 
   @Get('google')
-  @UseGuards(AuthGuard('google'))
-  async googleAuth() {
-    // Initiates Google OAuth flow
-    // This route will only work if GoogleStrategy is properly loaded
+  async googleAuth(@Res() res: Response) {
+    // Check if Google OAuth is configured
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+      return res.status(503).json({
+        error: 'Google OAuth not configured',
+        message: 'Google OAuth credentials are missing from environment variables'
+      });
+    }
+    
+    // If configured, redirect to Google OAuth
+    try {
+      // Manual redirect to Google OAuth
+      const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${process.env.GOOGLE_CLIENT_ID}&` +
+        `redirect_uri=${encodeURIComponent(process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/api/auth/google/callback')}&` +
+        `response_type=code&` +
+        `scope=email profile`;
+      
+      return res.redirect(googleAuthUrl);
+    } catch (error) {
+      return res.status(500).json({
+        error: 'OAuth initialization failed',
+        message: error.message
+      });
+    }
   }
 
   @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
-  async googleAuthCallback(@Req() req, @Res() res: Response) {
-    const result = await this.authService.googleLogin(req.user);
-    const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5173';
+  async googleAuthCallback(@Query('code') code: string, @Res() res: Response) {
+    if (!code) {
+      const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5173';
+      return res.redirect(`${frontendUrl}/login?error=oauth_cancelled`);
+    }
 
-    // Redirect to frontend with token and user data
-    const redirectUrl = `${frontendUrl}/auth/callback?token=${result.accessToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
-    return res.redirect(redirectUrl);
+    try {
+      // Handle Google OAuth callback manually
+      const result = await this.authService.handleGoogleCallback(code);
+      const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5173';
+
+      // Redirect to frontend with token and user data
+      const redirectUrl = `${frontendUrl}/auth/callback?token=${result.accessToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
+      return res.redirect(redirectUrl);
+    } catch (error) {
+      const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5173';
+      return res.redirect(`${frontendUrl}/login?error=oauth_failed`);
+    }
   }
 
   @Get('verify-email')
@@ -93,21 +124,51 @@ export class AuthController {
   }
 
   @Get('github')
-  @UseGuards(AuthGuard('github'))
-  async githubAuth() {
-    // Initiates GitHub OAuth flow
-    // This route will only work if GitHubStrategy is properly loaded
+  async githubAuth(@Res() res: Response) {
+    // Check if GitHub OAuth is configured
+    if (!process.env.GITHUB_CLIENT_ID || !process.env.GITHUB_CLIENT_SECRET) {
+      return res.status(503).json({
+        error: 'GitHub OAuth not configured',
+        message: 'GitHub OAuth credentials are missing from environment variables'
+      });
+    }
+    
+    // If configured, redirect to GitHub OAuth
+    try {
+      // Manual redirect to GitHub OAuth
+      const githubAuthUrl = `https://github.com/login/oauth/authorize?` +
+        `client_id=${process.env.GITHUB_CLIENT_ID}&` +
+        `redirect_uri=${encodeURIComponent(process.env.GITHUB_CALLBACK_URL || 'http://localhost:5000/api/auth/github/callback')}&` +
+        `scope=user:email`;
+      
+      return res.redirect(githubAuthUrl);
+    } catch (error) {
+      return res.status(500).json({
+        error: 'OAuth initialization failed',
+        message: error.message
+      });
+    }
   }
 
   @Get('github/callback')
-  @UseGuards(AuthGuard('github'))
-  async githubAuthCallback(@Req() req, @Res() res: Response) {
-    const result = await this.authService.githubLogin(req.user);
-    const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5173';
+  async githubAuthCallback(@Query('code') code: string, @Res() res: Response) {
+    if (!code) {
+      const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5173';
+      return res.redirect(`${frontendUrl}/login?error=oauth_cancelled`);
+    }
 
-    // Redirect to frontend with token and user data
-    const redirectUrl = `${frontendUrl}/auth/callback?token=${result.accessToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
-    return res.redirect(redirectUrl);
+    try {
+      // Handle GitHub OAuth callback manually
+      const result = await this.authService.handleGithubCallback(code);
+      const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5173';
+
+      // Redirect to frontend with token and user data
+      const redirectUrl = `${frontendUrl}/auth/callback?token=${result.accessToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
+      return res.redirect(redirectUrl);
+    } catch (error) {
+      const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5173';
+      return res.redirect(`${frontendUrl}/login?error=oauth_failed`);
+    }
   }
 
   // Two-Factor Authentication endpoints

@@ -106,6 +106,96 @@ export class AuthService {
     };
   }
 
+  async handleGoogleCallback(code: string) {
+    // Manual Google OAuth token exchange
+    const tokenUrl = 'https://oauth2.googleapis.com/token';
+    const tokenData = {
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      code,
+      grant_type: 'authorization_code',
+      redirect_uri: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/api/auth/google/callback',
+    };
+
+    try {
+      // Exchange code for access token
+      const tokenResponse = await fetch(tokenUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(tokenData),
+      });
+
+      const tokens = await tokenResponse.json();
+      
+      // Get user info from Google
+      const userResponse = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${tokens.access_token}`);
+      const googleUser = await userResponse.json();
+
+      // Create user object
+      const user = {
+        id: googleUser.id,
+        email: googleUser.email,
+        name: googleUser.name,
+        picture: googleUser.picture,
+      };
+
+      return this.googleLogin(user);
+    } catch (error) {
+      this.logger.error('Google OAuth callback error:', error);
+      throw new Error('Google OAuth authentication failed');
+    }
+  }
+
+  async handleGithubCallback(code: string) {
+    // Manual GitHub OAuth token exchange
+    const tokenUrl = 'https://github.com/login/oauth/access_token';
+    const tokenData = {
+      client_id: process.env.GITHUB_CLIENT_ID,
+      client_secret: process.env.GITHUB_CLIENT_SECRET,
+      code,
+    };
+
+    try {
+      // Exchange code for access token
+      const tokenResponse = await fetch(tokenUrl, {
+        method: 'POST',
+        headers: { 
+          'Accept': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded' 
+        },
+        body: new URLSearchParams(tokenData),
+      });
+
+      const tokens = await tokenResponse.json();
+      
+      // Get user info from GitHub
+      const userResponse = await fetch('https://api.github.com/user', {
+        headers: { 'Authorization': `token ${tokens.access_token}` },
+      });
+      const githubUser = await userResponse.json();
+
+      // Get user email from GitHub
+      const emailResponse = await fetch('https://api.github.com/user/emails', {
+        headers: { 'Authorization': `token ${tokens.access_token}` },
+      });
+      const emails = await emailResponse.json();
+      const primaryEmail = emails.find(email => email.primary)?.email || `${githubUser.login}@github.local`;
+
+      // Create user object
+      const user = {
+        id: githubUser.id,
+        email: primaryEmail,
+        name: githubUser.name || githubUser.login,
+        username: githubUser.login,
+      };
+
+      return this.githubLogin(user);
+    } catch (error) {
+      this.logger.error('GitHub OAuth callback error:', error);
+      throw new Error('GitHub OAuth authentication failed');
+    }
+  }
+
   async verifyEmail(token: string) {
     this.logger.log(`Email verification: ${token}`);
     return { message: 'Email verified successfully' };

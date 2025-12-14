@@ -97,6 +97,7 @@ const getOAuthProviders = (): any[] => {
   return providers;
 };
 
+// Get OAuth providers but don't fail if none available
 const oauthProviders = getOAuthProviders();
 
 @Module({
@@ -113,7 +114,7 @@ const oauthProviders = getOAuthProviders();
       AuditLog,
       // All entities enabled for full functionality
     ]),
-    PassportModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET || 'super-secret-key',
