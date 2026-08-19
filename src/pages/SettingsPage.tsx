@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { User, Bell, Shield, CreditCard, Globe, Moon, Sun, Save } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
+import { useAuth } from '../hooks/useAuth';
 import toast from 'react-hot-toast';
 
 const SettingsPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
   
   const [profile, setProfile] = useState({
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 (555) 123-4567',
-    dateOfBirth: '1990-01-15',
-    gender: 'male',
-    address: '123 Main St, New York, NY 10001'
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: '',
+    dateOfBirth: '',
+    gender: '',
+    address: ''
   });
 
   const [notifications, setNotifications] = useState({

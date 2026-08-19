@@ -15,6 +15,8 @@ interface UseApiQueryOptions<T> {
   onError?: (error: Error) => void;
   /** Dependencies that trigger refetch when changed */
   deps?: unknown[];
+  /** If true, suppress errors and return null data instead of showing error state */
+  silentFail?: boolean;
 }
 
 interface UseApiQueryResult<T> {
@@ -39,6 +41,7 @@ export function useApiQuery<T>(
     onSuccess,
     onError,
     deps = [],
+    silentFail = true,
   } = options;
 
   const [data, setData] = useState<T | null>(() => {
@@ -77,8 +80,17 @@ export function useApiQuery<T>(
     } catch (err) {
       if (fetchId === fetchIdRef.current && mountedRef.current) {
         const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        onError?.(error);
+        
+        // Check if this is an auth error (session expired) — don't treat as data error
+        const isAuthError = err instanceof ApiRequestError && err.status === 401;
+        
+        if (silentFail || isAuthError) {
+          // Silently fail: set data to null, don't show error
+          setData(null);
+        } else {
+          setError(error);
+          onError?.(error);
+        }
       }
     } finally {
       if (fetchId === fetchIdRef.current && mountedRef.current) {
@@ -86,7 +98,7 @@ export function useApiQuery<T>(
         setIsRefetching(false);
       }
     }
-  }, [key, queryFn, cacheDuration, onSuccess, onError]);
+  }, [key, queryFn, cacheDuration, onSuccess, onError, silentFail]);
 
   const refetch = useCallback(async () => {
     queryCache.delete(key);

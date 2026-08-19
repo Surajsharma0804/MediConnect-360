@@ -118,7 +118,11 @@ async function apiRequest<T>(
       clearTimeout(timeoutId);
 
       if (response.status === 401) {
-        clearAuthData();
+        // Only clear auth on explicit auth endpoint failures (not data endpoints)
+        const isAuthEndpoint = path.includes('/auth/me') || path.includes('/auth/refresh');
+        if (isAuthEndpoint) {
+          clearAuthData();
+        }
         throw new ApiRequestError('Session expired. Please log in again.', 401);
       }
 
