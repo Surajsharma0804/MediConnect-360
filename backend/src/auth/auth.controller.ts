@@ -160,33 +160,26 @@ export class AuthController {
   @ApiOperation({ summary: 'Initiate Google OAuth login' })
   @ApiResponse({ status: 302, description: 'Redirects to Google OAuth' })
   googleAuth() {
-    this.logger.log('🔍 Google OAuth initiation called');
+    this.logger.log('Google OAuth initiation called');
     // Passport handles the redirect - no logic needed here
   }
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  googleCallback(@Req() req: Request, @Res() res: Response) {
-    this.logger.log(`🔍 GOOGLE CALLBACK - WORLD-CLASS PATTERN`);
+  async googleCallback(@Req() req: Request, @Res() res: Response) {
+    this.logger.log('Google OAuth callback received');
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     
-    const { accessToken, refreshToken } = this.authService.loginOAuth(req.user);
-    
-    this.logger.log(`🔍 Setting cookies and redirecting`);
-    
-    res
-      .cookie('access_token', accessToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        path: '/',
-      })
-      .cookie('refresh_token', refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        path: '/',
-      })
-      .redirect('https://medi-connect-360.vercel.app/auth/callback');
+    try {
+      const result = await this.authService.handleOAuthLogin(req.user, 'google');
+      
+      this.authService.setAuthCookies(res, result.tokens);
+      this.logger.log(`Google OAuth login successful: ${result.user.email}`);
+      res.redirect(`${frontendUrl}/auth/callback`);
+    } catch (error) {
+      this.logger.error('Google OAuth callback failed:', error.message);
+      res.redirect(`${frontendUrl}/login?error=auth_failed`);
+    }
   }
 
   // GitHub OAuth Routes
@@ -195,32 +188,25 @@ export class AuthController {
   @ApiOperation({ summary: 'Initiate GitHub OAuth login' })
   @ApiResponse({ status: 302, description: 'Redirects to GitHub OAuth' })
   githubAuth() {
-    // Passport handles the redirect - no logic needed here
+    // Passport handles the redirect
   }
 
   @Get('github/callback')
   @UseGuards(AuthGuard('github'))
-  githubCallback(@Req() req: Request, @Res() res: Response) {
-    this.logger.log(`🔍 GITHUB CALLBACK - WORLD-CLASS PATTERN`);
+  async githubCallback(@Req() req: Request, @Res() res: Response) {
+    this.logger.log('GitHub OAuth callback received');
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     
-    const { accessToken, refreshToken } = this.authService.loginOAuth(req.user);
-    
-    this.logger.log(`🔍 Setting cookies and redirecting`);
-    
-    res
-      .cookie('access_token', accessToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        path: '/',
-      })
-      .cookie('refresh_token', refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        path: '/',
-      })
-      .redirect('https://medi-connect-360.vercel.app/auth/callback');
+    try {
+      const result = await this.authService.handleOAuthLogin(req.user, 'github');
+      
+      this.authService.setAuthCookies(res, result.tokens);
+      this.logger.log(`GitHub OAuth login successful: ${result.user.email}`);
+      res.redirect(`${frontendUrl}/auth/callback`);
+    } catch (error) {
+      this.logger.error('GitHub OAuth callback failed:', error.message);
+      res.redirect(`${frontendUrl}/login?error=auth_failed`);
+    }
   }
 
 

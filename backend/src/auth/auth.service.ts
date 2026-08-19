@@ -222,7 +222,7 @@ export class AuthService {
   }
 
   loginOAuth(oauthUser: any): { accessToken: string; refreshToken: string } {
-    this.logger.log(`🔍 loginOAuth called for user: ${oauthUser?.email}`);
+    this.logger.log(`loginOAuth called for: ${oauthUser?.email}`);
     
     // Generate tokens directly for OAuth user
     const payload = {
@@ -242,7 +242,7 @@ export class AuthService {
       expiresIn: '7d',
     });
 
-    this.logger.log(`🔑 loginOAuth returning tokens for: ${oauthUser.email}`);
+    this.logger.log(`loginOAuth tokens generated for: ${oauthUser.email}`);
     return { accessToken, refreshToken };
   }
 
