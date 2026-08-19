@@ -89,10 +89,24 @@ async function bootstrap() {
     // Enable compression
     app.use(compression());
 
-    // Enable API versioning
+    // Enable API versioning (exclude root paths for health checks)
     app.enableVersioning({
       type: VersioningType.URI,
       defaultVersion: '1',
+    });
+
+    // Root-level routes for Render health checks (no versioning)
+    const httpAdapter = app.getHttpAdapter();
+    httpAdapter.get('/', (_req: any, res: any) => {
+      res.json({
+        service: 'MediConnect 360 Backend',
+        status: 'running',
+        version: '1.0.0',
+        timestamp: new Date().toISOString(),
+      });
+    });
+    httpAdapter.head('/', (_req: any, res: any) => {
+      res.sendStatus(200);
     });
 
     // CORS Configuration
