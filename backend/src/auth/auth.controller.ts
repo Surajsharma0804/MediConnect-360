@@ -172,9 +172,16 @@ export class AuthController {
     try {
       const result = await this.authService.handleOAuthLogin(req.user, 'google');
       
+      // Set cookies (works for same-origin, fallback for cross-origin)
       this.authService.setAuthCookies(res, result.tokens);
       this.logger.log(`Google OAuth login successful: ${result.user.email}`);
-      res.redirect(`${frontendUrl}/auth/callback`);
+      
+      // Pass tokens in URL for cross-origin (different domains block third-party cookies)
+      const params = new URLSearchParams({
+        token: result.tokens.accessToken,
+        refresh: result.tokens.refreshToken,
+      });
+      res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
     } catch (error) {
       this.logger.error('Google OAuth callback failed:', error.message);
       res.redirect(`${frontendUrl}/login?error=auth_failed`);
@@ -199,9 +206,16 @@ export class AuthController {
     try {
       const result = await this.authService.handleOAuthLogin(req.user, 'github');
       
+      // Set cookies (works for same-origin, fallback for cross-origin)
       this.authService.setAuthCookies(res, result.tokens);
       this.logger.log(`GitHub OAuth login successful: ${result.user.email}`);
-      res.redirect(`${frontendUrl}/auth/callback`);
+      
+      // Pass tokens in URL for cross-origin
+      const params = new URLSearchParams({
+        token: result.tokens.accessToken,
+        refresh: result.tokens.refreshToken,
+      });
+      res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
     } catch (error) {
       this.logger.error('GitHub OAuth callback failed:', error.message);
       res.redirect(`${frontendUrl}/login?error=auth_failed`);

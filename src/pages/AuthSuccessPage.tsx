@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const AuthSuccessPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('Verifying authentication...');
 
@@ -11,8 +12,48 @@ const AuthSuccessPage: React.FC = () => {
   useEffect(() => {
     const verifyAuth = async () => {
       try {
-        console.log('Verifying auth after OAuth callback...');
-        
+        // Check for tokens in URL (cross-origin OAuth flow)
+        const token = searchParams.get('token');
+        const refresh = searchParams.get('refresh');
+
+        if (token) {
+          // Store tokens in the format the API service expects
+          const authData = {
+            accessToken: token,
+            refreshToken: refresh || '',
+            token: token,
+          };
+          localStorage.setItem('mediconnect_user', JSON.stringify(authData));
+          localStorage.setItem('access_token', token);
+          if (refresh) {
+            localStorage.setItem('refresh_token', refresh);
+          }
+
+          // Clean URL (remove tokens from address bar)
+          window.history.replaceState({}, '', '/auth/callback');
+
+          // Verify token by calling /auth/me with Authorization header
+          const response = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+            credentials: 'include',
+          });
+
+          if (!response.ok) {
+            throw new Error(`Auth verification failed: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log('OAuth login successful:', data.user?.email);
+
+          setStatus('success');
+          setMessage('Authentication successful! Redirecting to dashboard...');
+          setTimeout(() => navigate('/dashboard'), 1500);
+          return;
+        }
+
+        // Fallback: try cookie-based auth (same-origin)
         const response = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
           credentials: 'include',
         });
@@ -22,25 +63,21 @@ const AuthSuccessPage: React.FC = () => {
         }
 
         const data = await response.json();
-        console.log('Auth verification successful:', data.user);
-        
+        console.log('Auth verification successful:', data.user?.email);
+
         setStatus('success');
         setMessage('Authentication successful! Redirecting to dashboard...');
-        
-        // Redirect to dashboard after short delay
         setTimeout(() => navigate('/dashboard'), 1500);
       } catch (error) {
         console.error('Auth verification failed:', error);
         setStatus('error');
         setMessage('Authentication verification failed. Redirecting to login...');
-        
-        // Redirect to login after delay
         setTimeout(() => navigate('/login'), 3000);
       }
     };
 
     verifyAuth();
-  }, [navigate, API_BASE_URL]);
+  }, [navigate, API_BASE_URL, searchParams]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
