@@ -95,6 +95,17 @@ const DashboardPage: React.FC = () => {
 
   // ─── Data Fetching (ALL from API, ZERO hardcoded) ─────────────────────
 
+  // Safe wrapper: returns fallback on API failure (new users have no data)
+  const safeFetch = <T,>(fn: () => Promise<T>, fallback: T): () => Promise<T> => {
+    return async () => {
+      try {
+        return await fn();
+      } catch {
+        return fallback;
+      }
+    };
+  };
+
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const nowISO = now.toISOString();
@@ -106,7 +117,7 @@ const DashboardPage: React.FC = () => {
     refetch: refetchAppointments
   } = useApiQuery<Appointment[]>(
     'dashboard-appointments',
-    () => appointmentsAPI.getAll(true),
+    safeFetch(() => appointmentsAPI.getAll(true), []),
     { enabled: activeTab === 'overview' || activeTab === 'appointments' }
   );
 
@@ -117,7 +128,7 @@ const DashboardPage: React.FC = () => {
     refetch: refetchHealth
   } = useApiQuery<HealthTracking[]>(
     'dashboard-health',
-    () => healthTrackingAPI.getAll({ limit: 50, startDate: thirtyDaysAgo, endDate: nowISO }),
+    safeFetch(() => healthTrackingAPI.getAll({ limit: 50, startDate: thirtyDaysAgo, endDate: nowISO }), []),
     { enabled: activeTab === 'overview' || activeTab === 'progress' }
   );
 
@@ -126,7 +137,7 @@ const DashboardPage: React.FC = () => {
     isLoading: bpLoading 
   } = useApiQuery(
     'dashboard-bp-stats',
-    () => healthTrackingAPI.getStats('blood_pressure' as TrackingType, thirtyDaysAgo, nowISO),
+    safeFetch(() => healthTrackingAPI.getStats('blood_pressure' as TrackingType, thirtyDaysAgo, nowISO), null),
     { enabled: activeTab === 'overview' }
   );
 
@@ -135,7 +146,7 @@ const DashboardPage: React.FC = () => {
     isLoading: hrLoading 
   } = useApiQuery(
     'dashboard-hr-stats',
-    () => healthTrackingAPI.getStats('heart_rate' as TrackingType, thirtyDaysAgo, nowISO),
+    safeFetch(() => healthTrackingAPI.getStats('heart_rate' as TrackingType, thirtyDaysAgo, nowISO), null),
     { enabled: activeTab === 'overview' }
   );
 
@@ -144,7 +155,7 @@ const DashboardPage: React.FC = () => {
     isLoading: weightLoading 
   } = useApiQuery(
     'dashboard-weight-stats',
-    () => healthTrackingAPI.getStats('weight' as TrackingType, thirtyDaysAgo, nowISO),
+    safeFetch(() => healthTrackingAPI.getStats('weight' as TrackingType, thirtyDaysAgo, nowISO), null),
     { enabled: activeTab === 'overview' }
   );
 
@@ -153,7 +164,7 @@ const DashboardPage: React.FC = () => {
     isLoading: sleepLoading 
   } = useApiQuery(
     'dashboard-sleep-stats',
-    () => healthTrackingAPI.getStats('sleep' as TrackingType, thirtyDaysAgo, nowISO),
+    safeFetch(() => healthTrackingAPI.getStats('sleep' as TrackingType, thirtyDaysAgo, nowISO), null),
     { enabled: activeTab === 'overview' }
   );
 
@@ -164,7 +175,7 @@ const DashboardPage: React.FC = () => {
     refetch: refetchPrescriptions
   } = useApiQuery(
     'dashboard-prescriptions',
-    () => pharmacyAPI.getPrescriptions('active'),
+    safeFetch(() => pharmacyAPI.getPrescriptions('active'), []),
     { enabled: activeTab === 'overview' || activeTab === 'medications' }
   );
 
@@ -175,7 +186,7 @@ const DashboardPage: React.FC = () => {
     refetch: refetchDocuments
   } = useApiQuery(
     'dashboard-documents',
-    () => documentsAPI.getAll({ limit: 10, page: 1 }),
+    safeFetch(() => documentsAPI.getAll({ limit: 10, page: 1 }), []),
     { enabled: activeTab === 'records' }
   );
 
@@ -184,7 +195,7 @@ const DashboardPage: React.FC = () => {
     isLoading: remindersLoading,
   } = useApiQuery<Reminder[]>(
     'dashboard-reminders',
-    () => remindersAPI.getAll(undefined, true),
+    safeFetch(() => remindersAPI.getAll(undefined, true), []),
     { enabled: activeTab === 'overview' }
   );
 
