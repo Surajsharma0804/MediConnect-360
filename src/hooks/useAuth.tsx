@@ -51,6 +51,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAuthStatus();
   }, []);
 
+  // Get stored auth token from localStorage
+  const getStoredToken = (): string | null => {
+    try {
+      // Check direct token first
+      const directToken = localStorage.getItem('access_token');
+      if (directToken) return directToken;
+      
+      // Check mediconnect_user object
+      const stored = localStorage.getItem('mediconnect_user');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return parsed.accessToken || parsed.token || null;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
+  const getAuthHeaders = (): Record<string, string> => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    const token = getStoredToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  };
+
   const checkAuthStatus = async () => {
     try {
       const controller = new AbortController();
@@ -59,9 +89,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
         method: 'GET',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         signal: controller.signal,
       });
 
@@ -72,6 +100,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(data.user);
       } else {
         setUser(null);
+        // Clear invalid tokens
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('mediconnect_user');
       }
     } catch {
       setUser(null);
@@ -138,15 +170,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       await fetch(`${API_BASE_URL}/api/v1/auth/logout`, {
         method: 'POST',
-        credentials: 'include', // Include cookies
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        credentials: 'include',
+        headers: getAuthHeaders(),
       });
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
       setUser(null);
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('mediconnect_user');
     }
   };
 
@@ -154,10 +187,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
         method: 'GET',
-        credentials: 'include', // Include cookies
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        credentials: 'include',
+        headers: getAuthHeaders(),
       });
 
       if (response.ok) {
