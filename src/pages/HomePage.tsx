@@ -1,57 +1,151 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, Video, Brain, Stethoscope, BarChart, Heart, Shield, Users } from 'lucide-react';
+import {
+  Activity, Video, Brain, Stethoscope, BarChart, Heart, Shield, Users,
+  Loader2, FileText, TestTube, MessageCircle, AlertTriangle,
+} from 'lucide-react';
 import FeatureCard from '../components/home/FeatureCard';
 import HeroSection from '../components/home/HeroSection';
 import { useAuth } from '../hooks/useAuth';
+import { useApiQuery } from '../hooks/useApiQuery';
+import api from '../services/api';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface PlatformStats {
+  totalProviders: number;
+  totalPatients: number;
+  satisfactionRate: number;
+}
+
+// ─── Animated Counter ─────────────────────────────────────────────────────────
+
+const AnimatedStat: React.FC<{ 
+  value: string; 
+  label: string; 
+  color: string;
+  isLoading: boolean;
+}> = ({ value, label, color, isLoading }) => (
+  <div className="text-center">
+    <div className={`text-3xl font-bold ${color}`}>
+      {isLoading ? (
+        <span className="inline-flex items-center gap-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </span>
+      ) : value}
+    </div>
+    <p className="mt-2 text-slate-600 dark:text-slate-400">{label}</p>
+  </div>
+);
+
+// ─── Format Number ────────────────────────────────────────────────────────────
+
+const formatCount = (num: number): string => {
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M+`;
+  if (num >= 1000) return `${(num / 1000).toFixed(num >= 10000 ? 0 : 1)}K+`;
+  return `${num}+`;
+};
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 const HomePage: React.FC = () => {
   const { isAuthenticated } = useAuth();
-  
+
+  // Fetch platform stats from API
+  const { data: stats, isLoading: statsLoading } = useApiQuery<PlatformStats>(
+    'platform-stats',
+    async () => {
+      try {
+        // Try the analytics endpoint first
+        return await api.get<PlatformStats>('/analytics/platform-stats', { skipAuth: true, timeout: 5000 });
+      } catch {
+        // Fallback: try to get counts from health check or root endpoint
+        try {
+          const healthData = await api.get<any>('/health', { skipAuth: true, timeout: 5000 });
+          return {
+            totalProviders: healthData?.stats?.providers || 0,
+            totalPatients: healthData?.stats?.patients || 0,
+            satisfactionRate: healthData?.stats?.satisfaction || 0,
+          };
+        } catch {
+          // Return zeros — UI will handle gracefully
+          return { totalProviders: 0, totalPatients: 0, satisfactionRate: 0 };
+        }
+      }
+    },
+    { cacheDuration: 10 * 60 * 1000 } // Cache 10 min
+  );
+
   const features = [
     {
       title: "AI Symptom Checker",
-      description: "Advanced AI analyzes your symptoms and provides initial assessment with health insights.",
+      description: "Describe your symptoms and get AI-powered preliminary analysis with triage recommendations.",
       icon: <Brain className="h-6 w-6 text-indigo-600" />,
       link: "/symptom-checker",
       color: "from-indigo-500 to-blue-500"
     },
     {
       title: "Virtual Consultations",
-      description: "Connect with healthcare providers through secure, high-quality video appointments.",
+      description: "Connect with doctors through secure, high-quality video appointments from anywhere.",
       icon: <Video className="h-6 w-6 text-blue-600" />,
       link: "/virtual-consult",
       color: "from-blue-500 to-indigo-500"
     },
     {
-      title: "Health Dashboard",
-      description: "Monitor your health metrics, track progress, and visualize your health journey.",
-      icon: <BarChart className="h-6 w-6 text-emerald-600" />,
-      link: "/dashboard",
-      color: "from-emerald-500 to-teal-500"
-    },
-    {
-      title: "Medical Specialists",
-      description: "Access a network of verified specialists across multiple medical disciplines.",
+      title: "Find & Compare Doctors",
+      description: "Search verified specialists, compare MediConnect Scores, and book appointments instantly.",
       icon: <Stethoscope className="h-6 w-6 text-cyan-600" />,
-      link: "/specialists",
+      link: "/doctors",
       color: "from-cyan-500 to-blue-500"
     },
     {
-      title: "Secure Health Records",
-      description: "Your medical data is protected with end-to-end encryption and accessible only to authorized providers.",
-      icon: <Shield className="h-6 w-6 text-emerald-600" />,
-      link: "/security",
+      title: "Medical Records",
+      description: "Upload, organize, and securely store all your medical documents with AI-powered analysis.",
+      icon: <FileText className="h-6 w-6 text-emerald-600" />,
+      link: "/medical-records",
       color: "from-emerald-500 to-teal-500"
     },
     {
-      title: "Community Support",
-      description: "Join condition-specific groups for peer support and shared experiences.",
-      icon: <Users className="h-6 w-6 text-amber-600" />,
-      link: "/community",
-      color: "from-amber-500 to-orange-500"
-    }
+      title: "Lab Results",
+      description: "Track lab orders, view results with reference range indicators, and download reports.",
+      icon: <TestTube className="h-6 w-6 text-teal-600" />,
+      link: "/lab-results",
+      color: "from-teal-500 to-emerald-500"
+    },
+    {
+      title: "Secure Messaging",
+      description: "Message your healthcare providers with read receipts, file sharing, and quick responses.",
+      icon: <MessageCircle className="h-6 w-6 text-blue-600" />,
+      link: "/messages",
+      color: "from-blue-500 to-sky-500"
+    },
+    {
+      title: "Insurance Management",
+      description: "Store insurance cards, file claims, and track approvals — all in one place.",
+      icon: <Shield className="h-6 w-6 text-purple-600" />,
+      link: "/insurance",
+      color: "from-purple-500 to-indigo-500"
+    },
+    {
+      title: "Family Health",
+      description: "Manage health records for your entire family — parents, children, and dependents.",
+      icon: <Users className="h-6 w-6 text-pink-600" />,
+      link: "/family",
+      color: "from-pink-500 to-rose-500"
+    },
+    {
+      title: "Emergency SOS",
+      description: "One-touch emergency alert with GPS location sharing, Medical ID, and emergency contacts.",
+      icon: <AlertTriangle className="h-6 w-6 text-red-600" />,
+      link: "/emergency",
+      color: "from-red-500 to-orange-500"
+    },
   ];
+
+  // Derive display values from API data
+  const providerCount = stats?.totalProviders ? formatCount(stats.totalProviders) : '—';
+  const patientCount = stats?.totalPatients ? formatCount(stats.totalPatients) : '—';
+  const satisfactionRate = stats?.satisfactionRate ? `${stats.satisfactionRate}%` : '—';
 
   return (
     <div className="min-h-screen">
@@ -70,27 +164,27 @@ const HomePage: React.FC = () => {
         </div>
       </div>
       
-      {/* Stats Section */}
+      {/* Stats Section — Data from API */}
       <section className="py-12 px-4 sm:px-6 lg:px-8 glass-panel mt-4 mx-4 sm:mx-8 lg:mx-auto max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-              2,500+
-            </div>
-            <p className="mt-2 text-slate-600 dark:text-slate-400">Active Healthcare Providers</p>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-              1M+
-            </div>
-            <p className="mt-2 text-slate-600 dark:text-slate-400">Patients Served</p>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
-              98%
-            </div>
-            <p className="mt-2 text-slate-600 dark:text-slate-400">Patient Satisfaction</p>
-          </div>
+          <AnimatedStat
+            value={providerCount}
+            label="Active Healthcare Providers"
+            color="text-blue-600 dark:text-blue-400"
+            isLoading={statsLoading}
+          />
+          <AnimatedStat
+            value={patientCount}
+            label="Patients Served"
+            color="text-emerald-600 dark:text-emerald-400"
+            isLoading={statsLoading}
+          />
+          <AnimatedStat
+            value={satisfactionRate}
+            label="Patient Satisfaction"
+            color="text-indigo-600 dark:text-indigo-400"
+            isLoading={statsLoading}
+          />
         </div>
       </section>
       
@@ -139,10 +233,10 @@ const HomePage: React.FC = () => {
               </Link>
             )}
             <Link
-              to="/how-it-works"
+              to="/doctors"
               className="btn-secondary text-lg px-8 py-3"
             >
-              Learn More
+              Find a Doctor
             </Link>
           </div>
         </div>
@@ -167,28 +261,28 @@ const HomePage: React.FC = () => {
               <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
                 <li><Link to="/symptom-checker" className="hover:text-blue-600 dark:hover:text-blue-400">AI Symptom Checker</Link></li>
                 <li><Link to="/virtual-consult" className="hover:text-blue-600 dark:hover:text-blue-400">Virtual Consultations</Link></li>
-                <li><Link to="/specialists" className="hover:text-blue-600 dark:hover:text-blue-400">Specialist Network</Link></li>
-                <li><Link to="/emergency" className="hover:text-blue-600 dark:hover:text-blue-400">Emergency Services</Link></li>
+                <li><Link to="/doctors" className="hover:text-blue-600 dark:hover:text-blue-400">Find Doctors</Link></li>
+                <li><Link to="/emergency" className="hover:text-blue-600 dark:hover:text-blue-400">Emergency SOS</Link></li>
               </ul>
             </div>
             
             <div>
-              <h3 className="font-semibold mb-4 text-slate-900 dark:text-white">Company</h3>
+              <h3 className="font-semibold mb-4 text-slate-900 dark:text-white">Platform</h3>
               <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                <li><Link to="/about" className="hover:text-blue-600 dark:hover:text-blue-400">About Us</Link></li>
-                <li><Link to="/careers" className="hover:text-blue-600 dark:hover:text-blue-400">Careers</Link></li>
-                <li><Link to="/blog" className="hover:text-blue-600 dark:hover:text-blue-400">Blog</Link></li>
-                <li><Link to="/contact" className="hover:text-blue-600 dark:hover:text-blue-400">Contact</Link></li>
+                <li><Link to="/dashboard" className="hover:text-blue-600 dark:hover:text-blue-400">Health Dashboard</Link></li>
+                <li><Link to="/medical-records" className="hover:text-blue-600 dark:hover:text-blue-400">Medical Records</Link></li>
+                <li><Link to="/lab-results" className="hover:text-blue-600 dark:hover:text-blue-400">Lab Results</Link></li>
+                <li><Link to="/insurance" className="hover:text-blue-600 dark:hover:text-blue-400">Insurance</Link></li>
+                <li><Link to="/pricing" className="hover:text-blue-600 dark:hover:text-blue-400">Pricing</Link></li>
               </ul>
             </div>
             
             <div>
-              <h3 className="font-semibold mb-4 text-slate-900 dark:text-white">Legal</h3>
+              <h3 className="font-semibold mb-4 text-slate-900 dark:text-white">Account</h3>
               <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                <li><Link to="/terms" className="hover:text-blue-600 dark:hover:text-blue-400">Terms of Service</Link></li>
-                <li><Link to="/privacy" className="hover:text-blue-600 dark:hover:text-blue-400">Privacy Policy</Link></li>
-                <li><Link to="/hipaa" className="hover:text-blue-600 dark:hover:text-blue-400">HIPAA Compliance</Link></li>
-                <li><Link to="/accessibility" className="hover:text-blue-600 dark:hover:text-blue-400">Accessibility</Link></li>
+                <li><Link to="/messages" className="hover:text-blue-600 dark:hover:text-blue-400">Messages</Link></li>
+                <li><Link to="/family" className="hover:text-blue-600 dark:hover:text-blue-400">Family Health</Link></li>
+                <li><Link to="/settings" className="hover:text-blue-600 dark:hover:text-blue-400">Settings</Link></li>
               </ul>
             </div>
           </div>

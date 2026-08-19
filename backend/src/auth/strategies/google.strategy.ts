@@ -10,21 +10,20 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     const clientID = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     const callbackURL = process.env.GOOGLE_CALLBACK_URL || 
-      'https://mediconnect-backend-orkv.onrender.com/api/v1/auth/google/callback';
-
-    if (!clientID || !clientSecret) {
-      throw new Error('Google OAuth credentials not configured');
-    }
+      `http://localhost:${process.env.PORT || 5000}/api/v1/auth/google/callback`;
 
     super({
-      clientID,
-      clientSecret,
+      clientID: clientID || 'not-configured',
+      clientSecret: clientSecret || 'not-configured',
       callbackURL,
       scope: ['email', 'profile'],
     });
 
-    this.logger.log('Google OAuth strategy initialized');
-    this.logger.log(`Callback URL: ${callbackURL}`);
+    if (!clientID || !clientSecret || clientID.includes('your-')) {
+      this.logger.warn('Google OAuth not configured - set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET');
+    } else {
+      this.logger.log('Google OAuth strategy initialized');
+    }
   }
 
   async validate(
@@ -36,7 +35,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     try {
       const { id, name, emails, photos } = profile;
       
-      // Return normalized user object only - no DB calls here
       const user = {
         provider: 'google',
         providerId: id,
@@ -47,7 +45,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         picture: photos?.[0]?.value,
       };
 
-      this.logger.log(`Google OAuth validation successful: ${user.email}`);
       done(null, user);
     } catch (error) {
       this.logger.error('Google OAuth validation failed:', error);

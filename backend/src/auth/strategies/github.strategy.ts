@@ -10,21 +10,20 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
     const clientID = process.env.GITHUB_CLIENT_ID;
     const clientSecret = process.env.GITHUB_CLIENT_SECRET;
     const callbackURL = process.env.GITHUB_CALLBACK_URL || 
-      'https://mediconnect-backend-orkv.onrender.com/api/v1/auth/github/callback';
-
-    if (!clientID || !clientSecret) {
-      throw new Error('GitHub OAuth credentials not configured');
-    }
+      `http://localhost:${process.env.PORT || 5000}/api/v1/auth/github/callback`;
 
     super({
-      clientID,
-      clientSecret,
+      clientID: clientID || 'not-configured',
+      clientSecret: clientSecret || 'not-configured',
       callbackURL,
       scope: ['user:email'],
     });
 
-    this.logger.log('GitHub OAuth strategy initialized');
-    this.logger.log(`Callback URL: ${callbackURL}`);
+    if (!clientID || !clientSecret || clientID.includes('your-')) {
+      this.logger.warn('GitHub OAuth not configured - set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET');
+    } else {
+      this.logger.log('GitHub OAuth strategy initialized');
+    }
   }
 
   async validate(
@@ -36,7 +35,6 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
     try {
       const { id, username, displayName, emails, photos } = profile;
       
-      // Return normalized user object only - no DB calls here
       const user = {
         provider: 'github',
         providerId: id,
@@ -46,7 +44,6 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
         picture: photos?.[0]?.value,
       };
 
-      this.logger.log(`GitHub OAuth validation successful: ${user.email}`);
       done(null, user);
     } catch (error) {
       this.logger.error('GitHub OAuth validation failed:', error);

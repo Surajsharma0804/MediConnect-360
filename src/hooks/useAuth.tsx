@@ -44,11 +44,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://mediconnect-backend-orkv.onrender.com';
-  
-  // Debug logging
-  console.log('Auth Hook - API_BASE_URL:', API_BASE_URL);
-  console.log('Auth Hook - VITE_API_URL:', import.meta.env.VITE_API_URL);
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   // Fetch current user on app load
   useEffect(() => {
@@ -57,13 +53,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
-      // Add timeout to prevent hanging
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       const response = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
         method: 'GET',
-        credentials: 'include', // Include cookies
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -76,12 +71,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const data = await response.json();
         setUser(data.user);
       } else {
-        // Don't try refresh on initial load to speed up
         setUser(null);
       }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      setUser(null); // Set to null to stop loading
+    } catch {
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -181,14 +174,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // OAuth login methods
   const loginWithGoogle = () => {
-    console.log('Redirecting to Google OAuth:', `${API_BASE_URL}/api/v1/auth/google`);
-    setIsLoading(true); // Show loading state
+    setIsLoading(true);
     window.location.href = `${API_BASE_URL}/api/v1/auth/google`;
   };
 
   const loginWithGitHub = () => {
-    console.log('Redirecting to GitHub OAuth:', `${API_BASE_URL}/api/v1/auth/github`);
-    setIsLoading(true); // Show loading state
+    setIsLoading(true);
     window.location.href = `${API_BASE_URL}/api/v1/auth/github`;
   };
 

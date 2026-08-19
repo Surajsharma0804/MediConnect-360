@@ -3,19 +3,26 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import AuthProvider from './hooks/useAuth.tsx';
-import { registerSW } from 'virtual:pwa-register';
+import { validateEnv } from './utils/env';
 
-// Register Service Worker for PWA
-const updateSW = registerSW({
-  onNeedRefresh() {
-    if (confirm('New content available. Reload?')) {
-      updateSW(true);
-    }
-  },
-  onOfflineReady() {
-    console.log('App ready to work offline');
-  },
-});
+// Validate environment variables at startup
+validateEnv();
+
+// Register Service Worker for PWA (production only to avoid stale cache in dev)
+if (import.meta.env.PROD) {
+  import('virtual:pwa-register').then(({ registerSW }) => {
+    const updateSW = registerSW({
+      onNeedRefresh() {
+        if (confirm('New content available. Reload?')) {
+          updateSW(true);
+        }
+      },
+      onOfflineReady() {
+        console.log('App ready to work offline');
+      },
+    });
+  });
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

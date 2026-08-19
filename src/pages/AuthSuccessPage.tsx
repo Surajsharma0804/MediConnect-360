@@ -6,12 +6,12 @@ const AuthSuccessPage: React.FC = () => {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('Verifying authentication...');
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://mediconnect-backend-orkv.onrender.com';
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   useEffect(() => {
     const verifyAuth = async () => {
       try {
-        console.log('🔍 Verifying auth after OAuth success...');
+        console.log('Verifying auth after OAuth callback...');
         
         const response = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
           credentials: 'include',
@@ -22,7 +22,7 @@ const AuthSuccessPage: React.FC = () => {
         }
 
         const data = await response.json();
-        console.log('✅ Auth verification successful:', data.user);
+        console.log('Auth verification successful:', data.user);
         
         setStatus('success');
         setMessage('Authentication successful! Redirecting to dashboard...');
@@ -30,7 +30,7 @@ const AuthSuccessPage: React.FC = () => {
         // Redirect to dashboard after short delay
         setTimeout(() => navigate('/dashboard'), 1500);
       } catch (error) {
-        console.error('❌ Auth verification failed:', error);
+        console.error('Auth verification failed:', error);
         setStatus('error');
         setMessage('Authentication verification failed. Redirecting to login...');
         
