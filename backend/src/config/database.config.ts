@@ -57,8 +57,8 @@ export const databaseConfig = (): TypeOrmModuleOptions => {
     migrations: [__dirname + '/../migrations/*{.ts,.js}'],
     migrationsRun: false, // Don't auto-run migrations
     
-    // Schema Synchronization (NEVER in production)
-    synchronize: !isProduction && process.env.DB_SYNC !== 'false',
+    // Schema Synchronization (enabled for testing — use migrations for real production)
+    synchronize: true,
     
     // Logging Configuration
     logging: isProduction ? ['error', 'warn'] : ['query', 'error', 'warn'],
