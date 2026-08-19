@@ -107,31 +107,27 @@ const JitsiMeet: React.FC<JitsiMeetProps> = ({
 
         // Event listeners
         jitsiApi.current.addEventListener('videoConferenceJoined', () => {
-          console.log('Video conference joined');
+          // Conference joined
         });
 
         jitsiApi.current.addEventListener('videoConferenceLeft', () => {
-          console.log('Video conference left');
           onMeetingEnd?.();
         });
 
         (jitsiApi.current as Record<string, (event: string, callback: (data: JitsiParticipant) => void) => void>).addEventListener('participantJoined', (participant: JitsiParticipant) => {
-          console.log('Participant joined:', participant);
           onParticipantJoined?.(participant);
         });
 
         (jitsiApi.current as Record<string, (event: string, callback: (data: JitsiParticipant) => void) => void>).addEventListener('participantLeft', (participant: JitsiParticipant) => {
-          console.log('Participant left:', participant);
           onParticipantLeft?.(participant);
         });
 
         jitsiApi.current.addEventListener('readyToClose', () => {
-          console.log('Ready to close');
           onMeetingEnd?.();
         });
 
-      } catch (error) {
-        console.error('Error initializing Jitsi:', error);
+      } catch {
+        // Jitsi initialization error handled silently
       }
     };
 

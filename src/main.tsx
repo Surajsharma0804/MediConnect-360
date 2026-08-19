@@ -18,7 +18,7 @@ if (import.meta.env.PROD) {
         }
       },
       onOfflineReady() {
-        console.log('App ready to work offline');
+        // App ready for offline use
       },
     });
   });

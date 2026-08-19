@@ -45,7 +45,6 @@ const AuthSuccessPage: React.FC = () => {
           }
 
           const data = await response.json();
-          console.log('OAuth login successful:', data.user?.email);
 
           setStatus('success');
           setMessage('Authentication successful! Redirecting to dashboard...');
@@ -63,13 +62,11 @@ const AuthSuccessPage: React.FC = () => {
         }
 
         const data = await response.json();
-        console.log('Auth verification successful:', data.user?.email);
 
         setStatus('success');
         setMessage('Authentication successful! Redirecting to dashboard...');
         setTimeout(() => navigate('/dashboard'), 1500);
       } catch (error) {
-        console.error('Auth verification failed:', error);
         setStatus('error');
         setMessage('Authentication verification failed. Redirecting to login...');
         setTimeout(() => navigate('/login'), 3000);

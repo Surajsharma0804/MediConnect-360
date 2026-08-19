@@ -141,7 +141,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (data.tokens) storeTokens(data.tokens);
       setUser(data.user);
     } catch (error) {
-      console.error('Login error:', error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -167,7 +166,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (data.tokens) storeTokens(data.tokens);
       setUser(data.user);
     } catch (error) {
-      console.error('Registration error:', error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -181,8 +179,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         credentials: 'include',
         headers: getAuthHeaders(),
       });
-    } catch (error) {
-      console.error('Logout error:', error);
+    } catch {
+      // Logout API failure is non-critical
     } finally {
       setUser(null);
       localStorage.removeItem('access_token');
@@ -205,8 +203,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else {
         setUser(null);
       }
-    } catch (error) {
-      console.error('Auth refresh failed:', error);
+    } catch {
       setUser(null);
     }
   };

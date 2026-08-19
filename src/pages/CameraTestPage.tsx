@@ -4,12 +4,12 @@ import { Link } from 'react-router-dom';
 import CameraManager from '../components/video/CameraManager';
 
 const CameraTestPage: React.FC = () => {
-  const handleStreamReady = (stream: MediaStream) => {
-    console.log('Camera stream ready:', stream);
+  const handleStreamReady = (_stream: MediaStream) => {
+    // Stream ready for video consultation
   };
 
-  const handleStreamError = (error: string) => {
-    console.error('Camera stream error:', error);
+  const handleStreamError = (_error: string) => {
+    // Error handled by CameraManager UI
   };
 
   return (

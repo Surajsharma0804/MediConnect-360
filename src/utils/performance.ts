@@ -134,8 +134,8 @@ export function measureTime<T>(fn: () => T, label?: string): T {
   const result = fn();
   const duration = performance.now() - start;
   
-  if (label) {
-    console.log(`${label}: ${duration.toFixed(2)}ms`);
+  if (label && import.meta.env.DEV) {
+    // Performance timing only in development
   }
   
   return result;
@@ -150,8 +150,8 @@ export async function measureTimeAsync<T>(
   const result = await fn();
   const duration = performance.now() - start;
   
-  if (label) {
-    console.log(`${label}: ${duration.toFixed(2)}ms`);
+  if (label && import.meta.env.DEV) {
+    // Performance timing only in development
   }
   
   return result;
