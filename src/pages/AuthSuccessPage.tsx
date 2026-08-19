@@ -44,7 +44,7 @@ const AuthSuccessPage: React.FC = () => {
             throw new Error(`Auth verification failed: ${response.status}`);
           }
 
-          const data = await response.json();
+          await response.json();
 
           setStatus('success');
           setMessage('Authentication successful! Redirecting to dashboard...');
@@ -61,7 +61,7 @@ const AuthSuccessPage: React.FC = () => {
           throw new Error(`Auth verification failed: ${response.status}`);
         }
 
-        const data = await response.json();
+        await response.json();
 
         setStatus('success');
         setMessage('Authentication successful! Redirecting to dashboard...');

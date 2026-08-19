@@ -129,30 +129,14 @@ export class PerformanceMonitor {
 export const performanceMonitor = PerformanceMonitor.getInstance();
 
 // Utility to measure function execution time
-export function measureTime<T>(fn: () => T, label?: string): T {
-  const start = performance.now();
-  const result = fn();
-  const duration = performance.now() - start;
-  
-  if (label && import.meta.env.DEV) {
-    // Performance timing only in development
-  }
-  
-  return result;
+export function measureTime<T>(fn: () => T, _label?: string): T {
+  return fn();
 }
 
 // Utility to measure async function execution time
 export async function measureTimeAsync<T>(
   fn: () => Promise<T>,
-  label?: string
+  _label?: string
 ): Promise<T> {
-  const start = performance.now();
-  const result = await fn();
-  const duration = performance.now() - start;
-  
-  if (label && import.meta.env.DEV) {
-    // Performance timing only in development
-  }
-  
-  return result;
+  return fn();
 }

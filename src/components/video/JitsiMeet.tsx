@@ -25,13 +25,14 @@ const JitsiMeet: React.FC<JitsiMeetProps> = ({
   onParticipantLeft,
 }) => {
   const jitsiContainerRef = useRef<HTMLDivElement>(null);
-  const jitsiApi = useRef<unknown>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const jitsiApi = useRef<any>(null);
 
   useEffect(() => {
     // Load Jitsi Meet API script
     const loadJitsiScript = () => {
       return new Promise<void>((resolve, reject) => {
-        if ((window as Record<string, unknown>).JitsiMeetExternalAPI) {
+        if ((window as unknown as Record<string, unknown>).JitsiMeetExternalAPI) {
           resolve();
           return;
         }
@@ -102,7 +103,8 @@ const JitsiMeet: React.FC<JitsiMeetProps> = ({
           },
         };
 
-        const JitsiMeetExternalAPI = (window as Record<string, unknown>).JitsiMeetExternalAPI as new (domain: string, options: Record<string, unknown>) => unknown;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const JitsiMeetExternalAPI = (window as any).JitsiMeetExternalAPI;
         jitsiApi.current = new JitsiMeetExternalAPI(domain, options);
 
         // Event listeners
@@ -114,11 +116,11 @@ const JitsiMeet: React.FC<JitsiMeetProps> = ({
           onMeetingEnd?.();
         });
 
-        (jitsiApi.current as Record<string, (event: string, callback: (data: JitsiParticipant) => void) => void>).addEventListener('participantJoined', (participant: JitsiParticipant) => {
+        jitsiApi.current.addEventListener('participantJoined', (participant: JitsiParticipant) => {
           onParticipantJoined?.(participant);
         });
 
-        (jitsiApi.current as Record<string, (event: string, callback: (data: JitsiParticipant) => void) => void>).addEventListener('participantLeft', (participant: JitsiParticipant) => {
+        jitsiApi.current.addEventListener('participantLeft', (participant: JitsiParticipant) => {
           onParticipantLeft?.(participant);
         });
 
