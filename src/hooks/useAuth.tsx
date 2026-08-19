@@ -100,10 +100,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(data.user);
       } else {
         setUser(null);
-        // Clear invalid tokens
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('mediconnect_user');
+        // Don't clear tokens here — the callback page may be storing fresh ones
       }
     } catch {
       setUser(null);

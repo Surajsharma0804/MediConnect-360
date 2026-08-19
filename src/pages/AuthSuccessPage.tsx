@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 const AuthSuccessPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { refreshAuth } = useAuth();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('Verifying authentication...');
 
@@ -32,19 +34,8 @@ const AuthSuccessPage: React.FC = () => {
           // Clean URL (remove tokens from address bar)
           window.history.replaceState({}, '', '/auth/callback');
 
-          // Verify token by calling /auth/me with Authorization header
-          const response = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-            credentials: 'include',
-          });
-
-          if (!response.ok) {
-            throw new Error(`Auth verification failed: ${response.status}`);
-          }
-
-          await response.json();
+          // Update AuthProvider state with new tokens
+          await refreshAuth();
 
           setStatus('success');
           setMessage('Authentication successful! Redirecting to dashboard...');
@@ -53,15 +44,7 @@ const AuthSuccessPage: React.FC = () => {
         }
 
         // Fallback: try cookie-based auth (same-origin)
-        const response = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
-          credentials: 'include',
-        });
-
-        if (!response.ok) {
-          throw new Error(`Auth verification failed: ${response.status}`);
-        }
-
-        await response.json();
+        await refreshAuth();
 
         setStatus('success');
         setMessage('Authentication successful! Redirecting to dashboard...');
