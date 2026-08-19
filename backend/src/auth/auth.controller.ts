@@ -32,7 +32,6 @@ import type { User } from '../entities/user.entity';
   version: '1',
 })
 @UseGuards(ThrottlerGuard)
-@UseInterceptors(AuditLogInterceptor, SanitizeInterceptor)
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
 
@@ -75,7 +74,8 @@ export class AuthController {
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 attempts per minute
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseInterceptors(AuditLogInterceptor, SanitizeInterceptor)
   @ApiOperation({ summary: 'Register new user account' })
   @ApiBody({ type: RegisterDto })
   @ApiResponse({ status: 201, description: 'User registered successfully' })
@@ -89,7 +89,6 @@ export class AuthController {
     this.logger.log(`Registration attempt: ${registerDto.email}`);
     const result = await this.authService.register(registerDto);
     
-    // Set HttpOnly cookies
     this.authService.setAuthCookies(response, result.tokens);
     
     return {
@@ -100,7 +99,8 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 attempts per minute
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @UseInterceptors(AuditLogInterceptor, SanitizeInterceptor)
   @ApiOperation({ summary: 'Authenticate user login' })
   @ApiBody({ type: LoginDto })
   @ApiResponse({ status: 200, description: 'Login successful' })
@@ -115,7 +115,6 @@ export class AuthController {
     this.logger.log(`Login attempt: ${loginDto.email}`);
     const result = await this.authService.login(loginDto);
     
-    // Set HttpOnly cookies
     this.authService.setAuthCookies(response, result.tokens);
     
     return {
@@ -127,13 +126,13 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(AuditLogInterceptor)
   async logout(
     @CurrentUser() user: User,
     @Res({ passthrough: true }) response: Response,
   ) {
     this.logger.log(`Logout: ${user.email}`);
     
-    // Clear cookies
     this.authService.clearAuthCookies(response);
     
     return { message: 'Logout successful' };
@@ -154,14 +153,14 @@ export class AuthController {
     };
   }
 
-  // Google OAuth Routes
+  // ─── OAuth Routes (NO interceptors — query params break sanitizer) ──────────
+
   @Get('google')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Initiate Google OAuth login' })
   @ApiResponse({ status: 302, description: 'Redirects to Google OAuth' })
   googleAuth() {
-    this.logger.log('Google OAuth initiation called');
-    // Passport handles the redirect - no logic needed here
+    // Passport handles the redirect
   }
 
   @Get('google/callback')
