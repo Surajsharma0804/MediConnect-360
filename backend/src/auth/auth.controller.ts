@@ -93,6 +93,7 @@ export class AuthController {
     
     return {
       user: result.user,
+      tokens: result.tokens,
       message: 'Registration successful',
     };
   }
@@ -119,6 +120,7 @@ export class AuthController {
     
     return {
       user: result.user,
+      tokens: result.tokens,
       message: 'Login successful',
     };
   }
