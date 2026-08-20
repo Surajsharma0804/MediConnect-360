@@ -302,35 +302,34 @@ const CameraManager: React.FC<CameraManagerProps> = ({
 
         {permissionStatus === 'denied' && (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
-            <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center mb-4">
+            <div className="w-16 h-16 rounded-full bg-amber-600 flex items-center justify-center mb-4">
               <AlertCircle className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-xl font-semibold mb-2 text-white">Camera Access Denied</h3>
-            <p className="text-slate-300 mb-4 text-center max-w-md">
-              {error}
-            </p>
-            <div className="space-y-3 text-center">
-              <button
-                onClick={requestPermissions}
-                disabled={isLoading}
-                className="btn-primary flex items-center mx-auto"
-              >
-                {isLoading ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    Retrying...
-                  </>
-                ) : (
-                  'Try Again'
-                )}
-              </button>
-              <div className="text-xs text-slate-400 text-left max-w-sm space-y-1">
-                <p className="font-medium text-slate-300">To enable camera access:</p>
+            <h3 className="text-xl font-semibold mb-2 text-white">Camera Access Blocked</h3>
+            <div className="text-sm text-slate-300 mb-5 text-center max-w-sm space-y-2">
+              <p>Your browser is blocking camera access for this site.</p>
+              <div className="bg-slate-800 rounded-lg p-3 text-left space-y-1">
+                <p className="font-medium text-white">How to fix:</p>
                 <p>1. Click the 🔒 lock icon in the address bar</p>
-                <p>2. Find &quot;Camera&quot; and &quot;Microphone&quot; settings</p>
-                <p>3. Set both to &quot;Allow&quot;</p>
-                <p>4. Refresh this page</p>
+                <p>2. Set <strong>Camera</strong> and <strong>Microphone</strong> to <strong>Allow</strong></p>
+                <p>3. Click the button below to refresh</p>
               </div>
+            </div>
+            <div className="space-y-2 w-full max-w-xs">
+              <button
+                onClick={() => window.location.reload()}
+                className="btn-primary flex items-center justify-center w-full"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh Page
+              </button>
+              <button
+                onClick={() => requestPermissions(true)}
+                disabled={isLoading}
+                className="btn-secondary flex items-center justify-center w-full text-sm"
+              >
+                {isLoading ? 'Retrying...' : 'Try Without Refresh'}
+              </button>
             </div>
           </div>
         )}
