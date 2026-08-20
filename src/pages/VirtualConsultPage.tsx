@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Video, Mic, MicOff, VideoOff, Phone, MessageSquare, UserPlus, Share2, Clock, Star, RotateCcw, Wifi, WifiOff } from 'lucide-react';
 import CameraManager from '../components/video/CameraManager';
@@ -14,6 +14,7 @@ const VirtualConsultPage: React.FC = () => {
     isAudioEnabled,
     connectionQuality,
     participantCount,
+    stream,
     startConsultation,
     endConsultation,
     toggleVideo,
@@ -22,7 +23,15 @@ const VirtualConsultPage: React.FC = () => {
   } = useVideoConsultation();
 
   const videoRef = useRef<HTMLVideoElement>(null);
-  // Handle stream ready from CameraManager
+  
+  // Connect the hook's stream to the video element
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream, isConnected, isVideoEnabled]);
+
+  // Handle stream ready from CameraManager (backup)
   const handleStreamReady = (mediaStream: MediaStream) => {
     if (videoRef.current) {
       videoRef.current.srcObject = mediaStream;
