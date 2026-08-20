@@ -75,12 +75,25 @@ const CameraManager: React.FC<CameraManagerProps> = ({
   }, [selectedVideoDevice, selectedAudioDevice]);
 
   // Request camera and microphone permissions
-  const requestPermissions = useCallback(async () => {
+  const requestPermissions = useCallback(async (showToast = true) => {
     if (!isMediaSupported()) {
       const errorMsg = 'Your browser does not support camera and microphone access';
       setError(errorMsg);
       onStreamError?.(errorMsg);
       return false;
+    }
+
+    // Check if browser has already denied permission
+    try {
+      const cameraPermission = await navigator.permissions.query({ name: 'camera' as PermissionName });
+      if (cameraPermission.state === 'denied') {
+        setError('Camera access is blocked. Please update your browser settings to allow camera access for this site.');
+        setPermissionStatus('denied');
+        setIsLoading(false);
+        return false;
+      }
+    } catch {
+      // Permissions API not supported — fall through to getUserMedia
     }
 
     setIsLoading(true);
@@ -134,16 +147,16 @@ const CameraManager: React.FC<CameraManagerProps> = ({
       }
 
       onStreamReady?.(mediaStream);
-      toast.success('Camera and microphone access granted');
+      if (showToast) {
+        toast.success('Camera and microphone access granted');
+      }
       return true;
 
     } catch (error: any) {
-      console.error('Error accessing media devices:', error);
-      
       let errorMessage = 'Unable to access camera or microphone';
       
       if (error.name === 'NotAllowedError') {
-        errorMessage = 'Camera and microphone access denied. Please allow permissions and try again.';
+        errorMessage = 'Camera access is blocked. Please click the lock icon in your address bar, set Camera and Microphone to "Allow", then refresh this page.';
       } else if (error.name === 'NotFoundError') {
         errorMessage = 'No camera or microphone found. Please connect a device and try again.';
       } else if (error.name === 'NotReadableError') {
@@ -155,7 +168,9 @@ const CameraManager: React.FC<CameraManagerProps> = ({
       setError(errorMessage);
       setPermissionStatus('denied');
       onStreamError?.(errorMessage);
-      toast.error('Camera/microphone access failed');
+      if (showToast) {
+        toast.error(errorMessage);
+      }
       return false;
     } finally {
       setIsLoading(false);
@@ -181,10 +196,46 @@ const CameraManager: React.FC<CameraManagerProps> = ({
       if (audioTrack) {
         audioTrack.enabled = !audioTrack.enabled;
         setIsAudioEnabled(audioTrack.enabled);
-        toast.success(audioTrack.enabled ? 'Microphone turned on' : 'Microphone turned off');
+        toast.success(audioTrack.enabled ? 'Microphone unmuted' : 'Microphone muted');
       }
     }
   }, []);
+
+  // Switch camera (front/back)
+  const switchCamera = useCallback(async () => {
+    if (!streamRef.current) return;
+    
+    try {
+      // Stop current video track
+      streamRef.current.getVideoTracks().forEach(track => track.stop());
+      
+      // Toggle facing mode
+      const newFacingMode = streamRef.current.getVideoTracks()[0]?.getSettings().facingMode === 'user' ? 'environment' : 'user';
+      
+      const newStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: newFacingMode },
+        audio: false
+      });
+      
+      const newVideoTrack = newStream.getVideoTracks()[0];
+      const oldAudioTrack = streamRef.current.getAudioTracks()[0];
+      
+      const combinedStream = new MediaStream();
+      combinedStream.addTrack(newVideoTrack);
+      if (oldAudioTrack) combinedStream.addTrack(oldAudioTrack);
+      
+      streamRef.current = combinedStream;
+      setStream(combinedStream);
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = combinedStream;
+      }
+      
+      onStreamReady?.(combinedStream);
+    } catch {
+      toast.error('Unable to switch camera');
+    }
+  }, [onStreamReady]);
 
   // Change video device
   const changeVideoDevice = useCallback(async (deviceId: string) => {
@@ -211,10 +262,10 @@ const CameraManager: React.FC<CameraManagerProps> = ({
     };
   }, []);
 
-  // Initial: auto-request permissions on mount
+  // Initial: auto-request permissions on mount (no toast on auto)
   useEffect(() => {
     if (isMediaSupported()) {
-      requestPermissions();
+      requestPermissions(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
