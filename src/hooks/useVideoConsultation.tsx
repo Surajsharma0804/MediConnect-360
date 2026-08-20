@@ -102,7 +102,6 @@ export const useVideoConsultation = (): UseVideoConsultationReturn => {
       return true;
 
     } catch (error: any) {
-      console.error('Error accessing media devices:', error);
       
       let errorMessage = 'Unable to access camera or microphone';
       

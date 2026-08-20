@@ -30,8 +30,8 @@ const VirtualConsultPage: React.FC = () => {
   };
 
   // Handle stream error from CameraManager
-  const handleStreamError = (error: string) => {
-    console.error('Camera stream error:', error);
+  const handleStreamError = (_error: string) => {
+    // Error handled by CameraManager UI
   };
 
   // Get connection quality indicator
@@ -79,10 +79,9 @@ const VirtualConsultPage: React.FC = () => {
                       <div className="space-y-3">
                         <button
                           onClick={startConsultation}
-                          disabled={!hasPermissions}
-                          className={`btn-primary w-full ${!hasPermissions ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          className="btn-primary w-full"
                         >
-                          {hasPermissions ? 'Start Consultation' : 'Grant Camera Access First'}
+                          {hasPermissions ? 'Start Consultation' : 'Grant Camera Access & Start'}
                         </button>
                         
                         <Link 

@@ -211,12 +211,13 @@ const CameraManager: React.FC<CameraManagerProps> = ({
     };
   }, []);
 
-  // Initial device enumeration
+  // Initial: auto-request permissions on mount
   useEffect(() => {
     if (isMediaSupported()) {
-      getMediaDevices();
+      requestPermissions();
     }
-  }, [isMediaSupported, getMediaDevices]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className={`relative ${className}`}>
@@ -257,11 +258,11 @@ const CameraManager: React.FC<CameraManagerProps> = ({
             <p className="text-slate-300 mb-4 text-center max-w-md">
               {error}
             </p>
-            <div className="space-y-2">
+            <div className="space-y-3 text-center">
               <button
                 onClick={requestPermissions}
                 disabled={isLoading}
-                className="btn-primary flex items-center"
+                className="btn-primary flex items-center mx-auto"
               >
                 {isLoading ? (
                   <>
@@ -272,9 +273,13 @@ const CameraManager: React.FC<CameraManagerProps> = ({
                   'Try Again'
                 )}
               </button>
-              <p className="text-xs text-slate-400 text-center">
-                You may need to refresh the page and allow permissions in your browser
-              </p>
+              <div className="text-xs text-slate-400 text-left max-w-sm space-y-1">
+                <p className="font-medium text-slate-300">To enable camera access:</p>
+                <p>1. Click the 🔒 lock icon in the address bar</p>
+                <p>2. Find &quot;Camera&quot; and &quot;Microphone&quot; settings</p>
+                <p>3. Set both to &quot;Allow&quot;</p>
+                <p>4. Refresh this page</p>
+              </div>
             </div>
           </div>
         )}
