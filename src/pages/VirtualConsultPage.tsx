@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Video, Mic, MicOff, VideoOff, Phone, MessageSquare, UserPlus, Share2, Clock, Star, RotateCcw, Wifi, WifiOff } from 'lucide-react';
 import CameraManager from '../components/video/CameraManager';
@@ -22,20 +22,28 @@ const VirtualConsultPage: React.FC = () => {
     switchCamera
   } = useVideoConsultation();
 
+  // Callback ref: sets the stream the instant the video element mounts
   const videoRef = useRef<HTMLVideoElement>(null);
   
-  // Connect the hook's stream to the video element
+  const setVideoRef = useCallback((node: HTMLVideoElement | null) => {
+    videoRef.current = node;
+    if (node && stream) {
+      node.srcObject = stream;
+      node.play().catch(() => {});
+    }
+  }, [stream]);
+
+  // Also update when stream changes while video is already mounted
   useEffect(() => {
     if (videoRef.current && stream) {
       videoRef.current.srcObject = stream;
+      videoRef.current.play().catch(() => {});
     }
-  }, [stream, isConnected, isVideoEnabled]);
+  }, [stream]);
 
   // Handle stream ready from CameraManager (backup)
-  const handleStreamReady = (mediaStream: MediaStream) => {
-    if (videoRef.current) {
-      videoRef.current.srcObject = mediaStream;
-    }
+  const handleStreamReady = (_mediaStream: MediaStream) => {
+    // Stream from CameraManager — hook's stream is used instead via callback ref
   };
 
   // Handle stream error from CameraManager
@@ -139,7 +147,7 @@ const VirtualConsultPage: React.FC = () => {
                     <div className={`w-full h-full ${isVideoEnabled ? 'bg-slate-800' : 'bg-slate-900 flex items-center justify-center'}`}>
                       {isVideoEnabled ? (
                         <video
-                          ref={videoRef}
+                          ref={setVideoRef}
                           autoPlay
                           playsInline
                           muted
