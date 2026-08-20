@@ -98,7 +98,6 @@ export const useVideoConsultation = (): UseVideoConsultationReturn => {
         isAudioEnabled: true
       }));
 
-      toast.success('Camera and microphone access granted');
       return true;
 
     } catch (error: any) {
@@ -132,7 +131,6 @@ export const useVideoConsultation = (): UseVideoConsultationReturn => {
         stream: null
       }));
 
-      toast.error('Camera/microphone access failed');
       return false;
     }
   }, [checkBrowserSupport]);

@@ -156,20 +156,24 @@ const CameraManager: React.FC<CameraManagerProps> = ({
       let errorMessage = 'Unable to access camera or microphone';
       
       if (error.name === 'NotAllowedError') {
-        errorMessage = 'Camera access is blocked. Please click the lock icon in your address bar, set Camera and Microphone to "Allow", then refresh this page.';
+        errorMessage = 'Camera access is blocked by your browser. Enable camera access in site settings and refresh the page.';
       } else if (error.name === 'NotFoundError') {
         errorMessage = 'No camera or microphone found. Please connect a device and try again.';
       } else if (error.name === 'NotReadableError') {
-        errorMessage = 'Camera or microphone is already in use by another application.';
+        errorMessage = 'Camera or microphone is already in use by another application. Close other apps using the camera and try again.';
       } else if (error.name === 'OverconstrainedError') {
-        errorMessage = 'Selected camera or microphone does not meet the requirements.';
+        errorMessage = 'Selected camera does not meet the requirements.';
+      } else if (error.name === 'AbortError') {
+        errorMessage = 'Camera request was cancelled. Please try again.';
+      } else {
+        errorMessage = `Camera error: ${error.name || 'Unknown'} - ${error.message || 'Please check Windows Settings → Privacy → Camera is enabled'}`;
       }
 
       setError(errorMessage);
       setPermissionStatus('denied');
       onStreamError?.(errorMessage);
       if (showToast) {
-        toast.error(errorMessage);
+        toast.error(errorMessage, { duration: 5000 });
       }
       return false;
     } finally {
@@ -301,20 +305,32 @@ const CameraManager: React.FC<CameraManagerProps> = ({
         )}
 
         {permissionStatus === 'denied' && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
-            <div className="w-16 h-16 rounded-full bg-amber-600 flex items-center justify-center mb-4">
-              <AlertCircle className="h-8 w-8 text-white" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-4 overflow-y-auto">
+            <div className="w-14 h-14 rounded-full bg-amber-600 flex items-center justify-center mb-3">
+              <AlertCircle className="h-7 w-7 text-white" />
             </div>
-            <h3 className="text-xl font-semibold mb-2 text-white">Camera Access Blocked</h3>
-            <div className="text-sm text-slate-300 mb-5 text-center max-w-sm space-y-2">
-              <p>Your browser is blocking camera access for this site.</p>
-              <div className="bg-slate-800 rounded-lg p-3 text-left space-y-1">
-                <p className="font-medium text-white">How to fix:</p>
-                <p>1. Click the 🔒 lock icon in the address bar</p>
-                <p>2. Set <strong>Camera</strong> and <strong>Microphone</strong> to <strong>Allow</strong></p>
-                <p>3. Click the button below to refresh</p>
+            <h3 className="text-lg font-semibold mb-1 text-white">Camera Access Blocked</h3>
+            
+            {/* Show actual error */}
+            <p className="text-xs text-red-400 mb-3 text-center max-w-sm">{error}</p>
+
+            <div className="text-xs text-slate-300 mb-4 max-w-sm space-y-2">
+              {/* Browser fix */}
+              <div className="bg-slate-800 rounded-lg p-2.5 text-left space-y-1">
+                <p className="font-medium text-white text-sm">Fix 1: Browser Settings</p>
+                <p>• Click 🔒 lock icon → Camera & Microphone → <strong>Allow</strong></p>
+                <p>• Then refresh this page</p>
+              </div>
+              
+              {/* Windows fix */}
+              <div className="bg-slate-800 rounded-lg p-2.5 text-left space-y-1">
+                <p className="font-medium text-white text-sm">Fix 2: Windows Settings</p>
+                <p>• Open <strong>Settings → Privacy → Camera</strong></p>
+                <p>• Turn ON &quot;Allow apps to access your camera&quot;</p>
+                <p>• Make sure your browser is in the allowed list</p>
               </div>
             </div>
+
             <div className="space-y-2 w-full max-w-xs">
               <button
                 onClick={() => window.location.reload()}
@@ -328,7 +344,7 @@ const CameraManager: React.FC<CameraManagerProps> = ({
                 disabled={isLoading}
                 className="btn-secondary flex items-center justify-center w-full text-sm"
               >
-                {isLoading ? 'Retrying...' : 'Try Without Refresh'}
+                {isLoading ? 'Retrying...' : 'Try Again'}
               </button>
             </div>
           </div>
